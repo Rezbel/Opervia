@@ -10,6 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "OperviaWeb",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
+});
+
 builder.Services.AddScoped<
     ISaeConnectionTester,
     FirebirdSaeConnectionTester
@@ -48,6 +62,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("OperviaWeb");
+
 app.UseAuthorization();
 
 app.MapControllers();

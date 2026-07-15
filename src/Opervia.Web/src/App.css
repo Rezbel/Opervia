@@ -669,3 +669,74 @@ h2 {
     height: 470px;
   }
 }
+
+.connection-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 7, 14, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.connection-modal-content {
+  width: min-content;
+  max-width: 100%;
+  animation: connection-modal-enter 180ms ease-out;
+}
+
+@keyframes connection-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.global-search button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  background: #4f7cff;
+  cursor: pointer;
+}
+
+.global-search button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.flow-error-banner {
+  margin-bottom: 16px;
+  padding: 12px 15px;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 12px;
+  color: #ff9b9b;
+  background: rgba(239, 68, 68, 0.08);
+  font-size: 12px;
+}
+
+.metric-document-number {
+  overflow: hidden;
+  max-width: 190px;
+  font-size: 17px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copilot-input button:disabled,
+.copilot-input input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

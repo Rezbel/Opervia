@@ -1,0 +1,199 @@
+﻿.sae-connection-form {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  color: #eef4ff;
+  background: #0e1623;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+}
+
+.connection-form-header,
+.connection-form-heading,
+.connection-form-actions {
+  display: flex;
+  align-items: center;
+}
+
+.connection-form-header {
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.connection-form-heading {
+  gap: 12px;
+}
+
+.connection-form-heading span {
+  display: block;
+  margin-bottom: 4px;
+  color: #7294ff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.connection-form-heading h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.connection-form-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(79, 124, 255, 0.25);
+  border-radius: 12px;
+  color: #8cabff;
+  background: rgba(79, 124, 255, 0.13);
+}
+
+.connection-close-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  color: #8e9bb0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.connection-form-description {
+  margin: 18px 0 20px;
+  color: #8190a8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.connection-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.connection-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.connection-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.connection-field > span {
+  color: #aab6c8;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.connection-field small {
+  color: #647187;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.connection-input {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 11px;
+  color: #728099;
+  background: #0a111c;
+}
+
+.connection-input:focus-within {
+  border-color: rgba(79, 124, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.08);
+}
+
+.connection-input input {
+  min-width: 0;
+  width: 100%;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  color: #eef4ff;
+  background: transparent;
+}
+
+.connection-input input::placeholder {
+  color: #536076;
+}
+
+.connection-form-error {
+  margin-top: 16px;
+  padding: 11px 13px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 11px;
+  color: #ff9b9b;
+  background: rgba(239, 68, 68, 0.08);
+  font-size: 11px;
+}
+
+.connection-form-actions {
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.13);
+}
+
+.connection-cancel-button,
+.connection-submit-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.connection-cancel-button {
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: #aab6c8;
+  background: transparent;
+}
+
+.connection-submit-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  color: white;
+  background: #4f7cff;
+}
+
+.connection-submit-button:disabled,
+.connection-cancel-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 650px) {
+  .connection-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .connection-field.full-width {
+    grid-column: auto;
+  }
+
+  .connection-form-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .connection-cancel-button,
+  .connection-submit-button {
+    justify-content: center;
+    width: 100%;
+  }
+}
