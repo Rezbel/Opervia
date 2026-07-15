@@ -1,4 +1,5 @@
 ﻿using Opervia.Application.Connections;
+using Opervia.Application.Schema;
 using Opervia.Infrastructure.Firebird;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<
     ISaeConnectionTester,
     FirebirdSaeConnectionTester
+>();
+
+builder.Services.AddScoped<
+    ISaeSchemaInspector,
+    FirebirdSaeSchemaInspector
 >();
 
 var app = builder.Build();

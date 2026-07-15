@@ -13,36 +13,12 @@ public sealed class FirebirdSaeConnectionTester : ISaeConnectionTester
         CancellationToken cancellationToken = default
     )
     {
-        ArgumentNullException.ThrowIfNull(profile);
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            return new SaeConnectionTestResult(
-                false,
-                "La contraseña de Firebird es obligatoria.",
-                null,
-                0
-            );
-        }
-
-        var connectionString = new FbConnectionStringBuilder
-        {
-            DataSource = profile.Host,
-            Port = profile.Port,
-            Database = profile.Database,
-            UserID = profile.Username,
-            Password = password,
-            Charset = profile.Charset,
-            Pooling = false,
-            ConnectionTimeout = 8
-        }.ToString();
-
         var stopwatch = Stopwatch.StartNew();
 
         try
         {
             await using var connection =
-                new FbConnection(connectionString);
+                FirebirdConnectionFactory.Create(profile, password);
 
             await connection.OpenAsync(cancellationToken);
 

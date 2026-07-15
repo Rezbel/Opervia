@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Connections;
+using Opervia.Application.Schema;
 using Opervia.Domain.Connections;
 
 namespace Opervia.Api.Controllers;
@@ -10,26 +11,56 @@ namespace Opervia.Api.Controllers;
 public sealed class SaeConnectionsController : ControllerBase
 {
     private readonly ISaeConnectionTester _connectionTester;
+    private readonly ISaeSchemaInspector _schemaInspector;
 
     public SaeConnectionsController(
-        ISaeConnectionTester connectionTester
+        ISaeConnectionTester connectionTester,
+        ISaeSchemaInspector schemaInspector
     )
     {
         _connectionTester = connectionTester;
+        _schemaInspector = schemaInspector;
     }
 
     [HttpPost("test")]
-    [ProducesResponseType(
-        typeof(SaeConnectionTestResult),
-        StatusCodes.Status200OK
-    )]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<SaeConnectionTestResult>> TestAsync(
         [FromBody] TestSaeConnectionRequest request,
         CancellationToken cancellationToken
     )
     {
-        var profile = new SaeConnectionProfile
+        var profile = CreateProfile(request);
+
+        var result = await _connectionTester.TestAsync(
+            profile,
+            request.Password,
+            cancellationToken
+        );
+
+        return Ok(result);
+    }
+
+    [HttpPost("inspect-schema")]
+    public async Task<ActionResult<SaeSchemaInspectionResult>> InspectSchemaAsync(
+        [FromBody] TestSaeConnectionRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        var profile = CreateProfile(request);
+
+        var result = await _schemaInspector.InspectAsync(
+            profile,
+            request.Password,
+            cancellationToken
+        );
+
+        return Ok(result);
+    }
+
+    private static SaeConnectionProfile CreateProfile(
+        TestSaeConnectionRequest request
+    )
+    {
+        return new SaeConnectionProfile
         {
             DisplayName = request.DisplayName.Trim(),
             Host = request.Host.Trim(),
@@ -40,13 +71,5 @@ public sealed class SaeConnectionsController : ControllerBase
             SaeVersion = request.SaeVersion.Trim(),
             Charset = request.Charset.Trim()
         };
-
-        var result = await _connectionTester.TestAsync(
-            profile,
-            request.Password,
-            cancellationToken
-        );
-
-        return Ok(result);
     }
 }
