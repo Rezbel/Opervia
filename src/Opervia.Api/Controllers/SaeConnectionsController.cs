@@ -2,6 +2,7 @@
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Connections;
 using Opervia.Application.Schema;
+using Opervia.Application.Tables;
 using Opervia.Domain.Connections;
 
 namespace Opervia.Api.Controllers;
@@ -12,14 +13,17 @@ public sealed class SaeConnectionsController : ControllerBase
 {
     private readonly ISaeConnectionTester _connectionTester;
     private readonly ISaeSchemaInspector _schemaInspector;
+    private readonly ISaeTableStructureInspector _tableStructureInspector;
 
     public SaeConnectionsController(
         ISaeConnectionTester connectionTester,
-        ISaeSchemaInspector schemaInspector
+        ISaeSchemaInspector schemaInspector,
+        ISaeTableStructureInspector tableStructureInspector
     )
     {
         _connectionTester = connectionTester;
         _schemaInspector = schemaInspector;
+        _tableStructureInspector = tableStructureInspector;
     }
 
     [HttpPost("test")]
@@ -28,10 +32,8 @@ public sealed class SaeConnectionsController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var profile = CreateProfile(request);
-
         var result = await _connectionTester.TestAsync(
-            profile,
+            CreateProfile(request),
             request.Password,
             cancellationToken
         );
@@ -45,11 +47,26 @@ public sealed class SaeConnectionsController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var profile = CreateProfile(request);
-
         var result = await _schemaInspector.InspectAsync(
-            profile,
+            CreateProfile(request),
             request.Password,
+            cancellationToken
+        );
+
+        return Ok(result);
+    }
+
+    [HttpPost("inspect-table/{tableName}")]
+    public async Task<ActionResult<SaeTableStructureResult>> InspectTableAsync(
+        string tableName,
+        [FromBody] TestSaeConnectionRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _tableStructureInspector.InspectAsync(
+            CreateProfile(request),
+            request.Password,
+            tableName,
             cancellationToken
         );
 

@@ -1,5 +1,6 @@
 ﻿using Opervia.Application.Connections;
 using Opervia.Application.Schema;
+using Opervia.Application.Tables;
 using Opervia.Infrastructure.Firebird;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,11 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     ISaeSchemaInspector,
     FirebirdSaeSchemaInspector
+>();
+
+builder.Services.AddScoped<
+    ISaeTableStructureInspector,
+    FirebirdSaeTableStructureInspector
 >();
 
 var app = builder.Build();
