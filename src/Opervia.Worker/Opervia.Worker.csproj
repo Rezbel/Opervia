@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Opervia.Worker-929ec18a-4e35-46d0-945e-0a22a2281de6</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Opervia.Application\Opervia.Application.csproj" />
+    <ProjectReference Include="..\Opervia.Infrastructure\Opervia.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Opervia.Api/Opervia.Api.csproj" />
+    <Project Path="src/Opervia.Application/Opervia.Application.csproj" />
+    <Project Path="src/Opervia.Domain/Opervia.Domain.csproj" />
+    <Project Path="src/Opervia.Infrastructure/Opervia.Infrastructure.csproj" />
+    <Project Path="src/Opervia.Worker/Opervia.Worker.csproj" />
+  </Folder>
+</Solution>
