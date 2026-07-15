@@ -1,5 +1,6 @@
 ﻿using Opervia.Application.Connections;
 using Opervia.Application.Documents;
+using Opervia.Application.Flows;
 using Opervia.Application.Schema;
 using Opervia.Application.Tables;
 using Opervia.Infrastructure.Firebird;
@@ -32,6 +33,11 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     ISaeDocumentLookup,
     FirebirdSaeDocumentLookup
+>();
+
+builder.Services.AddScoped<
+    ISaeSalesFlowBuilder,
+    SaeSalesFlowBuilder
 >();
 
 var app = builder.Build();
