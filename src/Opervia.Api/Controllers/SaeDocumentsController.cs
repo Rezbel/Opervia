@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Documents;
-using Opervia.Domain.Connections;
 
 namespace Opervia.Api.Controllers;
 
@@ -38,17 +37,7 @@ public sealed class SaeDocumentsController : ControllerBase
             });
         }
 
-        var profile = new SaeConnectionProfile
-        {
-            DisplayName = request.DisplayName.Trim(),
-            Host = request.Host.Trim(),
-            Port = request.Port,
-            Database = request.Database.Trim(),
-            Username = request.Username.Trim(),
-            CompanyNumber = request.CompanyNumber.Trim(),
-            SaeVersion = request.SaeVersion.Trim(),
-            Charset = request.Charset.Trim()
-        };
+        var profile = request.ToProfile();
 
         var result = await _documentProbe.ReadLatestAsync(
             profile,

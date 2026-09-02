@@ -1,0 +1,1163 @@
+{
+  "sales_headers": {
+    "_row": 1,
+    "A": "Factura",
+    "B": "Fecha",
+    "C": "Status",
+    "N": "Aux_status",
+    "P": "Precio_subt_dct",
+    "R": "Compra_subt_dscto",
+    "U": "Mes",
+    "X": "Año_2",
+    "AM": "Precio unit compra",
+    "AN": "Precio unit compra",
+    "AO": "Fecha de compra"
+  },
+  "purchase_headers": {
+    "_row": 1,
+    "B": "Fecha Recepción",
+    "J": "Fecha",
+    "K": "Compra_subt_dscto",
+    "L": "Precio de compra",
+    "M": "Año",
+    "N": "Mes",
+    "O": "Mes_num",
+    "S": "Moneda"
+  },
+  "summary_rows": [
+    {
+      "_row": 3,
+      "B": "Tabla de Resultados"
+    },
+    {
+      "_row": 5,
+      "B": "Mes",
+      "C": "Ventas Netas ($)",
+      "D": "Costo de Venta ($)",
+      "E": "Utilidad Bruta ($)",
+      "F": "Margen Bruto (%)",
+      "G": "Gastos Fijos ($)",
+      "H": "Gastos Fijos (%)",
+      "I": "Utilidad Neta ($)",
+      "J": "Margen Neto (%)",
+      "K": "Mes num",
+      "L": "Año"
+    },
+    {
+      "_row": 6,
+      "A": "ene",
+      "B": "Enero",
+      "C": 6790588.858000008,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A6,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 4862564.51781999,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A6,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1928024.340180018,
+      "E_formula": "+C6-D6",
+      "F": 0.2839259422853451,
+      "F_formula": "+E6/C6",
+      "G": 1177921.9932988505,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A6,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.17346389509521518,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 750102.3468811675,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.11046204719012993,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 1.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 7,
+      "A": "feb",
+      "B": "Febrero",
+      "C": 5483785.0465000095,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A7,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3687909.7278000186,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A7,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1795875.3186999909,
+      "E_formula": "+C7-D7",
+      "F": 0.3274882774346155,
+      "F_formula": "+E7/C7",
+      "G": 1256594.2338735631,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A7,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.2291472446892455,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 539281.0848264277,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.09834103274537,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 2.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 8,
+      "A": "mar",
+      "B": "Marzo",
+      "C": 4795802.2055,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A8,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3297940.62705,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A8,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1497861.5784500004,
+      "E_formula": null,
+      "F": 0.31232763868622404,
+      "F_formula": null,
+      "G": 1322109.173333333,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A8,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.27568050488343543,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 175752.40511666727,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.03664713380278862,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 3.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 9,
+      "A": "abr",
+      "B": "Abril",
+      "C": 5828821.517499992,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A9,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 4173261.8291999944,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A9,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1655559.6882999972,
+      "E_formula": null,
+      "F": 0.28402991639553143,
+      "F_formula": null,
+      "G": 1270760.0,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A9,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.21801319463716137,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 384799.68829999724,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.06601672175837005,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 4.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 10,
+      "A": "may",
+      "B": "Mayo",
+      "C": 4888400.284999974,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A10,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3268826.2014500145,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A10,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1619574.0835499596,
+      "E_formula": null,
+      "F": 0.3313096287387947,
+      "F_formula": null,
+      "G": 1212770.2969999998,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A10,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.24809144634112265,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 406803.7865499598,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.08321818239767204,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 5.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 11,
+      "A": "jun",
+      "B": "Junio",
+      "C": 5316442.8484999845,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A11,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3781305.86540001,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A11,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1535136.9830999747,
+      "E_formula": null,
+      "F": 0.2887526541422538,
+      "F_formula": null,
+      "G": 1192459.405,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A11,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.22429647773538058,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 342677.57809997466,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.06445617640687323,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 6.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 12,
+      "A": "jul",
+      "B": "Julio",
+      "C": 5537390.004999995,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A12,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3865509.752400003,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A12,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1671880.2525999923,
+      "E_formula": null,
+      "F": 0.3019256817905846,
+      "F_formula": null,
+      "G": 1180504.5666666667,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A12,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.21318790361537263,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 491375.6859333257,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.088737778175212,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 7.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 13,
+      "A": "ago",
+      "B": "Agosto",
+      "C": 5522005.633999999,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A13,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3953609.486149994,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A13,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1568396.1478500045,
+      "E_formula": null,
+      "F": 0.2840265388707868,
+      "F_formula": null,
+      "G": 1130876.0039999997,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A13,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.20479443139952436,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 437520.14385000477,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.07923210747126247,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 8.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 14,
+      "A": "sep",
+      "B": "Septiembre",
+      "C": 5876324.632500003,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A14,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3873062.419099999,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A14,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 2003262.213400004,
+      "E_formula": "+C14-D14",
+      "F": 0.3409039388873489,
+      "F_formula": "+E14/C14",
+      "G": 1235960.3599999999,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A14,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.21032880878709678,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 767301.8534000041,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.13057513010025212,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 9.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 15,
+      "A": "oct",
+      "B": "Octubre",
+      "C": 5679939.494500005,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A15,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3876252.222249992,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A15,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1803687.2722500125,
+      "E_formula": "+C15-D15",
+      "F": 0.31755395880476506,
+      "F_formula": "+E15/C15",
+      "G": 1197665.32,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A15,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.21085881657009245,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 606021.9522500124,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.10669514223467261,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 10.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 16,
+      "A": "nov",
+      "B": "Noviembre",
+      "C": 4606362.523500003,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A16,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3119881.2587499944,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A16,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 1486481.2647500085,
+      "E_formula": "+C16-D16",
+      "F": 0.32270175375179794,
+      "F_formula": "+E16/C16",
+      "G": 1178741.5599999998,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A16,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.25589422325891303,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 307739.70475000865,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.06680753049288489,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 11.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 17,
+      "A": "dic",
+      "B": "Diciembre",
+      "C": 5557418.000149999,
+      "C_formula": "+SUMIFS(BD_Ventas_y_CtoVta!P:P,BD_Ventas_y_CtoVta!U:U,A17,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "D": 3486485.1709999857,
+      "D_formula": "+SUMIFS(BD_Ventas_y_CtoVta!R:R,BD_Ventas_y_CtoVta!U:U,A17,BD_Ventas_y_CtoVta!N:N,\"1\",BD_Ventas_y_CtoVta!X:X,Resultados[[#This Row],[Año]])",
+      "E": 2070932.8291500132,
+      "E_formula": null,
+      "F": 0.3726429844028499,
+      "F_formula": null,
+      "G": 1373790.1100000003,
+      "G_formula": "+SUMIFS('Gastos fijos'!B:B,'Gastos fijos'!E:E,A17,'Gastos fijos'!F:F,Resultados[[#This Row],[Año]])",
+      "H": 0.24719934868367302,
+      "H_formula": "+Resultados[[#This Row],[Gastos Fijos ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "I": 697142.7191500128,
+      "I_formula": "+Resultados[[#This Row],[Utilidad Bruta ($)]]-Resultados[[#This Row],[Gastos Fijos ($)]]",
+      "J": 0.12544363571917685,
+      "J_formula": "+Resultados[[#This Row],[Utilidad Neta ($)]]/Resultados[[#This Row],[Ventas Netas ($)]]",
+      "K": 12.0,
+      "L": 2025.0
+    },
+    {
+      "_row": 18,
+      "A": "ene",
+      "B": null,
+      "C": null,
+      "D": null,
+      "E": null,
+      "F": null,
+      "G": null,
+      "H": null,
+      "I": null,
+      "J": null,
+      "K": null,
+      "L": null
+    },
+    {
+      "_row": 19,
+      "A": "feb",
+      "B": null,
+      "C": null,
+      "D": null,
+      "E": null,
+      "F": null,
+      "G": null,
+      "H": null,
+      "I": null,
+      "J": null,
+      "K": null,
+      "L": null
+    },
+    {
+      "_row": 20,
+      "A": "mar",
+      "B": null,
+      "C": null,
+      "D": null,
+      "E": null,
+      "F": null,
+      "G": null,
+      "H": null,
+      "I": null,
+      "J": null,
+      "K": null,
+      "L": null
+    },
+    {
+      "_row": 21,
+      "A": "abr"
+    },
+    {
+      "_row": 22,
+      "A": "may"
+    },
+    {
+      "_row": 23,
+      "A": "jun"
+    },
+    {
+      "_row": 24,
+      "A": "jul"
+    },
+    {
+      "_row": 25,
+      "A": "ago"
+    },
+    {
+      "_row": 26,
+      "A": "sep"
+    },
+    {
+      "_row": 27,
+      "A": "oct"
+    },
+    {
+      "_row": 28,
+      "A": "nov"
+    },
+    {
+      "_row": 29,
+      "A": "dic"
+    }
+  ],
+  "sales_monthly": {
+    "2024-07": {
+      "sales": 2329541.531500001,
+      "cost": 1302469.3528999996,
+      "rows": 892,
+      "invoices": 312,
+      "min_date_serial": 45495.0,
+      "max_date_serial": 45504.0
+    },
+    "2024-08": {
+      "sales": 5454654.390500006,
+      "cost": 3279202.84959,
+      "rows": 2484,
+      "invoices": 803,
+      "min_date_serial": 45505.0,
+      "max_date_serial": 45534.0
+    },
+    "2024-09": {
+      "sales": 5508991.350000016,
+      "cost": 3526857.961469993,
+      "rows": 2395,
+      "invoices": 841,
+      "min_date_serial": 45537.0,
+      "max_date_serial": 45565.0
+    },
+    "2024-10": {
+      "sales": 5213063.120500009,
+      "cost": 3305238.993239998,
+      "rows": 2641,
+      "invoices": 924,
+      "min_date_serial": 45567.0,
+      "max_date_serial": 45596.0
+    },
+    "2024-11": {
+      "sales": 5912179.093499999,
+      "cost": 3612718.927059998,
+      "rows": 2355,
+      "invoices": 831,
+      "min_date_serial": 45597.0,
+      "max_date_serial": 45625.0
+    },
+    "2024-12": {
+      "sales": 5250293.8195000095,
+      "cost": 3417053.6863200064,
+      "rows": 2000,
+      "invoices": 626,
+      "min_date_serial": 45628.0,
+      "max_date_serial": 45657.0
+    },
+    "2025-01": {
+      "sales": 6790588.858000008,
+      "cost": 4862564.51781999,
+      "rows": 2231,
+      "invoices": 769,
+      "min_date_serial": 45659.0,
+      "max_date_serial": 45688.0
+    },
+    "2025-02": {
+      "sales": 5483785.0465000095,
+      "cost": 3687909.7278000186,
+      "rows": 2333,
+      "invoices": 781,
+      "min_date_serial": 45692.0,
+      "max_date_serial": 45716.0
+    },
+    "2025-03": {
+      "sales": 4795802.2055,
+      "cost": 3297940.62705,
+      "rows": 1995,
+      "invoices": 759,
+      "min_date_serial": 45719.0,
+      "max_date_serial": 45747.0
+    },
+    "2025-04": {
+      "sales": 5828821.517499992,
+      "cost": 4173261.8291999944,
+      "rows": 2240,
+      "invoices": 794,
+      "min_date_serial": 45748.0,
+      "max_date_serial": 45777.0
+    },
+    "2025-05": {
+      "sales": 4888400.284999974,
+      "cost": 3268826.2014500145,
+      "rows": 2430,
+      "invoices": 804,
+      "min_date_serial": 45779.0,
+      "max_date_serial": 45807.0
+    },
+    "2025-06": {
+      "sales": 5316442.8484999845,
+      "cost": 3781305.86540001,
+      "rows": 2000,
+      "invoices": 715,
+      "min_date_serial": 45810.0,
+      "max_date_serial": 45838.0
+    },
+    "2025-07": {
+      "sales": 5537390.004999995,
+      "cost": 3865509.752400003,
+      "rows": 2169,
+      "invoices": 791,
+      "min_date_serial": 45839.0,
+      "max_date_serial": 45869.0
+    },
+    "2025-08": {
+      "sales": 5522005.633999999,
+      "cost": 3953609.486149994,
+      "rows": 2137,
+      "invoices": 780,
+      "min_date_serial": 45870.0,
+      "max_date_serial": 45898.0
+    },
+    "2025-09": {
+      "sales": 5876324.632500003,
+      "cost": 3873062.419099999,
+      "rows": 1969,
+      "invoices": 771,
+      "min_date_serial": 45901.0,
+      "max_date_serial": 45930.0
+    },
+    "2025-10": {
+      "sales": 5679939.494500005,
+      "cost": 3876252.222249992,
+      "rows": 2158,
+      "invoices": 785,
+      "min_date_serial": 45931.0,
+      "max_date_serial": 45961.0
+    },
+    "2025-11": {
+      "sales": 4606362.523500003,
+      "cost": 3119881.2587499944,
+      "rows": 1905,
+      "invoices": 629,
+      "min_date_serial": 45964.0,
+      "max_date_serial": 45989.0
+    },
+    "2025-12": {
+      "sales": 5557418.000149999,
+      "cost": 3486485.1709999857,
+      "rows": 1908,
+      "invoices": 602,
+      "min_date_serial": 45992.0,
+      "max_date_serial": 46021.0
+    },
+    "2026-01": {
+      "sales": 5761621.395200005,
+      "cost": 4043281.4539999967,
+      "rows": 1942,
+      "invoices": 717,
+      "min_date_serial": 46027.0,
+      "max_date_serial": 46053.0
+    },
+    "2026-02": {
+      "sales": 4318091.755449997,
+      "cost": 2966196.592299997,
+      "rows": 2131,
+      "invoices": 771,
+      "min_date_serial": 46056.0,
+      "max_date_serial": 46081.0
+    },
+    "2026-03": {
+      "sales": 6016763.607420005,
+      "cost": 4150453.174999981,
+      "rows": 2236,
+      "invoices": 820,
+      "min_date_serial": 46083.0,
+      "max_date_serial": 46112.0
+    },
+    "2026-04": {
+      "sales": 5706314.440100009,
+      "cost": 3536074.2017999953,
+      "rows": 2402,
+      "invoices": 842,
+      "min_date_serial": 46113.0,
+      "max_date_serial": 46142.0
+    },
+    "2026-05": {
+      "sales": 441766.0529999999,
+      "cost": 287078.9675,
+      "rows": 194,
+      "invoices": 61,
+      "min_date_serial": 46146.0,
+      "max_date_serial": 46147.0
+    }
+  },
+  "sales_monthly_by_status": {
+    "2024-07": {
+      "Emitida": {
+        "sales": 2322921.531500001,
+        "cost": 1299287.8528999996,
+        "rows": 886,
+        "invoices": 310
+      },
+      "Dev.Parc.": {
+        "sales": 6620.0,
+        "cost": 3181.5,
+        "rows": 6,
+        "invoices": 2
+      }
+    },
+    "2024-08": {
+      "Emitida": {
+        "sales": 5407477.540500004,
+        "cost": 3249294.3354500006,
+        "rows": 2440,
+        "invoices": 795
+      },
+      "Dev.Parc.": {
+        "sales": 47176.85,
+        "cost": 29908.51414,
+        "rows": 44,
+        "invoices": 8
+      }
+    },
+    "2024-09": {
+      "Emitida": {
+        "sales": 5366615.790000016,
+        "cost": 3435022.806469994,
+        "rows": 2328,
+        "invoices": 829
+      },
+      "Dev.Parc.": {
+        "sales": 142375.56,
+        "cost": 91835.15500000003,
+        "rows": 67,
+        "invoices": 12
+      }
+    },
+    "2024-10": {
+      "Emitida": {
+        "sales": 5062290.006500007,
+        "cost": 3207176.62824,
+        "rows": 2573,
+        "invoices": 913
+      },
+      "Dev.Parc.": {
+        "sales": 73147.36399999999,
+        "cost": 49323.70499999999,
+        "rows": 36,
+        "invoices": 8
+      },
+      "Devuelta": {
+        "sales": 77625.75,
+        "cost": 48738.659999999996,
+        "rows": 32,
+        "invoices": 3
+      }
+    },
+    "2024-11": {
+      "Emitida": {
+        "sales": 5772570.233499996,
+        "cost": 3528281.4931099988,
+        "rows": 2305,
+        "invoices": 822
+      },
+      "Dev.Parc.": {
+        "sales": 139608.86,
+        "cost": 84437.43394999999,
+        "rows": 50,
+        "invoices": 9
+      }
+    },
+    "2024-12": {
+      "Emitida": {
+        "sales": 4983736.739500002,
+        "cost": 3232931.6708200052,
+        "rows": 1958,
+        "invoices": 618
+      },
+      "Dev.Parc.": {
+        "sales": 266557.08,
+        "cost": 184122.01549999995,
+        "rows": 42,
+        "invoices": 8
+      }
+    },
+    "2025-01": {
+      "Emitida": {
+        "sales": 6761487.562000006,
+        "cost": 4843137.93781999,
+        "rows": 2197,
+        "invoices": 762
+      },
+      "Devuelta": {
+        "sales": 976.5,
+        "cost": 558.0,
+        "rows": 1,
+        "invoices": 1
+      },
+      "Dev.Parc.": {
+        "sales": 28124.796,
+        "cost": 18868.58,
+        "rows": 33,
+        "invoices": 6
+      }
+    },
+    "2025-02": {
+      "Emitida": {
+        "sales": 5452439.89650001,
+        "cost": 3667112.7303000176,
+        "rows": 2314,
+        "invoices": 776
+      },
+      "Dev.Parc.": {
+        "sales": 31345.149999999994,
+        "cost": 20796.9975,
+        "rows": 19,
+        "invoices": 5
+      }
+    },
+    "2025-03": {
+      "Emitida": {
+        "sales": 4781637.7315,
+        "cost": 3288169.85405,
+        "rows": 1984,
+        "invoices": 756
+      },
+      "Dev.Parc.": {
+        "sales": 14164.474000000002,
+        "cost": 9770.773,
+        "rows": 11,
+        "invoices": 3
+      }
+    },
+    "2025-04": {
+      "Emitida": {
+        "sales": 5710000.637499992,
+        "cost": 4059573.029199995,
+        "rows": 2213,
+        "invoices": 792
+      },
+      "Dev.Parc.": {
+        "sales": 118820.88,
+        "cost": 113688.80000000002,
+        "rows": 27,
+        "invoices": 2
+      }
+    },
+    "2025-05": {
+      "Emitida": {
+        "sales": 4797112.287999976,
+        "cost": 3208045.018950014,
+        "rows": 2369,
+        "invoices": 795
+      },
+      "Dev.Parc.": {
+        "sales": 91287.99699999999,
+        "cost": 60781.18250000001,
+        "rows": 61,
+        "invoices": 9
+      }
+    },
+    "2025-06": {
+      "Emitida": {
+        "sales": 5273594.948499985,
+        "cost": 3753846.2904000096,
+        "rows": 1970,
+        "invoices": 709
+      },
+      "Dev.Parc.": {
+        "sales": 42847.9,
+        "cost": 27459.575,
+        "rows": 30,
+        "invoices": 6
+      }
+    },
+    "2025-07": {
+      "Emitida": {
+        "sales": 5423818.104999995,
+        "cost": 3747789.383400003,
+        "rows": 2117,
+        "invoices": 786
+      },
+      "Dev.Parc.": {
+        "sales": 113571.9,
+        "cost": 117720.369,
+        "rows": 52,
+        "invoices": 5
+      }
+    },
+    "2025-08": {
+      "Emitida": {
+        "sales": 5505310.6039999975,
+        "cost": 3943447.8481499944,
+        "rows": 2123,
+        "invoices": 775
+      },
+      "Dev.Parc.": {
+        "sales": 12143.03,
+        "cost": 6975.237999999999,
+        "rows": 10,
+        "invoices": 4
+      },
+      "Original": {
+        "sales": 4552.0,
+        "cost": 3186.4,
+        "rows": 4,
+        "invoices": 1
+      }
+    },
+    "2025-09": {
+      "Emitida": {
+        "sales": 5833163.382500003,
+        "cost": 3849010.4683499993,
+        "rows": 1946,
+        "invoices": 766
+      },
+      "Dev.Parc.": {
+        "sales": 43161.25,
+        "cost": 24051.95075,
+        "rows": 23,
+        "invoices": 5
+      }
+    },
+    "2025-10": {
+      "Emitida": {
+        "sales": 5672012.694500004,
+        "cost": 3871933.9822499924,
+        "rows": 2152,
+        "invoices": 783
+      },
+      "Dev.Parc.": {
+        "sales": 7926.799999999999,
+        "cost": 4318.24,
+        "rows": 6,
+        "invoices": 2
+      }
+    },
+    "2025-11": {
+      "Emitida": {
+        "sales": 4552246.107500003,
+        "cost": 3083840.9387499946,
+        "rows": 1881,
+        "invoices": 626
+      },
+      "Dev.Parc.": {
+        "sales": 54116.416,
+        "cost": 36040.32,
+        "rows": 24,
+        "invoices": 3
+      }
+    },
+    "2025-12": {
+      "Emitida": {
+        "sales": 5545501.336149998,
+        "cost": 3480148.370999986,
+        "rows": 1904,
+        "invoices": 601
+      },
+      "Dev.Parc.": {
+        "sales": 11916.664,
+        "cost": 6336.8,
+        "rows": 4,
+        "invoices": 1
+      }
+    },
+    "2026-01": {
+      "Emitida": {
+        "sales": 5658917.079200006,
+        "cost": 3970635.498999996,
+        "rows": 1904,
+        "invoices": 712
+      },
+      "Dev.Parc.": {
+        "sales": 102704.316,
+        "cost": 72645.955,
+        "rows": 38,
+        "invoices": 5
+      }
+    },
+    "2026-02": {
+      "Emitida": {
+        "sales": 4262144.225449995,
+        "cost": 2926224.2422999972,
+        "rows": 2105,
+        "invoices": 764
+      },
+      "Dev.Parc.": {
+        "sales": 48451.27999999999,
+        "cost": 35474.6,
+        "rows": 25,
+        "invoices": 6
+      },
+      "Devuelta": {
+        "sales": 7496.25,
+        "cost": 4497.75,
+        "rows": 1,
+        "invoices": 1
+      }
+    },
+    "2026-03": {
+      "Emitida": {
+        "sales": 5867444.608420007,
+        "cost": 4039433.399999982,
+        "rows": 2210,
+        "invoices": 813
+      },
+      "Dev.Parc.": {
+        "sales": 149318.999,
+        "cost": 111019.77499999998,
+        "rows": 26,
+        "invoices": 7
+      }
+    },
+    "2026-04": {
+      "Emitida": {
+        "sales": 5683356.843100008,
+        "cost": 3521883.957799996,
+        "rows": 2387,
+        "invoices": 838
+      },
+      "Dev.Parc.": {
+        "sales": 22957.597,
+        "cost": 14190.244000000002,
+        "rows": 15,
+        "invoices": 4
+      }
+    },
+    "2026-05": {
+      "Emitida": {
+        "sales": 393490.55299999984,
+        "cost": 258661.61750000005,
+        "rows": 180,
+        "invoices": 60
+      },
+      "Dev.Parc.": {
+        "sales": 48275.5,
+        "cost": 28417.350000000002,
+        "rows": 14,
+        "invoices": 1
+      }
+    }
+  },
+  "purchase_monthly": {
+    "2022-01": {
+      "amount": 4827938.229700004,
+      "rows": 535
+    },
+    "2022-02": {
+      "amount": 11205253.534799986,
+      "rows": 696
+    },
+    "2022-03": {
+      "amount": 3273912.5594500005,
+      "rows": 719
+    },
+    "2022-04": {
+      "amount": 2286644.5929999994,
+      "rows": 563
+    },
+    "2022-05": {
+      "amount": 2668791.2718559992,
+      "rows": 625
+    },
+    "2022-06": {
+      "amount": 3244834.5368,
+      "rows": 659
+    },
+    "2022-07": {
+      "amount": 4081791.6363439984,
+      "rows": 654
+    },
+    "2022-08": {
+      "amount": 3255099.4103000024,
+      "rows": 687
+    },
+    "2022-09": {
+      "amount": 2903633.593299997,
+      "rows": 742
+    },
+    "2022-10": {
+      "amount": 1890157.391209999,
+      "rows": 586
+    },
+    "2022-11": {
+      "amount": 3858357.581100001,
+      "rows": 680
+    },
+    "2022-12": {
+      "amount": 2314181.555899997,
+      "rows": 708
+    },
+    "2023-01": {
+      "amount": 3119201.7679999983,
+      "rows": 803
+    },
+    "2023-02": {
+      "amount": 2508465.0468999986,
+      "rows": 813
+    },
+    "2023-03": {
+      "amount": 4772266.646199997,
+      "rows": 973
+    },
+    "2023-04": {
+      "amount": 2546648.6145,
+      "rows": 653
+    },
+    "2023-05": {
+      "amount": 3185708.8341999985,
+      "rows": 737
+    },
+    "2023-06": {
+      "amount": 2222251.935800001,
+      "rows": 652
+    },
+    "2023-07": {
+      "amount": 3469820.0190000017,
+      "rows": 670
+    },
+    "2023-08": {
+      "amount": 2317857.435,
+      "rows": 593
+    },
+    "2023-09": {
+      "amount": 4090848.1204999946,
+      "rows": 806
+    },
+    "2023-10": {
+      "amount": 2373885.9186999984,
+      "rows": 538
+    },
+    "2023-11": {
+      "amount": 3283853.619599997,
+      "rows": 729
+    },
+    "2023-12": {
+      "amount": 3072644.3255000007,
+      "rows": 542
+    },
+    "2024-01": {
+      "amount": 2031324.973599999,
+      "rows": 551
+    },
+    "2024-02": {
+      "amount": 2755246.3278,
+      "rows": 472
+    },
+    "2024-03": {
+      "amount": 2153183.4667999977,
+      "rows": 521
+    },
+    "2024-04": {
+      "amount": 8323171.002050009,
+      "rows": 790
+    },
+    "2024-05": {
+      "amount": 4883523.529699998,
+      "rows": 727
+    },
+    "2024-06": {
+      "amount": 2648617.479499998,
+      "rows": 524
+    },
+    "2024-07": {
+      "amount": 3709781.504239998,
+      "rows": 713
+    },
+    "2024-08": {
+      "amount": 4144126.965500001,
+      "rows": 652
+    },
+    "2024-09": {
+      "amount": 4282472.0171,
+      "rows": 548
+    },
+    "2024-10": {
+      "amount": 2801888.9112999993,
+      "rows": 517
+    },
+    "2024-11": {
+      "amount": 4999300.651999999,
+      "rows": 534
+    },
+    "2024-12": {
+      "amount": 5747454.299599999,
+      "rows": 447
+    },
+    "2025-01": {
+      "amount": 3271540.7064000005,
+      "rows": 386
+    },
+    "2025-02": {
+      "amount": 4344055.750500001,
+      "rows": 507
+    },
+    "2025-03": {
+      "amount": 3038192.082100002,
+      "rows": 403
+    },
+    "2025-04": {
+      "amount": 5031533.370949999,
+      "rows": 502
+    },
+    "2025-05": {
+      "amount": 2706114.923499998,
+      "rows": 498
+    },
+    "2025-06": {
+      "amount": 3727697.0721,
+      "rows": 337
+    },
+    "2025-07": {
+      "amount": 3478649.101999998,
+      "rows": 471
+    },
+    "2025-08": {
+      "amount": 3450987.961799998,
+      "rows": 442
+    },
+    "2025-09": {
+      "amount": 3432101.1904999977,
+      "rows": 483
+    },
+    "2025-10": {
+      "amount": 2978875.0285000005,
+      "rows": 444
+    },
+    "2025-11": {
+      "amount": 3588308.7424999997,
+      "rows": 605
+    },
+    "2025-12": {
+      "amount": 2364052.1969999997,
+      "rows": 440
+    },
+    "2026-01": {
+      "amount": 7612189.255599999,
+      "rows": 641
+    },
+    "2026-02": {
+      "amount": 2864386.6199999987,
+      "rows": 581
+    },
+    "2026-03": {
+      "amount": 2885480.1235000007,
+      "rows": 575
+    },
+    "2026-04": {
+      "amount": 2830368.090499999,
+      "rows": 611
+    }
+  },
+  "status_counts": {
+    "1.0": 47147,
+    "0.0": 1256
+  },
+  "status_labels": {
+    "Emitida": 46446,
+    "Cancelad": 1256,
+    "Dev.Parc.": 663,
+    "Devuelta": 34,
+    "Original": 4
+  },
+  "row_counts": {
+    "sales": 48403,
+    "purchases": 31285
+  }
+}

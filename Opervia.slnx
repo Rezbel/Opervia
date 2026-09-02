@@ -6,4 +6,7 @@
     <Project Path="src/Opervia.Infrastructure/Opervia.Infrastructure.csproj" />
     <Project Path="src/Opervia.Worker/Opervia.Worker.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Opervia.Application.Tests/Opervia.Application.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -70,6 +70,65 @@
   line-height: 1.6;
 }
 
+.saved-connections {
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid rgba(79, 124, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(79, 124, 255, 0.04);
+}
+
+.saved-connections-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+  color: #aebfff;
+  font-size: 12px;
+}
+
+.saved-connection {
+  display: grid;
+  grid-template-columns: 1fr 38px;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.saved-connection-main,
+.saved-connection-delete {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  color: #e7edf8;
+  background: rgba(7, 14, 27, 0.65);
+  cursor: pointer;
+}
+
+.saved-connections-empty {
+  margin: 0;
+  color: #8492aa;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.saved-connection-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 9px 11px;
+}
+
+.saved-connection-main span {
+  color: #8492aa;
+  font-size: 11px;
+}
+
+.saved-connection-delete {
+  display: grid;
+  place-items: center;
+  color: #fda4af;
+}
+
 .connection-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

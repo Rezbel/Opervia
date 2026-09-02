@@ -1,0 +1,421 @@
+{
+  "Period": {
+    "From": "2025-01-01T00:00:00",
+    "To": "2026-05-05T00:00:00"
+  },
+  "Counts": {
+    "Excel": 12191,
+    "Sae": 12157,
+    "Matched": 12155,
+    "ExcelOnly": 36,
+    "SaeOnly": 2
+  },
+  "Sales": {
+    "Excel": 88127838.30182,
+    "Sae": 87722301.16699999999728606,
+    "Delta": 405537.13482000000271394,
+    "ExcelOnly": 913367.125,
+    "SaeOnly": -514250.49,
+    "MatchedCalculation": 6420.49982000000271394
+  },
+  "Cost": {
+    "Excel": 60229693.468970,
+    "Sae": 59160783.2594783353488,
+    "Delta": 1068910.2094916646512,
+    "ExcelOnly": 789603.393,
+    "SaeOnly": -566384,
+    "MatchedCalculation": 845690.8164916646512
+  },
+  "ExcelOnlyStatus": {
+    "Emitida": {
+      "Count": 36,
+      "Sales": 913367.125,
+      "Cost": 789603.3930000002
+    }
+  },
+  "ExcelOnlyCurrentSaeStatus": {
+    "C": {
+      "Count": 36,
+      "Sales": 913367.125,
+      "Cost": 789603.3930000002
+    }
+  },
+  "TopSalesDifferences": [
+    {
+      "Invoice": "F-QRR-000041",
+      "Excel": 51342.168999999994,
+      "Sae": 49941.279,
+      "Delta": 1400.890
+    },
+    {
+      "Invoice": "F-QR-071925",
+      "Excel": 3775,
+      "Sae": 2453.75,
+      "Delta": 1321.25
+    },
+    {
+      "Invoice": "F-HT-003493",
+      "Excel": 4839,
+      "Sae": 3871.2,
+      "Delta": 967.8
+    },
+    {
+      "Invoice": "F-QR-078070",
+      "Excel": 3595,
+      "Sae": 2876,
+      "Delta": 719
+    },
+    {
+      "Invoice": "F-QR-077925",
+      "Excel": 3292.25,
+      "Sae": 2897.54,
+      "Delta": 394.71
+    },
+    {
+      "Invoice": "F-XA-004117",
+      "Excel": 6670,
+      "Sae": 6279,
+      "Delta": 391
+    },
+    {
+      "Invoice": "F-XA-004471",
+      "Excel": 1276,
+      "Sae": 925.1,
+      "Delta": 350.9
+    },
+    {
+      "Invoice": "F-QR-078030",
+      "Excel": 6015,
+      "Sae": 5668,
+      "Delta": 347
+    },
+    {
+      "Invoice": "F-QR-077412",
+      "Excel": 2255,
+      "Sae": 1976,
+      "Delta": 279
+    },
+    {
+      "Invoice": "F-QR-071712",
+      "Excel": 13916.893,
+      "Sae": 13700.17,
+      "Delta": 216.723
+    },
+    {
+      "Invoice": "F-QR-072053",
+      "Excel": 18006,
+      "Sae": 17970.81,
+      "Delta": 35.19
+    },
+    {
+      "Invoice": "F-QR-072460",
+      "Excel": 2213.29,
+      "Sae": 2213.899,
+      "Delta": -0.609
+    },
+    {
+      "Invoice": "F-QR-071744",
+      "Excel": 49030.68,
+      "Sae": 49031.272,
+      "Delta": -0.592
+    },
+    {
+      "Invoice": "F-QR-072358",
+      "Excel": 222424.17,
+      "Sae": 222424.537,
+      "Delta": -0.367
+    },
+    {
+      "Invoice": "F-QR-071929",
+      "Excel": 16739.32,
+      "Sae": 16739.528,
+      "Delta": -0.208
+    }
+  ],
+  "TopCostDifferences": [
+    {
+      "Invoice": "F-QR-073500",
+      "Excel": 316053,
+      "Sae": 56508.25,
+      "Delta": 259544.75
+    },
+    {
+      "Invoice": "F-HT-003751",
+      "Excel": 136710,
+      "Sae": 6510,
+      "Delta": 130200
+    },
+    {
+      "Invoice": "F-HT-004121",
+      "Excel": 0,
+      "Sae": 95000,
+      "Delta": -95000
+    },
+    {
+      "Invoice": "F-QR-073564",
+      "Excel": 71326.5,
+      "Sae": 2491.071,
+      "Delta": 68835.429
+    },
+    {
+      "Invoice": "F-QR-072046",
+      "Excel": 294387.5,
+      "Sae": 228361.52,
+      "Delta": 66025.98
+    },
+    {
+      "Invoice": "F-QR-073502",
+      "Excel": 279000,
+      "Sae": 215000,
+      "Delta": 64000
+    },
+    {
+      "Invoice": "F-QR-075858",
+      "Excel": 73254.67000000001,
+      "Sae": 22002.724,
+      "Delta": 51251.946
+    },
+    {
+      "Invoice": "F-EQ000021",
+      "Excel": 4869.96,
+      "Sae": 54869.96,
+      "Delta": -50000.00
+    },
+    {
+      "Invoice": "F-XA-004916",
+      "Excel": 65545.06400000001,
+      "Sae": 18101.829,
+      "Delta": 47443.235
+    },
+    {
+      "Invoice": "F-QR-075875",
+      "Excel": 222329.25,
+      "Sae": 181905.75,
+      "Delta": 40423.50
+    },
+    {
+      "Invoice": "F-QR-075312",
+      "Excel": 46595.869999999995,
+      "Sae": 15675.597,
+      "Delta": 30920.273
+    },
+    {
+      "Invoice": "F-XA-003986",
+      "Excel": 36023.71000000001,
+      "Sae": 5331.21,
+      "Delta": 30692.50
+    },
+    {
+      "Invoice": "F-XA-004126",
+      "Excel": 33639.41,
+      "Sae": 3395.21,
+      "Delta": 30244.20
+    },
+    {
+      "Invoice": "F-EQ000044",
+      "Excel": 120000,
+      "Sae": 150000,
+      "Delta": -30000
+    },
+    {
+      "Invoice": "F-XA-004013",
+      "Excel": 47236.58,
+      "Sae": 17894.1011686765,
+      "Delta": 29342.4788313235
+    }
+  ],
+  "ExcelOnlyInvoices": [
+    {
+      "Invoice": "F-EQ000040",
+      "Status": "Emitida",
+      "Sales": 348000,
+      "Cost": 469854
+    },
+    {
+      "Invoice": "F-EQ000023",
+      "Status": "Emitida",
+      "Sales": 166250.49,
+      "Cost": 87882.80000000002
+    },
+    {
+      "Invoice": "F-SL-024680",
+      "Status": "Emitida",
+      "Sales": 100000,
+      "Cost": 95000
+    },
+    {
+      "Invoice": "F-QR-076587",
+      "Status": "Emitida",
+      "Sales": 68300,
+      "Cost": 38467.5
+    },
+    {
+      "Invoice": "F-ES000011",
+      "Status": "Emitida",
+      "Sales": 62000,
+      "Cost": 51000
+    },
+    {
+      "Invoice": "F-QR-076720",
+      "Status": "Emitida",
+      "Sales": 32112.582000000002,
+      "Cost": 26696.553000000007
+    },
+    {
+      "Invoice": "F-QR-075442",
+      "Status": "Emitida",
+      "Sales": 21200,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-075428",
+      "Status": "Emitida",
+      "Sales": 14600,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-075441",
+      "Status": "Emitida",
+      "Sales": 14100,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-073337",
+      "Status": "Emitida",
+      "Sales": 11794.1,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-074361",
+      "Status": "Emitida",
+      "Sales": 10309.2,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-076396",
+      "Status": "Emitida",
+      "Sales": 9500,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-078113",
+      "Status": "Emitida",
+      "Sales": 7235,
+      "Cost": 4340
+    },
+    {
+      "Invoice": "F-QR-073338",
+      "Status": "Emitida",
+      "Sales": 7105.950000000001,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-074353",
+      "Status": "Emitida",
+      "Sales": 4717.64,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-077939",
+      "Status": "Emitida",
+      "Sales": 4653.5,
+      "Cost": 3341
+    },
+    {
+      "Invoice": "F-HT-003764",
+      "Status": "Emitida",
+      "Sales": 4500,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-078059",
+      "Status": "Emitida",
+      "Sales": 4500,
+      "Cost": 2745.6000000000004
+    },
+    {
+      "Invoice": "F-QR-074354",
+      "Status": "Emitida",
+      "Sales": 2842.38,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-075533",
+      "Status": "Emitida",
+      "Sales": 2695,
+      "Cost": 1212.75
+    },
+    {
+      "Invoice": "F-QR-074730",
+      "Status": "Emitida",
+      "Sales": 2358.82,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-077151",
+      "Status": "Emitida",
+      "Sales": 1725.3,
+      "Cost": 640
+    },
+    {
+      "Invoice": "F-QR-078457",
+      "Status": "Emitida",
+      "Sales": 1612,
+      "Cost": 1116
+    },
+    {
+      "Invoice": "F-QR-078238",
+      "Status": "Emitida",
+      "Sales": 1541.332,
+      "Cost": 924.8
+    },
+    {
+      "Invoice": "F-QR-078033",
+      "Status": "Emitida",
+      "Sales": 1485,
+      "Cost": 948.29
+    },
+    {
+      "Invoice": "F-QR-074731",
+      "Status": "Emitida",
+      "Sales": 1421.19,
+      "Cost": 0
+    },
+    {
+      "Invoice": "F-QR-078465",
+      "Status": "Emitida",
+      "Sales": 1216.47,
+      "Cost": 980
+    },
+    {
+      "Invoice": "F-QR-078047",
+      "Status": "Emitida",
+      "Sales": 1016.311,
+      "Cost": 1257.42
+    },
+    {
+      "Invoice": "F-QR-075643",
+      "Status": "Emitida",
+      "Sales": 883,
+      "Cost": 500
+    },
+    {
+      "Invoice": "F-QR-078491",
+      "Status": "Emitida",
+      "Sales": 763.16,
+      "Cost": 471.25
+    }
+  ],
+  "SaeOnlyInvoices": [
+    {
+      "Invoice": "F-EQ000048",
+      "Sales": 348000,
+      "Cost": 469854
+    },
+    {
+      "Invoice": "F-EQ000032",
+      "Sales": 166250.49,
+      "Cost": 96530
+    }
+  ]
+}

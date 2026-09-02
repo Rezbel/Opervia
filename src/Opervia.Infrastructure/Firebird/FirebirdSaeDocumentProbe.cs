@@ -5,7 +5,9 @@ using Opervia.Domain.Connections;
 
 namespace Opervia.Infrastructure.Firebird;
 
-public sealed class FirebirdSaeDocumentProbe : ISaeDocumentProbe
+public sealed class FirebirdSaeDocumentProbe(
+    ILogger<FirebirdSaeDocumentProbe> logger
+) : ISaeDocumentProbe
 {
     public async Task<SaeDocumentProbeResult> ReadLatestAsync(
         SaeConnectionProfile profile,
@@ -44,6 +46,11 @@ public sealed class FirebirdSaeDocumentProbe : ISaeDocumentProbe
                     CVE_VEND,
                     NUM_ALMA,
                     CAN_TOT,
+                    DES_TOT,
+                    COALESCE(IMP_TOT1, 0) + COALESCE(IMP_TOT2, 0) +
+                    COALESCE(IMP_TOT3, 0) + COALESCE(IMP_TOT4, 0) +
+                    COALESCE(IMP_TOT5, 0) + COALESCE(IMP_TOT6, 0) +
+                    COALESCE(IMP_TOT7, 0) + COALESCE(IMP_TOT8, 0),
                     IMPORTE,
                     ENLAZADO,
                     TIP_DOC_ANT,
@@ -87,12 +94,15 @@ public sealed class FirebirdSaeDocumentProbe : ISaeDocumentProbe
                         GetNullableString(reader, 6),
                         GetNullableInt32(reader, 7),
                         GetNullableDecimal(reader, 8),
-                        GetNullableDecimal(reader, 9),
-                        GetNullableString(reader, 10),
-                        GetNullableString(reader, 11),
+                        GetNullableDecimal(reader, 11),
+                        (GetNullableDecimal(reader, 8) ?? 0) -
+                            (GetNullableDecimal(reader, 9) ?? 0),
+                        GetNullableDecimal(reader, 10),
                         GetNullableString(reader, 12),
                         GetNullableString(reader, 13),
-                        GetNullableString(reader, 14)
+                        GetNullableString(reader, 14),
+                        GetNullableString(reader, 15),
+                        GetNullableString(reader, 16)
                     )
                 );
             }
@@ -121,9 +131,14 @@ public sealed class FirebirdSaeDocumentProbe : ISaeDocumentProbe
         {
             stopwatch.Stop();
 
+            logger.LogWarning(
+                exception,
+                "Firebird rechazó una consulta de documentos."
+            );
+
             return CreateFailure(
                 tableName,
-                $"Firebird rechazó la consulta: {exception.Message}",
+                "Firebird rechazó la consulta de documentos.",
                 stopwatch.ElapsedMilliseconds
             );
         }
@@ -131,9 +146,14 @@ public sealed class FirebirdSaeDocumentProbe : ISaeDocumentProbe
         {
             stopwatch.Stop();
 
+            logger.LogError(
+                exception,
+                "Falló una consulta de documentos."
+            );
+
             return CreateFailure(
                 tableName,
-                $"No fue posible leer los documentos: {exception.Message}",
+                "No fue posible leer los documentos.",
                 stopwatch.ElapsedMilliseconds
             );
         }

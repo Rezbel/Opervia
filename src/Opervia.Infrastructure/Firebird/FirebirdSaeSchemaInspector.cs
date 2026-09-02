@@ -5,7 +5,9 @@ using Opervia.Domain.Connections;
 
 namespace Opervia.Infrastructure.Firebird;
 
-public sealed class FirebirdSaeSchemaInspector : ISaeSchemaInspector
+public sealed class FirebirdSaeSchemaInspector(
+    ILogger<FirebirdSaeSchemaInspector> logger
+) : ISaeSchemaInspector
 {
     private static readonly (string LogicalName, string BaseTableName)[]
         ExpectedTables =
@@ -119,8 +121,13 @@ public sealed class FirebirdSaeSchemaInspector : ISaeSchemaInspector
         {
             stopwatch.Stop();
 
+            logger.LogWarning(
+                exception,
+                "Firebird rechazó una inspección de estructura."
+            );
+
             return CreateFailureResult(
-                $"Firebird rechazó la inspección: {exception.Message}",
+                "Firebird rechazó la inspección de la estructura.",
                 stopwatch.ElapsedMilliseconds
             );
         }
@@ -128,8 +135,13 @@ public sealed class FirebirdSaeSchemaInspector : ISaeSchemaInspector
         {
             stopwatch.Stop();
 
+            logger.LogError(
+                exception,
+                "Falló una inspección de estructura Firebird."
+            );
+
             return CreateFailureResult(
-                $"No fue posible inspeccionar la estructura: {exception.Message}",
+                "No fue posible inspeccionar la estructura de la base.",
                 stopwatch.ElapsedMilliseconds
             );
         }

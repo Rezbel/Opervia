@@ -1,5 +1,9 @@
 ﻿import {
+  useEffect,
+  useRef,
+  useMemo,
   useState,
+  type CSSProperties,
   type FormEvent,
 } from 'react';
 
@@ -14,7 +18,11 @@ import {
   PackageSearch,
   Search,
   Settings,
+  Moon,
+  Sun,
   WalletCards,
+  AlertTriangle,
+  TrendingUp,
 } from 'lucide-react';
 
 import {
@@ -29,13 +37,28 @@ import {
 } from '@xyflow/react';
 
 import { SaeConnectionForm } from './features/connections/SaeConnectionForm';
-import { getSalesFlow } from './lib/saeApi';
+import { DocumentItemsPanel } from './features/processes/DocumentItemsPanel';
+import { RecentDocumentsPanel } from './features/processes/RecentDocumentsPanel';
+import { SalesFlowsDashboard } from './features/processes/SalesFlowsDashboard';
+import { InventoryDashboard } from './features/inventory/InventoryDashboard';
+import { ReceivablesDashboard } from './features/receivables/ReceivablesDashboard';
+import { ProfitabilityDashboard } from './features/profitability/ProfitabilityDashboard';
+import {
+  askOperviaAi,
+  getDocumentItems,
+  getLastUsedConnection,
+  getSalesFlow,
+  saveConnection,
+} from './lib/saeApi';
 
 import type {
   SaeConnectionRequest,
+  SaeDocumentItemsResult,
   SaeDocumentKind,
   SaeSalesFlowNode,
   SaeSalesFlowResult,
+  OperviaAiAnswer,
+  TaxDisplayMode,
 } from './types/sae';
 
 import '@xyflow/react/dist/style.css';
@@ -122,8 +145,56 @@ function detectDocumentKind(
   }
 }
 
+function parseFlowNodeId(
+  nodeId: string,
+): {
+  kind: SaeDocumentKind;
+  documentNumber: string;
+} | null {
+  const separatorIndex = nodeId.indexOf(':');
+
+  if (separatorIndex <= 0) {
+    return null;
+  }
+
+  const kindValue =
+    nodeId.slice(0, separatorIndex).toLowerCase();
+
+  const documentNumber =
+    nodeId.slice(separatorIndex + 1).trim();
+
+  if (!documentNumber) {
+    return null;
+  }
+
+  const kind: SaeDocumentKind | null =
+    kindValue === 'quotation'
+      ? 'Quotation'
+      : kindValue === 'order'
+        ? 'Order'
+        : kindValue === 'delivery'
+          ? 'Delivery'
+          : kindValue === 'invoice'
+            ? 'Invoice'
+            : null;
+
+  if (!kind) {
+    return null;
+  }
+
+  return {
+    kind,
+    documentNumber,
+  };
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === 'AbortError';
+}
+
 function createReactFlowNode(
   document: SaeSalesFlowNode,
+  taxDisplayMode: TaxDisplayMode,
 ): Node {
   return {
     id: document.id,
@@ -149,12 +220,30 @@ function createReactFlowNode(
 
           <strong>{document.documentNumber}</strong>
 
-          <small>
+          <small className="node-customer-code">
             Cliente {document.customerCode}
           </small>
 
+          {(document.customerCommercialName ||
+            document.customerName) && (
+            <span className="node-customer-name">
+              {document.customerCommercialName ||
+                document.customerName}
+            </span>
+          )}
+
+          {document.customerRfc && (
+            <small className="node-customer-rfc">
+              RFC: {document.customerRfc}
+            </small>
+          )}
+
           <small>
-            {formatCurrency(document.amount)}
+            {formatCurrency(
+              taxDisplayMode === 'withTax'
+                ? document.amount
+                : document.amountBeforeTax,
+            )}
           </small>
 
           <small>
@@ -288,8 +377,24 @@ const demoEdges: Edge[] = [
 ];
 
 function App() {
+  const flowRequestRef = useRef<AbortController | null>(null);
+  const itemsRequestRef = useRef<AbortController | null>(null);
+  const aiRequestRef = useRef<AbortController | null>(null);
+
   const [isConnectionOpen, setIsConnectionOpen] =
     useState(false);
+  const [activeView, setActiveView] =
+    useState<'dashboard' | 'flows' | 'receivables' | 'profitability' | 'inventory'>('dashboard');
+  const [taxDisplayMode, setTaxDisplayMode] = useState<TaxDisplayMode>(() =>
+    window.localStorage.getItem('opervia.taxDisplayMode') === 'withoutTax'
+      ? 'withoutTax'
+      : 'withTax',
+  );
+  const [themeMode, setThemeMode] = useState<'dark' | 'light'>(() =>
+    window.localStorage.getItem('opervia.themeMode') === 'light'
+      ? 'light'
+      : 'dark',
+  );
 
   const [activeConnection, setActiveConnection] =
     useState<SaeConnectionRequest | null>(null);
@@ -314,24 +419,163 @@ function App() {
 
   const [flowEdges, setFlowEdges] =
     useState<Edge[]>(demoEdges);
+  const [isItemsPanelOpen, setIsItemsPanelOpen] =
+    useState(false);
 
-  function handleConnectionSubmit(
+  const [isLoadingItems, setIsLoadingItems] =
+    useState(false);
+
+  const [documentItemsError, setDocumentItemsError] =
+    useState<string | null>(null);
+
+  const [documentItemsResult, setDocumentItemsResult] =
+    useState<SaeDocumentItemsResult | null>(null);
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [lastAiQuestion, setLastAiQuestion] = useState('');
+  const [aiAnswer, setAiAnswer] =
+    useState<OperviaAiAnswer | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [isAskingAi, setIsAskingAi] = useState(false);
+
+  const insights = useMemo(() => {
+    if (!flowResult) return null;
+    const amounts = flowResult.nodes
+      .map((node) =>
+        taxDisplayMode === 'withTax'
+          ? node.amount
+          : node.amountBeforeTax,
+      )
+      .filter((value): value is number => value !== null);
+    const missing = flowResult.nodes.filter(
+      (node) => node.amount === null || !node.documentDate,
+    ).length;
+    const maxAmount = Math.max(...amounts, 1);
+    const integrity = Math.max(
+      0,
+      100 - flowResult.warnings.length * 12 - missing * 8,
+    );
+    return { amounts, maxAmount, missing, integrity };
+  }, [flowResult, taxDisplayMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem('opervia.taxDisplayMode', taxDisplayMode);
+    if (flowResult) {
+      setFlowNodes(flowResult.nodes.map((node) =>
+        createReactFlowNode(node, taxDisplayMode)));
+    }
+  }, [flowResult, taxDisplayMode]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = themeMode;
+    document.documentElement.style.colorScheme = themeMode;
+    window.localStorage.setItem('opervia.themeMode', themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void getLastUsedConnection(controller.signal)
+      .then((connection) => {
+        if (!connection) return;
+        setActiveConnection(connection);
+        setActiveConnectionName(
+          `${connection.displayName} · Empresa ${connection.companyNumber}`,
+        );
+      })
+      .catch((error) => {
+        if (!isAbortError(error)) {
+          console.warn('No fue posible restaurar la conexión guardada.');
+        }
+      });
+
+    return () => {
+      const flowRequest = flowRequestRef.current;
+      const itemsRequest = itemsRequestRef.current;
+
+      flowRequestRef.current = null;
+      itemsRequestRef.current = null;
+      flowRequest?.abort();
+      itemsRequest?.abort();
+      aiRequestRef.current?.abort();
+      controller.abort();
+    };
+  }, []);
+
+  function clearFlowState() {
+    setFlowResult(null);
+    setFlowNodes(demoNodes);
+    setFlowEdges(demoEdges);
+    setAiAnswer(null);
+    setAiError(null);
+    setAiQuestion('');
+    setLastAiQuestion('');
+  }
+
+  async function handleAiQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeConnection || !aiQuestion.trim() || isAskingAi) return;
+    aiRequestRef.current?.abort();
+    const controller = new AbortController();
+    aiRequestRef.current = controller;
+    const normalizedQuestion = aiQuestion.trim();
+    setLastAiQuestion(normalizedQuestion);
+    setAiAnswer(null);
+    setIsAskingAi(true);
+    setAiError(null);
+    try {
+      setAiAnswer(await askOperviaAi(
+        normalizedQuestion,
+        activeConnectionName,
+        activeConnection,
+        flowResult,
+        documentItemsResult,
+        controller.signal,
+      ));
+    } catch (error) {
+      if (!isAbortError(error)) {
+        setAiError(error instanceof Error ? error.message : 'No fue posible consultar Opervia AI.');
+      }
+    } finally {
+      if (aiRequestRef.current === controller) {
+        aiRequestRef.current = null;
+        setIsAskingAi(false);
+      }
+    }
+  }
+
+  function clearDocumentItemsState() {
+    setIsItemsPanelOpen(false);
+    setIsLoadingItems(false);
+    setDocumentItemsResult(null);
+    setDocumentItemsError(null);
+  }
+
+  async function handleConnectionSubmit(
     connection: SaeConnectionRequest,
   ) {
+    await saveConnection(connection);
+    flowRequestRef.current?.abort();
+    flowRequestRef.current = null;
+    itemsRequestRef.current?.abort();
+    itemsRequestRef.current = null;
+
     setActiveConnection(connection);
 
     setActiveConnectionName(
       `${connection.displayName} · Empresa ${connection.companyNumber}`,
     );
 
+    setDocumentNumber('');
+    setIsLoadingFlow(false);
     setFlowError(null);
+    clearFlowState();
+    clearDocumentItemsState();
     setIsConnectionOpen(false);
   }
 
-  async function handleFlowSearch(
-    event: FormEvent<HTMLFormElement>,
+  async function loadFlow(
+    kind: SaeDocumentKind,
+    normalizedDocumentNumber: string,
   ) {
-    event.preventDefault();
     setFlowError(null);
 
     if (!activeConnection) {
@@ -343,30 +587,27 @@ function App() {
       return;
     }
 
-    const normalizedDocumentNumber =
-      documentNumber.trim();
+    flowRequestRef.current?.abort();
+    flowRequestRef.current = null;
+    itemsRequestRef.current?.abort();
+    itemsRequestRef.current = null;
+    clearFlowState();
+    clearDocumentItemsState();
 
-    const documentKind =
-      detectDocumentKind(normalizedDocumentNumber);
-
-    if (!documentKind) {
-      setFlowError(
-        'El documento debe comenzar con C, P, R o F.',
-      );
-      return;
-    }
-
+    const requestController = new AbortController();
+    flowRequestRef.current = requestController;
     setIsLoadingFlow(true);
 
     try {
       const result = await getSalesFlow(
         activeConnection,
-        documentKind,
+        kind,
         normalizedDocumentNumber,
+        requestController.signal,
       );
 
       const nodes = result.nodes.map(
-        createReactFlowNode,
+        (node) => createReactFlowNode(node, taxDisplayMode),
       );
 
       const edges: Edge[] = result.edges.map(
@@ -385,19 +626,121 @@ function App() {
       setFlowNodes(nodes);
       setFlowEdges(edges);
     } catch (error) {
+      if (isAbortError(error)) {
+        return;
+      }
+
       setFlowError(
         error instanceof Error
           ? error.message
           : 'No fue posible cargar el flujo.',
       );
     } finally {
-      setIsLoadingFlow(false);
+      if (flowRequestRef.current === requestController) {
+        flowRequestRef.current = null;
+        setIsLoadingFlow(false);
+      }
     }
   }
 
+  async function handleFlowSearch(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+    const normalizedDocumentNumber = documentNumber.trim();
+    const kind = detectDocumentKind(normalizedDocumentNumber);
+
+    if (!kind) {
+      setFlowError('El documento debe comenzar con C, P, R o F.');
+      return;
+    }
+
+    await loadFlow(kind, normalizedDocumentNumber);
+  }
+
+  async function handleRecentDocumentSelect(
+    kind: SaeDocumentKind,
+    selectedDocumentNumber: string,
+  ) {
+    setDocumentNumber(selectedDocumentNumber);
+    await loadFlow(kind, selectedDocumentNumber);
+    window.requestAnimationFrame(() => {
+      document.querySelector('.flow-panel')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  }
+
+  async function handleNodeClick(
+    node: Node,
+  ) {
+    if (!activeConnection) {
+      setFlowError(
+        'Primero configura una conexión con Aspel SAE.',
+      );
+
+      setIsConnectionOpen(true);
+      return;
+    }
+
+    if (node.id.startsWith('demo-')) {
+      return;
+    }
+
+    const identity = parseFlowNodeId(node.id);
+
+    if (!identity) {
+      setFlowError(
+        'No fue posible identificar el documento seleccionado.',
+      );
+      return;
+    }
+
+    itemsRequestRef.current?.abort();
+    const requestController = new AbortController();
+    itemsRequestRef.current = requestController;
+
+    setIsItemsPanelOpen(true);
+    setIsLoadingItems(true);
+    setDocumentItemsError(null);
+    setDocumentItemsResult(null);
+
+    try {
+      const result = await getDocumentItems(
+        activeConnection,
+        identity.kind,
+        identity.documentNumber,
+        requestController.signal,
+      );
+
+      setDocumentItemsResult(result);
+    } catch (error) {
+      if (isAbortError(error)) {
+        return;
+      }
+
+      setDocumentItemsError(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible cargar las partidas.',
+      );
+    } finally {
+      if (itemsRequestRef.current === requestController) {
+        itemsRequestRef.current = null;
+        setIsLoadingItems(false);
+      }
+    }
+  }
   const flowTitle = flowResult
     ? `Flujo real · ${flowResult.startingDocumentNumber}`
     : 'Flujo demostrativo';
+  const receivableDocumentNumber =
+    flowResult?.nodes.find((node) => node.kind === 'Invoice')
+      ?.documentNumber ??
+    (detectDocumentKind(documentNumber) === 'Invoice'
+      ? documentNumber
+      : '');
 
   return (
     <div className="app-shell">
@@ -414,22 +757,50 @@ function App() {
         </div>
 
         <nav className="sidebar-nav">
-          <button className="nav-item active">
+          <button
+            className={`nav-item ${
+              activeView === 'dashboard' ? 'active' : ''
+            }`}
+            onClick={() => setActiveView('dashboard')}
+          >
             <LayoutDashboard size={19} />
             <span>Centro de control</span>
           </button>
 
-          <button className="nav-item">
+          <button
+            className={`nav-item ${
+              activeView === 'flows' ? 'active' : ''
+            }`}
+            onClick={() => setActiveView('flows')}
+          >
             <Activity size={19} />
             <span>Flujos de ventas</span>
           </button>
 
-          <button className="nav-item">
+          <button
+            className={`nav-item ${
+              activeView === 'receivables' ? 'active' : ''
+            }`}
+            onClick={() => setActiveView('receivables')}
+          >
             <WalletCards size={19} />
             <span>Cuentas por cobrar</span>
           </button>
 
-          <button className="nav-item">
+          <button
+            className={`nav-item ${
+              activeView === 'profitability' ? 'active' : ''
+            }`}
+            onClick={() => setActiveView('profitability')}
+          >
+            <TrendingUp size={19} />
+            <span>Rentabilidad</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeView === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveView('inventory')}
+          >
             <Boxes size={19} />
             <span>Inventario</span>
           </button>
@@ -456,13 +827,44 @@ function App() {
         </nav>
 
         <div className="sidebar-footer">
+          <div className="theme-display-control">
+            <span>APARIENCIA</span>
+            <button
+              type="button"
+              onClick={() => setThemeMode((current) => current === 'dark' ? 'light' : 'dark')}
+              aria-label={`Cambiar a modo ${themeMode === 'dark' ? 'claro' : 'oscuro'}`}
+            >
+              {themeMode === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+              <span>{themeMode === 'dark' ? 'Modo oscuro' : 'Modo claro'}</span>
+              <small>Cambiar</small>
+            </button>
+          </div>
+          <div className="tax-display-control">
+            <span>IMPORTES DE FACTURA</span>
+            <div>
+              <button
+                type="button"
+                className={taxDisplayMode === 'withoutTax' ? 'active' : ''}
+                onClick={() => setTaxDisplayMode('withoutTax')}
+              >
+                Sin IVA
+              </button>
+              <button
+                type="button"
+                className={taxDisplayMode === 'withTax' ? 'active' : ''}
+                onClick={() => setTaxDisplayMode('withTax')}
+              >
+                Con IVA
+              </button>
+            </div>
+          </div>
           <div className="sync-indicator">
             <span />
 
             <div>
               <strong>
                 {activeConnection
-                  ? 'Conexión configurada'
+                  ? 'Perfil SAE configurado'
                   : 'SAE sin configurar'}
               </strong>
 
@@ -477,6 +879,8 @@ function App() {
       </aside>
 
       <main className="main-content">
+        {activeView === 'dashboard' ? (
+          <>
         <header className="topbar">
           <div>
             <span className="eyebrow">
@@ -597,6 +1001,56 @@ function App() {
           </div>
         )}
 
+        {activeConnection && (
+          <RecentDocumentsPanel
+            connection={activeConnection}
+            taxDisplayMode={taxDisplayMode}
+            onSelectDocument={(kind, number) => {
+              void handleRecentDocumentSelect(kind, number);
+            }}
+          />
+        )}
+
+        {flowResult && insights && (
+          <section className="insights-panel" aria-label="Indicadores del flujo">
+            <div className="insight-score">
+              <div
+                className="score-ring"
+                style={{ '--score': `${insights.integrity * 3.6}deg` } as CSSProperties}
+              >
+                <strong>{insights.integrity}%</strong>
+              </div>
+              <div>
+                <span className="eyebrow">CALIDAD DEL FLUJO</span>
+                <h2>Integridad de datos</h2>
+                <p>{insights.missing === 0 ? 'Datos principales completos' : `${insights.missing} documentos con datos faltantes`}</p>
+              </div>
+            </div>
+            <div className="amount-chart">
+              <div className="chart-title">
+                <TrendingUp size={18} />
+                <strong>Importe por etapa</strong>
+              </div>
+              {flowResult.nodes.map((node) => (
+                <div className="amount-row" key={node.id}>
+                  <span>{node.documentNumber}</span>
+                  <div><i style={{ width: `${Math.max(4, ((node.amount ?? 0) / insights.maxAmount) * 100)}%` }} /></div>
+                  <b>{formatCurrency(
+                    taxDisplayMode === 'withTax'
+                      ? node.amount
+                      : node.amountBeforeTax,
+                  )}</b>
+                </div>
+              ))}
+            </div>
+            <div className="anomaly-card">
+              <AlertTriangle size={22} />
+              <strong>{flowResult.warnings.length + insights.missing} alertas</strong>
+              <span>Revisión automática del proceso</span>
+            </div>
+          </section>
+        )}
+
         <section className="workspace-grid">
           <article className="panel flow-panel">
             <div className="panel-header">
@@ -620,6 +1074,9 @@ function App() {
                   'demo'
                 }
                 nodes={flowNodes}
+                onNodeClick={(_, node) => {
+                  void handleNodeClick(node);
+                }}
                 edges={flowEdges}
                 fitView
                 fitViewOptions={{
@@ -657,7 +1114,17 @@ function App() {
                 </span>
 
                 <h2>Opervia AI</h2>
+                <small className="local-ai-badge">
+                  LOCAL · SIN COSTO
+                </small>
+                <small className="readonly-ai-badge">
+                  SAE · SOLO LECTURA
+                </small>
               </div>
+
+              <span className="copilot-online">
+                <i /> Disponible
+              </span>
             </div>
 
             {!activeConnection && (
@@ -671,18 +1138,23 @@ function App() {
               </div>
             )}
 
-            {activeConnection &&
-              !flowResult &&
-              !isLoadingFlow && (
-                <div className="copilot-message ai-message">
-                  <strong>Conexión preparada.</strong>
-
+            {activeConnection && !lastAiQuestion && !isLoadingFlow && (
+              <div className="copilot-welcome">
+                <span className="copilot-welcome-icon"><Bot size={20} /></span>
+                <div>
+                  <strong>¿Qué necesitas consultar?</strong>
                   <p>
-                    Busca un documento para reconstruir
-                    automáticamente su recorrido.
+                    Pregunta con tus propias palabras. Buscaré la respuesta
+                    directamente en SAE sin modificar ningún dato.
                   </p>
                 </div>
-              )}
+                <div className="copilot-capabilities">
+                  <span><Boxes size={14} /> Existencias</span>
+                  <span><Building2 size={14} /> Clientes</span>
+                  <span><WalletCards size={14} /> Ventas y facturas</span>
+                </div>
+              </div>
+            )}
 
             {isLoadingFlow && (
               <div className="copilot-message ai-message">
@@ -697,49 +1169,134 @@ function App() {
               </div>
             )}
 
-            {flowResult && (
-              <div className="copilot-message ai-message">
-                <strong>
-                  Flujo real reconstruido.
-                </strong>
+            {flowResult && !lastAiQuestion && (
+              <div className="copilot-context-note">
+                <span>Contexto activo</span>
+                <strong>{flowResult.startingDocumentNumber}</strong>
+                <small>{flowResult.nodes.length} documentos relacionados</small>
+              </div>
+            )}
 
-                <p>
-                  Encontré {flowResult.nodes.length}{' '}
-                  documentos relacionados en{' '}
-                  {flowResult.elapsedMilliseconds} ms.
-                </p>
+            {lastAiQuestion && (
+              <div className="copilot-message user-message ai-user-question">
+                <small>Tú</small>
+                <p>{lastAiQuestion}</p>
+              </div>
+            )}
 
-                <div className="ai-findings">
-                  {flowResult.warnings.length === 0 ? (
-                    <span>Sin inconsistencias</span>
-                  ) : (
-                    flowResult.warnings.map(
-                      (warning) => (
-                        <span key={warning}>
-                          {warning}
-                        </span>
-                      ),
-                    )
-                  )}
+            {isAskingAi && (
+              <div className="copilot-message ai-message ai-thinking">
+                <span><Activity size={16} /></span>
+                <div>
+                  <strong>Consultando Aspel SAE…</strong>
+                  <p>Estoy revisando los datos relacionados con tu pregunta.</p>
                 </div>
               </div>
             )}
 
-            <div className="copilot-input">
+            {aiAnswer && (
+              <div className="copilot-message ai-message ai-answer">
+                <div className="ai-answer-heading">
+                  <span><Bot size={17} /></span>
+                  <div>
+                    <small>Opervia AI</small>
+                    <strong>{aiAnswer.summary}</strong>
+                  </div>
+                </div>
+                <p className="ai-answer-body">{aiAnswer.answer}</p>
+                {aiAnswer.alerts.length > 0 && (
+                  <div className="ai-alert-list">
+                    <small>Ten en cuenta</small>
+                    {aiAnswer.alerts.map((alert) => (
+                      <div key={alert}>
+                        <AlertTriangle size={14} />
+                        <span>{alert}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="ai-answer-meta">
+                  <span><i /> Datos consultados en SAE</span>
+                  <small>{aiAnswer.model}</small>
+                </div>
+                <div className="suggested-questions ai-followups">
+                  <small>También puedes preguntar</small>
+                  {aiAnswer.suggestedQuestions.map((question) => (
+                    <button type="button" key={question} onClick={() => setAiQuestion(question)}>
+                      <Search size={13} />
+                      <span>{question}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {aiError && <div className="copilot-message ai-error">{aiError}</div>}
+
+            {activeConnection && !lastAiQuestion && !aiAnswer && !isAskingAi && (
+              <div className="suggested-questions ai-starters">
+                <small>Prueba con una pregunta</small>
+                <button type="button" onClick={() => setAiQuestion('¿Cuánto stock hay del producto ')}>
+                  <Boxes size={14} />
+                  <span>¿Cuánto stock hay de un producto?</span>
+                </button>
+                <button type="button" onClick={() => setAiQuestion('¿Cuál fue la última venta vigente del cliente ')}>
+                  <WalletCards size={14} />
+                  <span>¿Cuál fue la última venta de un cliente?</span>
+                </button>
+              </div>
+            )}
+
+            <form className="copilot-input" onSubmit={handleAiQuestion}>
               <input
-                placeholder="Pregunta sobre esta operación..."
-                disabled={!flowResult}
+                placeholder="Escribe tu pregunta sobre SAE…"
+                disabled={!activeConnection}
+                value={aiQuestion}
+                maxLength={1000}
+                onChange={(event) => setAiQuestion(event.target.value)}
               />
 
               <button
                 aria-label="Enviar consulta"
-                disabled={!flowResult}
+                title="Enviar pregunta"
+                disabled={!activeConnection || !aiQuestion.trim() || isAskingAi}
               >
-                <Bot size={18} />
+                {isAskingAi ? <Activity size={18} /> : <Bot size={18} />}
               </button>
-            </div>
+            </form>
           </aside>
         </section>
+          </>
+        ) : activeView === 'flows' ? (
+          <SalesFlowsDashboard
+            connection={activeConnection}
+            connectionName={activeConnectionName}
+            taxDisplayMode={taxDisplayMode}
+            onRequestConnection={() => setIsConnectionOpen(true)}
+          />
+        ) : activeView === 'inventory' ? (
+          <InventoryDashboard
+            connection={activeConnection}
+            connectionName={activeConnectionName}
+            taxDisplayMode={taxDisplayMode}
+            onRequestConnection={() => setIsConnectionOpen(true)}
+          />
+        ) : activeView === 'receivables' ? (
+          <ReceivablesDashboard
+            connection={activeConnection}
+            connectionName={activeConnectionName}
+            initialDocumentNumber={receivableDocumentNumber}
+            onRequestConnection={() => setIsConnectionOpen(true)}
+            taxDisplayMode={taxDisplayMode}
+          />
+        ) : (
+          <ProfitabilityDashboard
+            connection={activeConnection}
+            connectionName={activeConnectionName}
+            taxDisplayMode={taxDisplayMode}
+            onRequestConnection={() => setIsConnectionOpen(true)}
+          />
+        )}
       </main>
 
       {isConnectionOpen && (
@@ -767,6 +1324,20 @@ function App() {
             />
           </div>
         </div>
+      )}
+
+      {isItemsPanelOpen && (
+        <DocumentItemsPanel
+          result={documentItemsResult}
+          taxDisplayMode={taxDisplayMode}
+          isLoading={isLoadingItems}
+          error={documentItemsError}
+          onClose={() => {
+            itemsRequestRef.current?.abort();
+            itemsRequestRef.current = null;
+            clearDocumentItemsState();
+          }}
+        />
       )}
     </div>
   );

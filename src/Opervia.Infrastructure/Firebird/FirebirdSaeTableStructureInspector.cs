@@ -5,7 +5,9 @@ using Opervia.Domain.Connections;
 
 namespace Opervia.Infrastructure.Firebird;
 
-public sealed class FirebirdSaeTableStructureInspector
+public sealed class FirebirdSaeTableStructureInspector(
+    ILogger<FirebirdSaeTableStructureInspector> logger
+)
     : ISaeTableStructureInspector
 {
     public async Task<SaeTableStructureResult> InspectAsync(
@@ -124,9 +126,14 @@ public sealed class FirebirdSaeTableStructureInspector
         {
             stopwatch.Stop();
 
+            logger.LogError(
+                exception,
+                "Falló una inspección de tabla Firebird."
+            );
+
             return new SaeTableStructureResult(
                 false,
-                $"No fue posible inspeccionar la tabla: {exception.Message}",
+                "No fue posible inspeccionar la tabla solicitada.",
                 normalizedTableName,
                 Array.Empty<SaeColumnDefinition>(),
                 stopwatch.ElapsedMilliseconds

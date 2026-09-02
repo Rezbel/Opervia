@@ -5,7 +5,9 @@ using Opervia.Domain.Connections;
 
 namespace Opervia.Infrastructure.Firebird;
 
-public sealed class FirebirdSaeConnectionTester : ISaeConnectionTester
+public sealed class FirebirdSaeConnectionTester(
+    ILogger<FirebirdSaeConnectionTester> logger
+) : ISaeConnectionTester
 {
     public async Task<SaeConnectionTestResult> TestAsync(
         SaeConnectionProfile profile,
@@ -46,9 +48,14 @@ public sealed class FirebirdSaeConnectionTester : ISaeConnectionTester
         {
             stopwatch.Stop();
 
+            logger.LogWarning(
+                exception,
+                "Firebird rechazó una prueba de conexión."
+            );
+
             return new SaeConnectionTestResult(
                 false,
-                $"Firebird rechazó la conexión: {exception.Message}",
+                "Firebird rechazó la conexión. Verifica el servidor, la base y las credenciales.",
                 null,
                 stopwatch.ElapsedMilliseconds
             );
@@ -57,9 +64,14 @@ public sealed class FirebirdSaeConnectionTester : ISaeConnectionTester
         {
             stopwatch.Stop();
 
+            logger.LogError(
+                exception,
+                "Falló una prueba de conexión con Firebird."
+            );
+
             return new SaeConnectionTestResult(
                 false,
-                $"No fue posible establecer la conexión: {exception.Message}",
+                "No fue posible establecer la conexión con Firebird.",
                 null,
                 stopwatch.ElapsedMilliseconds
             );

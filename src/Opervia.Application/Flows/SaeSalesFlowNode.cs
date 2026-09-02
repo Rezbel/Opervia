@@ -7,9 +7,14 @@ public sealed record SaeSalesFlowNode(
     string? DocumentType,
     string DocumentNumber,
     string CustomerCode,
+    string? CustomerName,
+    string? CustomerCommercialName,
+    string? CustomerRfc,
     string? Status,
     DateTime? DocumentDate,
     decimal? Amount,
+    decimal? AmountBeforeTax,
+    decimal? TaxAmount,
     string? PreviousDocumentNumber,
     string? NextDocumentNumber
 );

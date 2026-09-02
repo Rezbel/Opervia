@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Opervia.Application.Customers;
 using Opervia.Application.Documents;
 using Opervia.Domain.Connections;
 
@@ -9,12 +10,15 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
     private const int MaximumDocuments = 12;
 
     private readonly ISaeDocumentLookup _documentLookup;
+    private readonly ISaeCustomerLookup _customerLookup;
 
     public SaeSalesFlowBuilder(
-        ISaeDocumentLookup documentLookup
+        ISaeDocumentLookup documentLookup,
+        ISaeCustomerLookup customerLookup
     )
     {
         _documentLookup = documentLookup;
+        _customerLookup = customerLookup;
     }
 
     public async Task<SaeSalesFlowResult> BuildAsync(
@@ -49,15 +53,14 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
                 StringComparer.OrdinalIgnoreCase
             );
 
-        var currentKind =
-            startingDocumentKind;
+        var currentKind = startingDocumentKind;
+        var currentNumber = normalizedStartingNumber;
 
-        var currentNumber =
-            normalizedStartingNumber;
-
-        for (var index = 0;
-             index < MaximumDocuments;
-             index++)
+        for (
+            var index = 0;
+            index < MaximumDocuments;
+            index++
+        )
         {
             var visitKey =
                 $"{currentKind}:{currentNumber}";
@@ -136,11 +139,8 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
                 break;
             }
 
-            currentKind =
-                previousKind.Value;
-
-            currentNumber =
-                previousNumber;
+            currentKind = previousKind.Value;
+            currentNumber = previousNumber;
         }
 
         if (discoveredDocuments.Count == MaximumDocuments)
@@ -152,25 +152,60 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
 
         discoveredDocuments.Reverse();
 
+        SaeCustomer? customer = null;
+
+        var customerCode =
+            discoveredDocuments
+                .Select(item =>
+                    item.Document.CustomerCode?.Trim()
+                )
+                .FirstOrDefault(code =>
+                    !string.IsNullOrWhiteSpace(code)
+                );
+
+        if (!string.IsNullOrWhiteSpace(customerCode))
+        {
+            var customerResult =
+                await _customerLookup.FindAsync(
+                    profile,
+                    password,
+                    customerCode,
+                    cancellationToken
+                );
+
+            if (customerResult.IsSuccessful &&
+                customerResult.Customer is not null)
+            {
+                customer = customerResult.Customer;
+            }
+            else
+            {
+                warnings.Add(customerResult.Message);
+            }
+        }
+
         var nodes =
             discoveredDocuments
                 .Select((item, sequence) =>
-                    CreateNode(item, sequence)
+                    CreateNode(
+                        item,
+                        sequence,
+                        customer
+                    )
                 )
                 .ToArray();
 
         var edges =
             new List<SaeSalesFlowEdge>();
 
-        for (var index = 0;
-             index < nodes.Length - 1;
-             index++)
+        for (
+            var index = 0;
+            index < nodes.Length - 1;
+            index++
+        )
         {
-            var source =
-                nodes[index];
-
-            var target =
-                nodes[index + 1];
+            var source = nodes[index];
+            var target = nodes[index + 1];
 
             edges.Add(
                 new SaeSalesFlowEdge(
@@ -203,14 +238,20 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
 
     private static SaeSalesFlowNode CreateNode(
         DiscoveredDocument item,
-        int sequence
+        int sequence,
+        SaeCustomer? customer
     )
     {
-        var document =
-            item.Document;
+        var document = item.Document;
+        var kind = item.Kind.ToString();
 
-        var kind =
-            item.Kind.ToString();
+        var customerMatches =
+            customer is not null &&
+            string.Equals(
+                customer.Code,
+                document.CustomerCode,
+                StringComparison.OrdinalIgnoreCase
+            );
 
         return new SaeSalesFlowNode(
             $"{kind.ToLowerInvariant()}:{document.DocumentNumber}",
@@ -219,9 +260,20 @@ public sealed class SaeSalesFlowBuilder : ISaeSalesFlowBuilder
             document.DocumentType,
             document.DocumentNumber,
             document.CustomerCode,
+            customerMatches
+                ? customer!.Name
+                : null,
+            customerMatches
+                ? customer!.CommercialName
+                : null,
+            customerMatches
+                ? customer!.Rfc
+                : null,
             document.Status,
             document.DocumentDate,
             document.Amount,
+            document.AmountBeforeTax,
+            document.TaxAmount,
             document.PreviousDocumentNumber,
             document.NextDocumentNumber
         );

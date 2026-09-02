@@ -1,0 +1,104 @@
+.sales-flows-page { min-height: 100%; padding: 30px 34px 44px; color: #e8eef9; background: #070d18; }
+.sales-flows-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.sales-flows-header h1 { margin: 7px 0 8px; font-size: clamp(28px, 3vw, 40px); letter-spacing: -.04em; }
+.sales-flows-header p { max-width: 720px; margin: 0; color: #96a4b9; font-size: 14px; line-height: 1.55; }
+.sales-flow-source { display: flex; align-items: center; gap: 11px; min-width: 270px; padding: 13px 15px; border: 1px solid #243248; border-radius: 14px; background: #0d1625; }
+.sales-flow-source > span { width: 10px; height: 10px; border-radius: 50%; background: #36d399; box-shadow: 0 0 0 5px rgba(54,211,153,.1); }
+.sales-flow-source div { min-width: 0; flex: 1; }
+.sales-flow-source small, .sales-flow-source strong { display: block; }
+.sales-flow-source small { color: #7f8da2; font-size: 10px; }
+.sales-flow-source strong { overflow: hidden; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.sales-flow-source svg { color: #45d9b0; }
+
+.sales-flow-filters { display: grid; grid-template-columns: auto 150px 150px minmax(190px, 1fr) auto; align-items: end; gap: 12px; margin-top: 24px; padding: 15px; border: 1px solid #223047; border-radius: 16px; background: #0d1625; }
+.period-presets { display: flex; gap: 6px; }
+.period-presets button { min-height: 39px; padding: 0 11px; border: 1px solid #2b3a52; border-radius: 9px; color: #aebbd0; background: #111c2e; font-size: 11px; cursor: pointer; }
+.period-presets button:hover { border-color: #4f7cff; color: #fff; }
+.sales-flow-filters label { display: grid; gap: 6px; color: #8290a5; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.sales-flow-filters input, .sales-flow-filters select { width: 100%; min-height: 39px; padding: 0 11px; border: 1px solid #2b3a52; border-radius: 9px; color: #eaf0fb; outline: none; background: #0a1220; font: inherit; font-size: 12px; text-transform: none; }
+.sales-flow-filters input:focus, .sales-flow-filters select:focus { border-color: #4f7cff; box-shadow: 0 0 0 3px rgba(79,124,255,.12); }
+.sales-flow-apply { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 18px; border: 0; border-radius: 10px; color: white; background: #4f7cff; font-size: 12px; font-weight: 800; cursor: pointer; }
+.sales-flow-apply:disabled { opacity: .65; cursor: wait; }
+.spin { animation: flow-spin 1s linear infinite; }
+@keyframes flow-spin { to { transform: rotate(360deg); } }
+
+.sales-flow-error { display: flex; align-items: center; gap: 9px; margin-top: 14px; padding: 12px 14px; border: 1px solid rgba(248,113,113,.35); border-radius: 11px; color: #ff9b9b; background: rgba(127,29,29,.15); font-size: 12px; }
+.flow-health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-top: 17px; }
+.flow-health-grid article { display: flex; align-items: center; gap: 13px; min-height: 105px; padding: 17px; border: 1px solid #223047; border-radius: 16px; background: #0d1625; }
+.flow-health-grid article > svg { flex: 0 0 auto; width: 42px; height: 42px; padding: 10px; border-radius: 12px; color: #77a0ff; background: rgba(79,124,255,.13); }
+.flow-health-grid article.warning > svg { color: #f9c85c; background: rgba(245,158,11,.12); }
+.flow-health-grid article.danger > svg { color: #ff8585; background: rgba(239,68,68,.12); }
+.flow-health-grid span, .flow-health-grid strong, .flow-health-grid small { display: block; }
+.flow-health-grid span { color: #9ba9bd; font-size: 11px; }
+.flow-health-grid strong { margin: 4px 0; font-size: 21px; letter-spacing: -.03em; }
+.flow-health-grid small { color: #718198; font-size: 10px; line-height: 1.35; }
+
+.flow-funnel-panel, .flow-bottlenecks-panel, .flow-diagnosis-panel { margin-top: 16px; border: 1px solid #223047; border-radius: 17px; background: #0d1625; }
+.flow-funnel-panel { padding: 20px; }
+.flow-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.flow-section-heading h2 { margin: 5px 0 0; font-size: 18px; letter-spacing: -.025em; }
+.flow-section-heading > small { margin-top: 5px; color: #8492a7; font-size: 11px; }
+.flow-funnel { display: flex; align-items: stretch; gap: 0; margin-top: 20px; }
+.flow-funnel-segment { display: flex; flex: 1; align-items: center; min-width: 0; }
+.flow-funnel-segment > article { flex: 1; min-width: 0; padding: 17px; border: 1px solid #2a3a54; border-radius: 14px; background: linear-gradient(145deg, #111d31, #0d1728); }
+.flow-funnel-segment > article > span, .flow-funnel-segment > article > strong, .flow-funnel-segment > article > small, .flow-funnel-segment > article > b { display: block; }
+.flow-funnel-segment > article > span { color: #91a0b6; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.flow-funnel-segment > article > strong { margin-top: 9px; font-size: 28px; }
+.flow-funnel-segment > article > small { margin-top: 3px; color: #75849a; font-size: 10px; }
+.flow-funnel-segment > article > b { overflow: hidden; margin-top: 13px; color: #b9c8de; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.flow-funnel-segment > article em { color: #708097; font-size: 8px; font-style: normal; font-weight: 600; text-transform: uppercase; }
+.flow-transition { display: grid; place-items: center; flex: 0 0 78px; color: #668eff; }
+.flow-transition strong { font-size: 12px; }
+.flow-transition small { color: #77869b; font-size: 9px; }
+.flow-method-note { margin: 16px 0 0; color: #74839a; font-size: 10px; line-height: 1.45; }
+
+.flow-analysis-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, .65fr); gap: 16px; }
+.flow-bottlenecks-panel, .flow-diagnosis-panel { overflow: hidden; padding: 20px; }
+.flow-record-count { padding: 6px 9px; border: 1px solid #2a3a52; border-radius: 8px; color: #92a1b6; font-size: 10px; }
+.flow-bottleneck-table { margin: 18px -20px -20px; }
+.flow-table-head, .flow-table-row { display: grid; grid-template-columns: 1.15fr 1.4fr .55fr .7fr; align-items: center; gap: 14px; padding: 11px 20px; }
+.flow-table-head { border-top: 1px solid #1f2d42; border-bottom: 1px solid #1f2d42; color: #6f7e94; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+.flow-table-row { border-bottom: 1px solid rgba(37,51,72,.7); }
+.flow-table-row:last-child { border-bottom: 0; }
+.flow-table-row strong, .flow-table-row small { display: block; }
+.flow-table-row strong { overflow: hidden; color: #dce6f5; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.flow-table-row small { overflow: hidden; margin-top: 3px; color: #75859a; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }
+.flow-table-row > span { width: fit-content; padding: 5px 8px; border-radius: 99px; color: #f8c75f; background: rgba(245,158,11,.1); font-size: 10px; font-weight: 800; }
+.flow-table-row > span.critical-wait { color: #ff8b8b; background: rgba(239,68,68,.11); }
+.flow-table-row > b { color: #cbd8e9; text-align: right; font-size: 10px; }
+.flow-no-bottlenecks { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 180px; color: #66d8ae; font-size: 12px; }
+.flow-diagnosis-panel { align-self: start; }
+.diagnosis-item { display: flex; align-items: flex-start; gap: 11px; margin-top: 13px; padding: 13px; border: 1px solid #25344b; border-radius: 12px; background: #101b2d; }
+.diagnosis-item > svg { flex: 0 0 auto; margin-top: 1px; }
+.diagnosis-item.amber > svg { color: #f5bf52; }
+.diagnosis-item.blue > svg { color: #72a0ff; }
+.diagnosis-item.red > svg { color: #ff8080; }
+.diagnosis-item.green > svg { color: #50d3a2; }
+.diagnosis-item strong { font-size: 11px; }
+.diagnosis-item p { margin: 5px 0 0; color: #8d9bb0; font-size: 10px; line-height: 1.5; }
+.flow-readonly-note { display: block; margin-top: 17px; color: #64748b; font-size: 9px; text-align: center; }
+.sales-flow-empty { display: grid; place-items: center; min-height: 70vh; padding: 40px; text-align: center; }
+.sales-flow-empty svg { color: #6f94ff; }
+.sales-flow-empty h1 { margin: 13px 0 4px; }
+.sales-flow-empty p { max-width: 480px; color: #8b99ad; }
+.sales-flow-empty button { margin-top: 12px; padding: 11px 16px; border: 0; border-radius: 10px; color: #fff; background: #4f7cff; cursor: pointer; }
+
+@media (max-width: 1180px) {
+  .flow-health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sales-flow-filters { grid-template-columns: 1fr 1fr; }
+  .period-presets { grid-column: 1 / -1; }
+  .flow-funnel { overflow-x: auto; padding-bottom: 6px; }
+  .flow-funnel-segment { min-width: 265px; }
+  .flow-analysis-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .sales-flows-page { padding: 22px 18px 36px; }
+  .sales-flows-header { display: grid; }
+  .sales-flow-source { width: 100%; min-width: 0; }
+  .sales-flow-filters, .flow-health-grid { grid-template-columns: 1fr; }
+  .period-presets { flex-wrap: wrap; grid-column: auto; }
+  .sales-flow-apply { width: 100%; }
+  .flow-table-head { display: none; }
+  .flow-table-row { grid-template-columns: 1fr auto; }
+  .flow-table-row > div:nth-child(2) { grid-column: 1 / -1; }
+}

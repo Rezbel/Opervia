@@ -5,7 +5,9 @@ using Opervia.Domain.Connections;
 
 namespace Opervia.Infrastructure.Firebird;
 
-public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
+public sealed class FirebirdSaeDocumentLookup(
+    ILogger<FirebirdSaeDocumentLookup> logger
+) : ISaeDocumentLookup
 {
     public async Task<SaeDocumentLookupResult> FindAsync(
         SaeConnectionProfile profile,
@@ -30,6 +32,7 @@ public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
             ResolveTableName(profile, documentKind);
 
         var stopwatch = Stopwatch.StartNew();
+        var connectionWasOpened = false;
 
         try
         {
@@ -42,6 +45,7 @@ public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
             await connection.OpenAsync(
                 cancellationToken
             );
+            connectionWasOpened = true;
 
             var sql = $"""
                 SELECT FIRST 1
@@ -54,6 +58,11 @@ public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
                     CVE_VEND,
                     NUM_ALMA,
                     CAN_TOT,
+                    DES_TOT,
+                    COALESCE(IMP_TOT1, 0) + COALESCE(IMP_TOT2, 0) +
+                    COALESCE(IMP_TOT3, 0) + COALESCE(IMP_TOT4, 0) +
+                    COALESCE(IMP_TOT5, 0) + COALESCE(IMP_TOT6, 0) +
+                    COALESCE(IMP_TOT7, 0) + COALESCE(IMP_TOT8, 0),
                     IMPORTE,
                     ENLAZADO,
                     TIP_DOC_ANT,
@@ -106,12 +115,15 @@ public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
                     GetNullableString(reader, 6),
                     GetNullableInt32(reader, 7),
                     GetNullableDecimal(reader, 8),
-                    GetNullableDecimal(reader, 9),
-                    GetNullableString(reader, 10),
-                    GetNullableString(reader, 11),
+                    GetNullableDecimal(reader, 11),
+                    (GetNullableDecimal(reader, 8) ?? 0) -
+                        (GetNullableDecimal(reader, 9) ?? 0),
+                    GetNullableDecimal(reader, 10),
                     GetNullableString(reader, 12),
                     GetNullableString(reader, 13),
-                    GetNullableString(reader, 14)
+                    GetNullableString(reader, 14),
+                    GetNullableString(reader, 15),
+                    GetNullableString(reader, 16)
                 );
 
             stopwatch.Stop();
@@ -128,9 +140,16 @@ public sealed class FirebirdSaeDocumentLookup : ISaeDocumentLookup
         {
             stopwatch.Stop();
 
+            logger.LogError(
+                exception,
+                "Falló una búsqueda de documento."
+            );
+
             return new SaeDocumentLookupResult(
                 false,
-                $"No fue posible buscar el documento: {exception.Message}",
+                connectionWasOpened
+                    ? "Firebird respondió, pero no fue posible consultar el documento. Revisa la estructura de la empresa SAE."
+                    : $"No fue posible conectar con Firebird en {profile.Host}:{profile.Port}. Verifica que el servidor esté encendido, la red o VPN y el puerto configurado.",
                 tableName,
                 null,
                 stopwatch.ElapsedMilliseconds

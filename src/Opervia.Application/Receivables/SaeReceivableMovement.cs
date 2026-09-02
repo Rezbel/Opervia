@@ -1,0 +1,30 @@
+﻿namespace Opervia.Application.Receivables;
+
+public sealed record SaeReceivableMovement(
+    string CustomerCode,
+    string? Reference,
+    int MovementId,
+    int ConceptNumber,
+    string? ConceptDescription,
+    string? ConceptType,
+    int? ChargeNumber,
+    int LineNumber,
+    string? InvoiceNumber,
+    string? Document,
+    decimal? Amount,
+    DateTime? ApplicationDate,
+    DateTime? DueDate,
+    string? MovementType,
+    int? MovementSign,
+    int? ConceptSign,
+    string? SystemReference,
+    string? Operation,
+    string? OriginBankReference,
+    string? DestinationBankReference,
+    string? OriginPaymentAccount,
+    string? DestinationPaymentAccount,
+    string? CheckNumber,
+    string? PaymentDocument,
+    string? OperationId,
+    string? Uuid
+);

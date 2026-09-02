@@ -2,7 +2,6 @@
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Documents;
 using Opervia.Application.Flows;
-using Opervia.Domain.Connections;
 
 namespace Opervia.Api.Controllers;
 
@@ -40,17 +39,7 @@ public sealed class SaeSalesFlowController : ControllerBase
             });
         }
 
-        var profile = new SaeConnectionProfile
-        {
-            DisplayName = request.DisplayName.Trim(),
-            Host = request.Host.Trim(),
-            Port = request.Port,
-            Database = request.Database.Trim(),
-            Username = request.Username.Trim(),
-            CompanyNumber = request.CompanyNumber.Trim(),
-            SaeVersion = request.SaeVersion.Trim(),
-            Charset = request.Charset.Trim()
-        };
+        var profile = request.ToProfile();
 
         var result = await _salesFlowBuilder.BuildAsync(
             profile,

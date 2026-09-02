@@ -11,6 +11,8 @@ public sealed record SaeDocumentHeader(
     int? WarehouseNumber,
     decimal? QuantityTotal,
     decimal? Amount,
+    decimal? AmountBeforeTax,
+    decimal? TaxAmount,
     string? LinkedStatus,
     string? PreviousDocumentType,
     string? PreviousDocumentNumber,

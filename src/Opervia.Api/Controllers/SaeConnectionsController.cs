@@ -3,7 +3,6 @@ using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Connections;
 using Opervia.Application.Schema;
 using Opervia.Application.Tables;
-using Opervia.Domain.Connections;
 
 namespace Opervia.Api.Controllers;
 
@@ -33,7 +32,7 @@ public sealed class SaeConnectionsController : ControllerBase
     )
     {
         var result = await _connectionTester.TestAsync(
-            CreateProfile(request),
+            request.ToProfile(),
             request.Password,
             cancellationToken
         );
@@ -48,7 +47,7 @@ public sealed class SaeConnectionsController : ControllerBase
     )
     {
         var result = await _schemaInspector.InspectAsync(
-            CreateProfile(request),
+            request.ToProfile(),
             request.Password,
             cancellationToken
         );
@@ -64,29 +63,12 @@ public sealed class SaeConnectionsController : ControllerBase
     )
     {
         var result = await _tableStructureInspector.InspectAsync(
-            CreateProfile(request),
+            request.ToProfile(),
             request.Password,
             tableName,
             cancellationToken
         );
 
         return Ok(result);
-    }
-
-    private static SaeConnectionProfile CreateProfile(
-        TestSaeConnectionRequest request
-    )
-    {
-        return new SaeConnectionProfile
-        {
-            DisplayName = request.DisplayName.Trim(),
-            Host = request.Host.Trim(),
-            Port = request.Port,
-            Database = request.Database.Trim(),
-            Username = request.Username.Trim(),
-            CompanyNumber = request.CompanyNumber.Trim(),
-            SaeVersion = request.SaeVersion.Trim(),
-            Charset = request.Charset.Trim()
-        };
     }
 }

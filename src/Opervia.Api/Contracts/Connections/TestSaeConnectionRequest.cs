@@ -36,9 +36,17 @@ public sealed class TestSaeConnectionRequest
 
     [Required]
     [StringLength(30)]
+    [RegularExpression(
+        @"^10$",
+        ErrorMessage = "Esta versión de Opervia solamente admite SAE 10."
+    )]
     public string SaeVersion { get; init; } = "10";
 
     [Required]
     [StringLength(30)]
+    [RegularExpression(
+        @"^[A-Za-z0-9_]+$",
+        ErrorMessage = "El juego de caracteres no es válido."
+    )]
     public string Charset { get; init; } = "UTF8";
 }

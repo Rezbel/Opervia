@@ -13,6 +13,7 @@ import {
 import type { SaeConnectionRequest } from '../../types/sae';
 
 import './SaeConnectionForm.css';
+import { SavedConnectionProfiles } from './SavedConnectionProfiles';
 
 interface SaeConnectionFormProps {
   isSubmitting?: boolean;
@@ -34,7 +35,7 @@ export function SaeConnectionForm({
   const [username, setUsername] = useState('SYSDBA');
   const [password, setPassword] = useState('');
   const [companyNumber, setCompanyNumber] = useState('');
-  const [saeVersion, setSaeVersion] = useState('10');
+  const saeVersion = '10';
   const [charset, setCharset] = useState('UTF8');
   const [validationError, setValidationError] =
     useState<string | null>(null);
@@ -79,6 +80,13 @@ export function SaeConnectionForm({
       return;
     }
 
+    if (database.trim().startsWith('\\\\')) {
+      setValidationError(
+        'La ruta no puede ser una carpeta compartida. Escribe la ruta local vista por el servidor Firebird (por ejemplo C:\\Aspel\\...) o un alias.',
+      );
+      return;
+    }
+
     if (!username.trim() || !password) {
       setValidationError(
         'El usuario y la contraseña de Firebird son obligatorios.',
@@ -93,17 +101,23 @@ export function SaeConnectionForm({
       return;
     }
 
-    await onSubmit({
-      displayName: displayName.trim(),
-      host: host.trim(),
-      port: normalizedPort,
-      database: database.trim(),
-      username: username.trim(),
-      password,
-      companyNumber: companyNumber.trim(),
-      saeVersion: saeVersion.trim(),
-      charset: charset.trim(),
-    });
+    try {
+      await onSubmit({
+        displayName: displayName.trim(),
+        host: host.trim(),
+        port: normalizedPort,
+        database: database.trim(),
+        username: username.trim(),
+        password,
+        companyNumber: companyNumber.trim(),
+        saeVersion: saeVersion.trim(),
+        charset: charset.trim(),
+      });
+    } catch (error) {
+      setValidationError(error instanceof Error
+        ? error.message
+        : 'No fue posible guardar la conexión.');
+    }
   }
 
   return (
@@ -139,6 +153,11 @@ export function SaeConnectionForm({
         Configura el servidor y la empresa que Opervia utilizará
         para consultar información en modo de solo lectura.
       </p>
+
+      <SavedConnectionProfiles
+        disabled={isSubmitting}
+        onUse={onSubmit}
+      />
 
       <div className="connection-form-grid">
         <label className="connection-field full-width">
@@ -266,16 +285,13 @@ export function SaeConnectionForm({
         </label>
 
         <label className="connection-field">
-          <span>Versión de SAE</span>
+          <span>Versión compatible de SAE</span>
 
           <div className="connection-input">
             <input
               value={saeVersion}
-              onChange={(event) =>
-                setSaeVersion(event.target.value)
-              }
-              placeholder="10"
-              autoComplete="off"
+              readOnly
+              aria-readonly="true"
             />
           </div>
         </label>
