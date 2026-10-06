@@ -5,27 +5,24 @@ import {
   RefreshCw,
   Search,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getSalesFlowSummary } from '../../lib/saeApi';
 import type {
   SaeConnectionRequest,
   SaeDocumentKind,
   SaeSalesFlowDocumentListItem,
-  TaxDisplayMode,
 } from '../../types/sae';
 import './RecentDocumentsPanel.css';
 
 interface RecentDocumentsPanelProps {
   connection: SaeConnectionRequest;
-  taxDisplayMode: TaxDisplayMode;
   onSelectDocument: (
     kind: SaeDocumentKind,
     documentNumber: string,
   ) => void;
 }
 
-type PeriodPreset = 'today' | 'month' | '30days' | 'year';
-type KindFilter = 'all' | SaeDocumentKind;
+type PeriodPreset = 'today' | 'month' | '30days';
 
 const kindLabels: Record<SaeDocumentKind, string> = {
   Quotation: 'Cotización',
@@ -33,6 +30,11 @@ const kindLabels: Record<SaeDocumentKind, string> = {
   Delivery: 'Remisión',
   Invoice: 'Factura',
 };
+
+const branchOptions = [
+  ['QR', 'Querétaro'], ['SL', 'San Luis Potosí'], ['XA', 'Xalapa'], ['HT', 'Huasteca'],
+  ['EH', 'Equipos Huasteca'], ['EQ', 'Equipos Querétaro'], ['ES', 'Equipos San Luis Potosí'], ['EX', 'Equipos Xalapa'],
+] as const;
 
 function localIsoDate(date: Date): string {
   const offset = date.getTimezoneOffset();
@@ -44,10 +46,6 @@ function periodDates(preset: PeriodPreset): { from: string; to: string } {
   const from = new Date(to);
   if (preset === 'month') from.setDate(1);
   if (preset === '30days') from.setDate(from.getDate() - 29);
-  if (preset === 'year') {
-    from.setMonth(0);
-    from.setDate(1);
-  }
   return { from: localIsoDate(from), to: localIsoDate(to) };
 }
 
@@ -65,13 +63,17 @@ const date = new Intl.DateTimeFormat('es-MX', {
 
 export function RecentDocumentsPanel({
   connection,
-  taxDisplayMode,
   onSelectDocument,
 }: RecentDocumentsPanelProps) {
   const requestRef = useRef<AbortController | null>(null);
-  const [period, setPeriod] = useState<PeriodPreset>('today');
-  const [kind, setKind] = useState<KindFilter>('all');
+  const [period, setPeriod] = useState<PeriodPreset>('30days');
   const [query, setQuery] = useState('');
+  const [sellerCode, setSellerCode] = useState('');
+  const [branchCode, setBranchCode] = useState('');
+  const [page, setPage] = useState(1);
+  const [selectedDocumentKey, setSelectedDocumentKey] = useState('');
+  const pageSize = 50;
+  const [totalDocuments, setTotalDocuments] = useState(0);
   const [documents, setDocuments] =
     useState<SaeSalesFlowDocumentListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,10 +91,16 @@ export function RecentDocumentsPanel({
         connection,
         selectedPeriod.from,
         selectedPeriod.to,
-        '',
+        sellerCode,
         controller.signal,
+        'Order',
+        page,
+        pageSize,
+        branchCode,
+        query,
       );
       setDocuments(result.documents ?? []);
+      setTotalDocuments(result.totalDocumentCount ?? 0);
     } catch (loadError) {
       if ((loadError as Error).name !== 'AbortError') {
         setError(loadError instanceof Error
@@ -105,36 +113,25 @@ export function RecentDocumentsPanel({
         setIsLoading(false);
       }
     }
-  }, [connection, period]);
+  }, [connection, period, sellerCode, branchCode, page, query]);
 
   useEffect(() => {
     void load();
     return () => requestRef.current?.abort();
   }, [load]);
 
-  const visibleDocuments = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase('es-MX');
-    return documents.filter((document) => {
-      if (kind !== 'all' && document.kind !== kind) return false;
-      if (!normalizedQuery) return true;
-      return [
-        document.documentNumber,
-        document.customerCode,
-        document.sellerCode ?? '',
-      ].some((value) => value.toLocaleLowerCase('es-MX').includes(normalizedQuery));
-    });
-  }, [documents, kind, query]);
+  const visibleDocuments = documents;
 
   return (
     <section className="recent-documents-panel">
       <div className="recent-documents-heading">
         <div>
-          <span className="eyebrow">DOCUMENTOS DEL PERIODO</span>
-          <h2>Actividad reciente</h2>
-          <p>Selecciona cualquier documento para reconstruir y consultar su flujo.</p>
+          <span className="eyebrow">PEDIDOS DEL PERIODO</span>
+          <h2>Actividad reciente · Pedidos</h2>
+          <p>Selecciona un pedido para consultar sus remisiones y facturas relacionadas.</p>
         </div>
         <span className="recent-documents-count">
-          {visibleDocuments.length} documentos
+          {visibleDocuments.length} pedidos
         </span>
       </div>
 
@@ -144,13 +141,12 @@ export function RecentDocumentsPanel({
             ['today', 'Hoy'],
             ['month', 'Este mes'],
             ['30days', 'Últimos 30 días'],
-            ['year', 'Este año'],
           ] as const).map(([value, label]) => (
             <button
               type="button"
               key={value}
               className={period === value ? 'active' : ''}
-              onClick={() => setPeriod(value)}
+              onClick={() => { setPage(1); setPeriod(value); }}
             >
               {value === 'today' && <CalendarDays size={14} />}
               {label}
@@ -162,20 +158,24 @@ export function RecentDocumentsPanel({
           <Search size={15} />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar documento, cliente o vendedor"
+            onChange={(event) => { setPage(1); setQuery(event.target.value); }}
+            placeholder="Buscar pedido, cliente o vendedor"
           />
         </label>
-
+        <input
+          className="recent-seller-filter"
+          value={sellerCode}
+          onChange={(event) => { setPage(1); setSellerCode(event.target.value); }}
+          placeholder="Clave de vendedor"
+          aria-label="Clave de vendedor"
+        />
         <select
-          aria-label="Filtrar por tipo de documento"
-          value={kind}
-          onChange={(event) => setKind(event.target.value as KindFilter)}
+          value={branchCode}
+          onChange={(event) => { setPage(1); setBranchCode(event.target.value); }}
+          aria-label="Sucursal"
         >
-          <option value="all">Todos los tipos</option>
-          {Object.entries(kindLabels).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
+          <option value="">Todas las sucursales</option>
+          {branchOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
 
         <button
@@ -204,17 +204,25 @@ export function RecentDocumentsPanel({
         <div className="recent-documents-table">
           <div className="recent-documents-table-head">
             <span>Documento</span>
-            <span>Cliente / vendedor</span>
+              <span>Cliente</span>
+              <span>Vendedor (clave)</span>
             <span>Fecha</span>
-            <span>Importe</span>
+              <span>Importe total sin IVA</span>
             <span />
           </div>
-          {visibleDocuments.map((document) => (
+          {visibleDocuments.map((document) => {
+            const documentKey = `${document.kind}:${document.documentNumber}`;
+            const selected = selectedDocumentKey === documentKey;
+            return (
             <button
               type="button"
-              className="recent-document-row"
-              key={`${document.kind}:${document.documentNumber}`}
-              onClick={() => onSelectDocument(document.kind, document.documentNumber)}
+              className={`recent-document-row${selected ? ' selected' : ''}`}
+              key={documentKey}
+              aria-pressed={selected}
+              onClick={() => {
+                setSelectedDocumentKey(documentKey);
+                onSelectDocument(document.kind, document.documentNumber);
+              }}
             >
               <span className={`recent-kind-icon ${document.kind.toLowerCase()}`}>
                 <FileText size={16} />
@@ -224,25 +232,29 @@ export function RecentDocumentsPanel({
                 <small>{kindLabels[document.kind]}</small>
               </span>
               <span className="recent-document-customer">
-                <strong>Cliente {document.customerCode}</strong>
-                <small>{document.sellerCode || 'Sin vendedor'}</small>
+                <strong>{document.customerName || 'Nombre no disponible'}</strong>
+                <small>{document.customerCode}</small>
               </span>
+              <span>{document.sellerCode || 'Sin vendedor'}</span>
               <span>{date.format(new Date(document.documentDate))}</span>
               <span className="recent-document-amount">
                 <strong>{currency.format(
-                  taxDisplayMode === 'withTax'
-                    ? document.amountWithTax
-                    : document.amountBeforeTax,
+                  document.amountBeforeTax,
                 )}</strong>
-                <small className={document.isCancelled ? 'cancelled' : 'active'}>
-                  {document.isCancelled ? 'Cancelado' : 'Vigente'}
-                </small>
               </span>
               <span className="recent-document-action">
                 <Eye size={15} /> Ver flujo
               </span>
             </button>
-          ))}
+            );
+          })}
+        </div>
+      )}
+      {totalDocuments > pageSize && (
+        <div className="recent-pagination" aria-label="Paginación de pedidos">
+          <button type="button" disabled={page === 1 || isLoading} onClick={() => setPage((value) => value - 1)}>Anterior</button>
+          <span>Página {page} de {Math.max(1, Math.ceil(totalDocuments / pageSize))} · {totalDocuments} pedidos</span>
+          <button type="button" disabled={page >= Math.ceil(totalDocuments / pageSize) || isLoading} onClick={() => setPage((value) => value + 1)}>Siguiente</button>
         </div>
       )}
     </section>

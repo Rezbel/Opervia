@@ -480,3 +480,13 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local development data and logs
+App_Data/
+.run/
+
+# Company databases and private analysis outputs
+*.FDB
+*.fdb
+.analysis/sae-2026-10-05/
+

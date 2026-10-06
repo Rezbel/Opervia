@@ -1,4 +1,4 @@
-﻿namespace Opervia.Application.Flows;
+namespace Opervia.Application.Flows;
 
 public sealed record SaeSalesFlowNode(
     string Id,
@@ -16,5 +16,7 @@ public sealed record SaeSalesFlowNode(
     decimal? AmountBeforeTax,
     decimal? TaxAmount,
     string? PreviousDocumentNumber,
-    string? NextDocumentNumber
+    string? NextDocumentNumber,
+    int? WarehouseNumber = null,
+    string? SalespersonCode = null
 );

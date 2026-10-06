@@ -1,0 +1,785 @@
+{
+  "isSuccessful": true,
+  "message": "Productos adquiridos del cliente, conciliados con sus facturas de SAE.",
+  "periodStart": "2026-09-07",
+  "periodEnd": "2026-10-06",
+  "customerCode": "1414",
+  "customerName": "HAZAEL DAVILA VAZQUEZ",
+  "salesWithoutTax": 52729.02,
+  "salesWithTax": 61165.68,
+  "invoiceCount": 36,
+  "productCount": 29,
+  "brands": [
+    {
+      "brand": "MAGLUMI",
+      "salesWithoutTax": 31094.17,
+      "salesWithTax": 36069.25,
+      "products": [
+        {
+          "productCode": "MAGL 130617501",
+          "productName": "MAGLUMI ANTI  CCP 50 PRUEBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 5092.21,
+          "salesWithoutTax": 5092.21,
+          "salesWithTax": 5906.97,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080633",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.34,
+              "salesWithoutTax": 1731.35,
+              "salesWithTax": 2008.37
+            },
+            {
+              "invoiceNumber": "F-QR-080632",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.33,
+              "salesWithoutTax": 1680.43,
+              "salesWithTax": 1949.3
+            },
+            {
+              "invoiceNumber": "F-QR-080631",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.33,
+              "salesWithoutTax": 1680.43,
+              "salesWithTax": 1949.3
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 630003",
+          "productName": "REACTION MODULES 6 CAJAS CON 64 PZAS",
+          "productLine": "MAI",
+          "productLineName": "EQUIPOS MAGLUMI",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 3498.46,
+          "salesWithoutTax": 3498.46,
+          "salesWithTax": 4058.21,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081035",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.04,
+              "salesWithoutTax": 139.94,
+              "salesWithTax": 162.33
+            },
+            {
+              "invoiceNumber": "F-QR-081033",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.48,
+              "salesWithoutTax": 1679.26,
+              "salesWithTax": 1947.94
+            },
+            {
+              "invoiceNumber": "F-QR-081032",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.48,
+              "salesWithoutTax": 1679.26,
+              "salesWithTax": 1947.94
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130255002M",
+          "productName": "INSULINA (2G) 100 PBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 3385.6,
+          "salesWithoutTax": 3385.6,
+          "salesWithTax": 3927.3,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080638",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.5,
+              "salesWithoutTax": 1692.8,
+              "salesWithTax": 1963.65
+            },
+            {
+              "invoiceNumber": "F-QR-080637",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.5,
+              "salesWithoutTax": 1692.8,
+              "salesWithTax": 1963.65
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130299004M",
+          "productName": "STARTER KIT 1+2,  2X230ML",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1279.0,
+          "salesWithoutTax": 2558.0,
+          "salesWithTax": 2967.28,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081026",
+              "elaborationDate": "2026-10-01",
+              "quantity": 1,
+              "salesWithoutTax": 1279.0,
+              "salesWithTax": 1483.64
+            },
+            {
+              "invoiceNumber": "F-QR-080822",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 1279,
+              "salesWithTax": 1483.64
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130252010M",
+          "productName": "TESTOSTERONA 2G 100 PRUEBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 2127.24,
+          "salesWithoutTax": 2127.24,
+          "salesWithTax": 2467.6,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080636",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.5,
+              "salesWithoutTax": 1063.62,
+              "salesWithTax": 1233.8
+            },
+            {
+              "invoiceNumber": "F-QR-080635",
+              "elaborationDate": "2026-09-07",
+              "quantity": 0.5,
+              "salesWithoutTax": 1063.62,
+              "salesWithTax": 1233.8
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130203014M",
+          "productName": "MAGLUMI T3-UPTAKE 100 PBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1860.95,
+          "salesWithoutTax": 1860.95,
+          "salesWithTax": 2158.7,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080826",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 1860.95,
+              "salesWithTax": 2158.7
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130253003M",
+          "productName": "MAGLUMI TOTAL T3 (CLIA) 2G",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 1798.8,
+          "salesWithoutTax": 1798.8,
+          "salesWithTax": 2086.61,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081026",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.05,
+              "salesWithoutTax": 89.94,
+              "salesWithTax": 104.33
+            },
+            {
+              "invoiceNumber": "F-QR-081024",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.95,
+              "salesWithoutTax": 1708.86,
+              "salesWithTax": 1982.28
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130203023M",
+          "productName": "TSH (3G) 100 PBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1691.67,
+          "salesWithoutTax": 1691.67,
+          "salesWithTax": 1962.34,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080630",
+              "elaborationDate": "2026-09-07",
+              "quantity": 1,
+              "salesWithoutTax": 1691.67,
+              "salesWithTax": 1962.34
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130253004M",
+          "productName": "MAGLUMI FREE T4 (CLIA) 2G",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1691.67,
+          "salesWithoutTax": 1691.67,
+          "salesWithTax": 1962.34,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080744",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 1691.67,
+              "salesWithTax": 1962.34
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130253005M",
+          "productName": "MAGLUMI FREE T3 (CLIA) 2G",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1691.67,
+          "salesWithoutTax": 1691.67,
+          "salesWithTax": 1962.34,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080629",
+              "elaborationDate": "2026-09-07",
+              "quantity": 1,
+              "salesWithoutTax": 1691.67,
+              "salesWithTax": 1962.34
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130253002M",
+          "productName": "MAGLUMI TOTAL T4 (CLIA) 2G",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1691.65,
+          "salesWithoutTax": 1691.65,
+          "salesWithTax": 1962.31,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081023",
+              "elaborationDate": "2026-10-01",
+              "quantity": 1,
+              "salesWithoutTax": 1691.65,
+              "salesWithTax": 1962.31
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130299005M",
+          "productName": "WASH LIQUID 1X714ML INDIVIDUAL",
+          "productLine": "MARC",
+          "productLineName": "REFAC/CONSUM MAGLUMI",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 760.07,
+          "salesWithoutTax": 1520.13,
+          "salesWithTax": 1763.35,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081027",
+              "elaborationDate": "2026-10-01",
+              "quantity": 1,
+              "salesWithoutTax": 760.06,
+              "salesWithTax": 881.67
+            },
+            {
+              "invoiceNumber": "F-QR-080823",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 760.07,
+              "salesWithTax": 881.68
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130652003M",
+          "productName": "MAGLUMI HCG/b-HCG 50 PBAS 2G",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1271.72,
+          "salesWithoutTax": 1271.72,
+          "salesWithTax": 1475.2,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080743",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 1271.72,
+              "salesWithTax": 1475.2
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130299006M",
+          "productName": "LIGHT CHECK 5X2 ML",
+          "productLine": "MARC",
+          "productLineName": "REFAC/CONSUM MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1214.4,
+          "salesWithoutTax": 1214.4,
+          "salesWithTax": 1408.7,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080628",
+              "elaborationDate": "2026-09-07",
+              "quantity": 1,
+              "salesWithoutTax": 1214.4,
+              "salesWithTax": 1408.7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "SPINREACT",
+      "salesWithoutTax": 7469.75,
+      "salesWithTax": 8664.91,
+      "products": [
+        {
+          "productCode": "SPIN 1709201",
+          "productName": "APTT  R1 5X4 R2 5X4 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1466.25,
+          "salesWithoutTax": 1466.25,
+          "salesWithTax": 1700.85,
+          "lastPurchaseDate": "2026-09-24",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080919",
+              "elaborationDate": "2026-09-24",
+              "quantity": 1,
+              "salesWithoutTax": 1466.25,
+              "salesWithTax": 1700.85
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN MI1001111",
+          "productName": "CREATININA-J 3 X 30ML/ 3 X 30ML",
+          "productLine": "SPQ06",
+          "productLineName": "QC LINEA DEDICADA",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 717.75,
+          "salesWithoutTax": 1435.5,
+          "salesWithTax": 1665.18,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080745",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 693.0,
+              "salesWithTax": 803.88
+            },
+            {
+              "invoiceNumber": "F-QR-080634",
+              "elaborationDate": "2026-09-07",
+              "quantity": 1,
+              "salesWithoutTax": 742.5,
+              "salesWithTax": 861.3
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN MI41001",
+          "productName": "ACIDO URICO 3X30 , 3X30",
+          "productLine": "SPQ06",
+          "productLineName": "QC LINEA DEDICADA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1292,
+          "salesWithoutTax": 1292,
+          "salesWithTax": 1498.72,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080747",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 1292,
+              "salesWithTax": 1498.72
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN MI41041",
+          "productName": "UREA LQ 5X25ML/1X32ML",
+          "productLine": "SPQ06",
+          "productLineName": "QC LINEA DEDICADA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 952.5,
+          "salesWithoutTax": 952.5,
+          "salesWithTax": 1104.9,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080746",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 952.5,
+              "salesWithTax": 1104.9
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200901",
+          "productName": "ROSA DE BENGALA R 2.5 C+1X1 C-1X1 ML",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 784.0,
+          "salesWithoutTax": 784.0,
+          "salesWithTax": 909.44,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081031",
+              "elaborationDate": "2026-10-01",
+              "quantity": 1,
+              "salesWithoutTax": 784.0,
+              "salesWithTax": 909.44
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200406",
+          "productName": "VDRL 250 PBAS",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 688,
+          "salesWithoutTax": 688,
+          "salesWithTax": 798.08,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080823",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 688,
+              "salesWithTax": 798.08
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN MI41011",
+          "productName": "GLUCOSA LQ 6X30ML",
+          "productLine": "SPQ06",
+          "productLineName": "QC LINEA DEDICADA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 451.5,
+          "salesWithoutTax": 451.5,
+          "salesWithTax": 523.74,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080745",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 451.5,
+              "salesWithTax": 523.74
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 52010",
+          "productName": "TIRAS REACTIVAS MULTIPARAMETRICAS 100 TI",
+          "productLine": "SPP11",
+          "productLineName": "PRUEBAS RAPIDAS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 220,
+          "salesWithoutTax": 220,
+          "salesWithTax": 255.2,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080745",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 220,
+              "salesWithTax": 255.2
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700004",
+          "productName": "ANTI-B MONOCLONAL 10 ML",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 180,
+          "salesWithoutTax": 180,
+          "salesWithTax": 208.8,
+          "lastPurchaseDate": "2026-09-24",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080918",
+              "elaborationDate": "2026-09-24",
+              "quantity": 1,
+              "salesWithoutTax": 180,
+              "salesWithTax": 208.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "ROCHE",
+      "salesWithoutTax": 6225.0,
+      "salesWithTax": 7221.0,
+      "products": [
+        {
+          "productCode": "ROCH 12215268001",
+          "productName": "CELLPACK PK 20L",
+          "productLine": "ROHR",
+          "productLineName": "ROCHE HEMATO RVO",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 6225,
+          "salesWithoutTax": 6225.0,
+          "salesWithTax": 7221.0,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081031",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.1,
+              "salesWithoutTax": 622.5,
+              "salesWithTax": 722.1
+            },
+            {
+              "invoiceNumber": "F-QR-081030",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.27,
+              "salesWithoutTax": 1680.75,
+              "salesWithTax": 1949.67
+            },
+            {
+              "invoiceNumber": "F-QR-081029",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.27,
+              "salesWithoutTax": 1680.75,
+              "salesWithTax": 1949.67
+            },
+            {
+              "invoiceNumber": "F-QR-081028",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.27,
+              "salesWithoutTax": 1680.75,
+              "salesWithTax": 1949.67
+            },
+            {
+              "invoiceNumber": "F-QR-081027",
+              "elaborationDate": "2026-10-01",
+              "quantity": 0.09,
+              "salesWithoutTax": 560.25,
+              "salesWithTax": 649.89
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "LIFOTRONIC",
+      "salesWithoutTax": 3453.0,
+      "salesWithTax": 4005.48,
+      "products": [
+        {
+          "productCode": "LIFO 03-R02B100",
+          "productName": "KIT DE REACTIVO HbA1c GH 900 PLUS C/100",
+          "productLine": "LIFOR",
+          "productLineName": "LIFOTRONIC REACTIVO",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 3453,
+          "salesWithoutTax": 3453.0,
+          "salesWithTax": 4005.48,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080749",
+              "elaborationDate": "2026-09-10",
+              "quantity": 0.5,
+              "salesWithoutTax": 1726.5,
+              "salesWithTax": 2002.74
+            },
+            {
+              "invoiceNumber": "F-QR-080748",
+              "elaborationDate": "2026-09-10",
+              "quantity": 0.5,
+              "salesWithoutTax": 1726.5,
+              "salesWithTax": 2002.74
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "WONDFO",
+      "salesWithoutTax": 1829.0,
+      "salesWithTax": 2121.64,
+      "products": [
+        {
+          "productCode": "WOND W207",
+          "productName": "HBA1C HEMOGLOBINA CUANTITATIVA",
+          "productLine": "FIN",
+          "productLineName": "FINECARE",
+          "unit": "pz",
+          "quantity": 1.0,
+          "averageUnitPrice": 1829,
+          "salesWithoutTax": 1829.0,
+          "salesWithTax": 2121.64,
+          "lastPurchaseDate": "2026-09-24",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080918",
+              "elaborationDate": "2026-09-24",
+              "quantity": 0.1,
+              "salesWithoutTax": 182.9,
+              "salesWithTax": 212.16
+            },
+            {
+              "invoiceNumber": "F-QR-080917",
+              "elaborationDate": "2026-09-24",
+              "quantity": 0.9,
+              "salesWithoutTax": 1646.1,
+              "salesWithTax": 1909.48
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "MINDRAY",
+      "salesWithoutTax": 1408.0,
+      "salesWithTax": 1633.28,
+      "products": [
+        {
+          "productCode": "MIND A12-000047",
+          "productName": "M-30 DILUYENTE 20L",
+          "productLine": "MIH",
+          "productLineName": "HEMATOLOGIA MINDRAY",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1058.0,
+          "salesWithoutTax": 1058.0,
+          "salesWithTax": 1227.28,
+          "lastPurchaseDate": "2026-09-24",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080918",
+              "elaborationDate": "2026-09-24",
+              "quantity": 1,
+              "salesWithoutTax": 1058.0,
+              "salesWithTax": 1227.28
+            }
+          ]
+        },
+        {
+          "productCode": "MIND 105-002225",
+          "productName": "PROBE CLEANSER 50ML MINDRAY",
+          "productLine": "MIH",
+          "productLineName": "HEMATOLOGIA MINDRAY",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 350,
+          "salesWithoutTax": 350,
+          "salesWithTax": 406,
+          "lastPurchaseDate": "2026-10-01",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081027",
+              "elaborationDate": "2026-10-01",
+              "quantity": 1,
+              "salesWithoutTax": 350,
+              "salesWithTax": 406
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "NIETO HERMANOS",
+      "salesWithoutTax": 1250.1,
+      "salesWithTax": 1450.12,
+      "products": [
+        {
+          "productCode": "NH A2",
+          "productName": "ALCOHOL 96 DE 20LT",
+          "productLine": "VARIO",
+          "productLineName": "VARIOS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1250.1,
+          "salesWithoutTax": 1250.1,
+          "salesWithTax": 1450.12,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080821",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 1250.1,
+              "salesWithTax": 1450.12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elapsedMilliseconds": 72
+}

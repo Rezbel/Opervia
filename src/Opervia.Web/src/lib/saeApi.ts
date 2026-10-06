@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   SaeConnectionRequest,
   SaeDocumentItemsResult,
   SaeDocumentKind,
@@ -8,6 +8,8 @@
   SaeCustomerReceivableMovementsResult,
   SaeReceivableProbeResult,
   SaeReceivableRootResult,
+  SaeReceivableInvoiceListingResult,
+  SaeReceivableInvoiceAccountResult,
   SaeReceivablesSummaryResult,
   SaeReceivablesSummaryFilters,
   ProfitabilityDashboardResult,
@@ -15,6 +17,9 @@
   CreateManualProfitabilityEntry,
   SaeSalesFlowSummaryResult,
   SaeInventoryAnalyticsResult,
+  SaeCustomerPortfolioResult,
+  SaeCommercialResult,
+  SaeCommercialCustomerPurchasesResult,
 } from '../types/sae';
 
 const API_BASE_URL =
@@ -276,9 +281,19 @@ export async function getSalesFlowSummary(
   to: string,
   seller?: string,
   signal?: AbortSignal,
+  documentKind?: SaeDocumentKind,
+  page = 1,
+  pageSize = 50,
+  branch?: string,
+  search?: string,
 ): Promise<SaeSalesFlowSummaryResult> {
   const params = new URLSearchParams({ from, to });
+  if (documentKind) params.set('documentKind', documentKind);
+  params.set('page', String(page));
+  params.set('pageSize', String(pageSize));
   if (seller) params.set('seller', seller);
+  if (branch) params.set('branch', branch);
+  if (search) params.set('search', search);
   const response = await fetch(
     `${API_BASE_URL}/api/sae/sales-flow/summary?${params.toString()}`,
     {
@@ -327,6 +342,52 @@ export async function getInventoryAnalytics(
   if (!result.isSuccessful) {
     throw new Error(result.message || 'No fue posible analizar el inventario.');
   }
+  return result;
+}
+
+export async function getCustomerPortfolio(
+  connection: SaeConnectionRequest,
+  from: string,
+  to: string,
+  filters: Record<string, string>,
+  signal?: AbortSignal,
+): Promise<SaeCustomerPortfolioResult> {
+  const params = new URLSearchParams({ from, to });
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/sae/customers/portfolio?${params.toString()}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal },
+  );
+  await ensureSuccessfulResponse(response);
+  const result = await response.json() as SaeCustomerPortfolioResult;
+  if (!result.isSuccessful) throw new Error(result.message || 'No fue posible consultar los clientes.');
+  return result;
+}
+
+
+export async function getCommercialSummary(connection: SaeConnectionRequest, from: string, to: string, filters: Record<string, string>, signal?: AbortSignal): Promise<SaeCommercialResult> {
+  const params = new URLSearchParams({ from, to });
+  Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+  const response = await fetch(`${API_BASE_URL}/api/sae/commercial?${params.toString()}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal });
+  await ensureSuccessfulResponse(response);
+  const result = await response.json() as SaeCommercialResult;
+  if (!result.isSuccessful) throw new Error(result.message || 'No fue posible consultar el análisis comercial.');
+  return result;
+}
+export async function getCommercialCustomerProducts(
+  connection: SaeConnectionRequest, from: string, to: string, filters: Record<string, string>, signal?: AbortSignal,
+): Promise<SaeCommercialCustomerPurchasesResult> {
+  const params = new URLSearchParams({ from, to });
+  Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+  const response = await fetch(`${API_BASE_URL}/api/sae/commercial/customer-products?${params.toString()}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection),
+    cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal,
+  });
+  await ensureSuccessfulResponse(response);
+  const result = await response.json() as SaeCommercialCustomerPurchasesResult;
+  if (!result.isSuccessful) throw new Error(result.message || 'No fue posible consultar los productos del cliente.');
   return result;
 }
 
@@ -411,10 +472,16 @@ export async function getReceivablesSummary(
   periodEnd: string,
   filters: SaeReceivablesSummaryFilters = {},
   signal?: AbortSignal,
+  invoicePage = 1,
+  invoicePageSize = 50,
+  includeInvoices = true,
 ): Promise<SaeReceivablesSummaryResult> {
   const params = new URLSearchParams({
     from: periodStart,
     to: periodEnd,
+    invoicePage: String(invoicePage),
+    invoicePageSize: String(invoicePageSize),
+    includeInvoices: String(includeInvoices),
   });
 
   if (filters.sellerCode) {
@@ -447,11 +514,37 @@ export async function getReceivablesSummary(
       String(filters.paymentConceptNumber),
     );
   }
+  if (filters.invoiceSearch) {
+    params.set('invoiceSearch', filters.invoiceSearch);
+  }
 
   return postReceivableQuery<SaeReceivablesSummaryResult>(
     `/api/sae/receivables/summary?${params.toString()}`,
     connection,
     signal,
+  );
+}
+
+export async function getReceivableInvoices(
+  connection: SaeConnectionRequest,
+  from: string,
+  to: string,
+  search: string,
+  page: number,
+  pageSize: number,
+  signal?: AbortSignal,
+): Promise<SaeReceivableInvoiceListingResult> {
+  const params = new URLSearchParams({ from, to, search, page: String(page), pageSize: String(pageSize) });
+  return postReceivableQuery<SaeReceivableInvoiceListingResult>(
+    `/api/sae/receivables/invoices?${params}`, connection, signal,
+  );
+}
+
+export async function getReceivableInvoiceAccount(
+  connection: SaeConnectionRequest, invoiceNumber: string, signal?: AbortSignal,
+): Promise<SaeReceivableInvoiceAccountResult> {
+  return postReceivableQuery<SaeReceivableInvoiceAccountResult>(
+    `/api/sae/receivables/invoice-account/${encodeURIComponent(invoiceNumber.trim())}`, connection, signal,
   );
 }
 
@@ -485,3 +578,4 @@ export async function getProfitabilityDashboard(
   await ensureSuccessfulResponse(response);
   return (await response.json()) as ProfitabilityDashboardResult;
 }
+

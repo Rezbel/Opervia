@@ -1,0 +1,169 @@
+{
+  "isSuccessful": true,
+  "message": "Productos adquiridos del cliente, conciliados con sus facturas de SAE.",
+  "periodStart": "2026-09-07",
+  "periodEnd": "2026-10-06",
+  "customerCode": "2035",
+  "customerName": "ESPECIALIDADES SANTA SOFIA",
+  "salesWithoutTax": 239900,
+  "salesWithTax": 278284,
+  "invoiceCount": 1,
+  "productCount": 7,
+  "brands": [
+    {
+      "brand": "SPINREACT",
+      "salesWithoutTax": 239900,
+      "salesWithTax": 278284,
+      "products": [
+        {
+          "productCode": "SPINCELL 5",
+          "productName": "SPINCELL 5 COMPACT",
+          "productLine": "SPI17",
+          "productLineName": "EQUIPOS SPIN",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 239900,
+          "salesWithoutTax": 239900,
+          "salesWithTax": 278284,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 239900,
+              "salesWithTax": 278284
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1705600",
+          "productName": "DILUYENTE SPINCELL5 1X20L",
+          "productLine": "SP13",
+          "productLineName": "HEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1705610",
+          "productName": "LISANTE SPINCELL5. 1x 1 L 1X1000  ML",
+          "productLine": "SP13",
+          "productLineName": "HEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1705680",
+          "productName": "DETERGENTE SPINCELL 5 1X20L",
+          "productLine": "SP13",
+          "productLineName": "HEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1705681",
+          "productName": "SHEATH SPINCELL5 1X20L",
+          "productLine": "SP13",
+          "productLineName": "HEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 52010",
+          "productName": "TIRAS REACTIVAS MULTIPARAMETRICAS 100 TI",
+          "productLine": "SPP11",
+          "productLineName": "PRUEBAS RAPIDAS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN UR120",
+          "productName": "URISPIN READER U-120",
+          "productLine": "SPI17",
+          "productLineName": "EQUIPOS SPIN",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 0,
+          "salesWithoutTax": 0,
+          "salesWithTax": 0,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-EQ000082",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 0,
+              "salesWithTax": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elapsedMilliseconds": 66
+}

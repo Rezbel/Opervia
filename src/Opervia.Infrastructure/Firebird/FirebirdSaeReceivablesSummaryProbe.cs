@@ -6,7 +6,8 @@ using Opervia.Domain.Connections;
 namespace Opervia.Infrastructure.Firebird;
 
 public sealed class FirebirdSaeReceivablesSummaryProbe(
-    ILogger<FirebirdSaeReceivablesSummaryProbe> logger
+    ILogger<FirebirdSaeReceivablesSummaryProbe> logger,
+    ISaeReceivableInvoiceListingProbe invoiceProbe
 ) : ISaeReceivablesSummaryProbe
 {
     private const int MaximumRecentRecords = 8;
@@ -18,7 +19,10 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
         DateOnly periodStart,
         DateOnly periodEnd,
         SaeReceivablesSummaryFilter filters,
-        CancellationToken cancellationToken = default
+        int invoicePage,
+        int invoicePageSize,
+        CancellationToken cancellationToken = default,
+        bool includeInvoices = true
     )
     {
         ValidatePeriod(periodStart, periodEnd);
@@ -115,27 +119,11 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             var classifiedReductions =
                 ClassifyReductions(reductions);
 
-            var recentPayments =
-                await ReadRecentPaymentsAsync(
-                    connection,
-                    movementsTableName,
-                    conceptsTableName,
-                    invoiceTableName,
-                    from,
-                    toExclusive,
-                    filters,
-                    cancellationToken
-                );
-
-            var recentCancellations =
-                await ReadRecentCancellationsAsync(
-                    connection,
-                    invoiceTableName,
-                    from,
-                    toExclusive,
-                    filters,
-                    cancellationToken
-                );
+            var invoiceListing = includeInvoices
+                ? await invoiceProbe.ReadAsync(profile, password, periodStart, periodEnd,
+                    filters.InvoiceSearch, invoicePage, invoicePageSize, cancellationToken, filters)
+                : new SaeReceivableInvoiceListingResult(true, "", periodStart, periodEnd, [], invoicePage, invoicePageSize, 0, 0);
+            if (!invoiceListing.IsSuccessful) throw new InvalidOperationException(invoiceListing.Message);
 
             var futureDatedReductionCount =
                 await ReadFutureReductionCountAsync(
@@ -183,8 +171,12 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 classifiedReductions.IncomeBreakdown,
                 classifiedReductions.NonCashBreakdown,
                 dailySeries,
-                recentPayments,
-                recentCancellations,
+                Array.Empty<SaeReceivableRecentMovement>(),
+                Array.Empty<SaeReceivableRecentCancellation>(),
+                invoiceListing.Invoices,
+                invoiceListing.InvoicePage,
+                invoicePageSize,
+                invoiceListing.TotalInvoiceCount,
                 futureDatedReductionCount,
                 invoiceSummary.GrossAmountWithoutTax,
                 invoiceSummary.NetAmountWithoutTax,
@@ -286,8 +278,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     THEN ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0)) ELSE 0 END
                 ), 0)
             FROM {tableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
             """;
 
@@ -375,7 +367,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             BuildInvoiceFilterClause(filters, "I");
         var sql = $"""
             SELECT
-                CAST(I.FECHA_DOC AS DATE),
+                CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE),
                 COALESCE(SUM(
                     CASE
                         WHEN COALESCE(I.STATUS, '') <> 'C'
@@ -384,11 +376,11 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     END
                 ), 0)
             FROM {tableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
-            GROUP BY CAST(I.FECHA_DOC AS DATE)
-            ORDER BY CAST(I.FECHA_DOC AS DATE)
+            GROUP BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
+            ORDER BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
             """;
 
         await using var command = CreatePeriodCommand(
@@ -502,18 +494,18 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
     {
         var filterClause = BuildInvoiceFilterClause(filters, "I");
         var sql = $"""
-            SELECT CAST(I.FECHA_DOC AS DATE),
+            SELECT CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE),
                 COALESCE(SUM(
                     CASE WHEN COALESCE(I.STATUS, '') <> 'C'
                     THEN ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))
                     ELSE 0 END
                 ), 0)
             FROM {tableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
-            GROUP BY CAST(I.FECHA_DOC AS DATE)
-            ORDER BY CAST(I.FECHA_DOC AS DATE)
+            GROUP BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
+            ORDER BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
             """;
         await using var command = CreatePeriodCommand(sql, connection, from, toExclusive);
         AddFilterParameters(command, filters);
@@ -662,8 +654,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             FROM {sellersTableName} V
             LEFT JOIN {invoiceTableName} I
                 ON I.CVE_VEND = V.CVE_VEND
-               AND I.FECHA_DOC >= @FROM_DATE
-               AND I.FECHA_DOC < @TO_DATE
+               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             WHERE COALESCE(V.STATUS, 'A') <> 'B'
             GROUP BY V.CVE_VEND, V.NOMBRE
             ORDER BY V.NOMBRE
@@ -683,8 +675,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.SERIE
             ORDER BY I.SERIE
             """,
@@ -703,8 +695,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.NUM_ALMA
             ORDER BY I.NUM_ALMA
             """,
@@ -723,8 +715,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE I.FECHA_DOC >= @FROM_DATE
-              AND I.FECHA_DOC < @TO_DATE
+            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.STATUS
             ORDER BY I.STATUS
             """,
@@ -761,8 +753,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     COALESCE(SUM(ABS(I.IMPORTE)), 0),
                     COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
                 FROM {invoiceTableName} I
-                WHERE I.FECHA_DOC >= @FROM_DATE
-                  AND I.FECHA_DOC < @TO_DATE
+                WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+                  AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
                 GROUP BY I.METODODEPAGO
                 ORDER BY I.METODODEPAGO
                 """,
@@ -986,7 +978,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 I.CVE_DOC,
                 I.CVE_CLPV,
                 ABS(I.IMPORTE),
-                I.FECHA_DOC,
+                COALESCE(I.FECHAELAB, I.FECHA_DOC),
                 I.FECHA_CANCELA
             FROM {tableName} I
             WHERE I.STATUS = 'C'
@@ -1144,7 +1136,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             : string.Join(" AND ", clauses);
     }
 
-    private static string BuildInvoiceFilterClause(
+    internal static string BuildInvoiceFilterClause(
         SaeReceivablesSummaryFilter filters,
         string alias
     )
@@ -1220,7 +1212,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             : string.Join(" AND ", clauses);
     }
 
-    private static void AddFilterParameters(
+    internal static void AddFilterParameters(
         FbCommand command,
         SaeReceivablesSummaryFilter filters,
         bool includePaymentConcept = false
@@ -1475,6 +1467,10 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             Array.Empty<SaeReceivablesDailyPoint>(),
             Array.Empty<SaeReceivableRecentMovement>(),
             Array.Empty<SaeReceivableRecentCancellation>(),
+            Array.Empty<SaeReceivableInvoiceRow>(),
+            1,
+            50,
+            0,
             0,
             0,
             0,
@@ -1487,7 +1483,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
         );
     }
 
-    private sealed record InvoiceSummary(
+private sealed record InvoiceSummary(
         int InvoiceCount,
         decimal GrossAmount,
         decimal NetAmount,

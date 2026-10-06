@@ -15,8 +15,13 @@ public sealed class SaeSalesFlowSummaryController(
         [FromQuery] DateOnly from,
         [FromQuery] DateOnly to,
         [FromQuery] string? seller,
+        [FromQuery] string? documentKind,
         [FromBody] TestSaeConnectionRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] string? branch = null,
+        [FromQuery] string? search = null)
     {
         if (from == default || to == default || to < from)
         {
@@ -40,7 +45,7 @@ public sealed class SaeSalesFlowSummaryController(
             from,
             to,
             string.IsNullOrWhiteSpace(seller) ? null : seller.Trim(),
-            cancellationToken);
+            cancellationToken, documentKind, page, pageSize, branch, search);
 
         return Ok(result);
     }

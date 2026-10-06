@@ -24,8 +24,12 @@ public sealed class SaeReceivablesSummaryController(
             [FromQuery] string? status,
             [FromQuery] string? fiscalMethod,
             [FromQuery] int? paymentConcept,
+            [FromQuery] string? invoiceSearch,
             [FromBody] TestSaeConnectionRequest request,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken,
+            [FromQuery] int invoicePage = 1,
+            [FromQuery] int invoicePageSize = 10,
+            [FromQuery] bool includeInvoices = true
         )
     {
         if (from == default || to == default)
@@ -61,6 +65,11 @@ public sealed class SaeReceivablesSummaryController(
             );
         }
 
+        if (invoicePage < 1 || invoicePageSize is < 1 or > 100)
+        {
+            return BadRequest(new { message = "La página debe ser positiva y el tamaño debe estar entre 1 y 100." });
+        }
+
         if (folioFrom is < 0 || folioTo is < 0)
         {
             return BadRequest(
@@ -94,7 +103,8 @@ public sealed class SaeReceivablesSummaryController(
             warehouse,
             status?.Trim(),
             fiscalMethod?.Trim(),
-            paymentConcept
+            paymentConcept,
+            invoiceSearch?.Trim()
         );
 
         var result = await summaryProbe.ReadAsync(
@@ -103,7 +113,10 @@ public sealed class SaeReceivablesSummaryController(
             from,
             to,
             filters,
-            cancellationToken
+            invoicePage,
+            invoicePageSize,
+            cancellationToken,
+            includeInvoices
         );
 
         return Ok(result);

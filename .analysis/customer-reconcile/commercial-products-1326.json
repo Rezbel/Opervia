@@ -1,0 +1,722 @@
+{
+  "isSuccessful": true,
+  "message": "Productos adquiridos del cliente, conciliados con sus facturas de SAE.",
+  "periodStart": "2026-09-07",
+  "periodEnd": "2026-10-06",
+  "customerCode": "1326",
+  "customerName": "OMAR RIVERA SOLORIO",
+  "salesWithoutTax": 64720.58,
+  "salesWithTax": 74907.87,
+  "invoiceCount": 7,
+  "productCount": 28,
+  "brands": [
+    {
+      "brand": "SPINREACT",
+      "salesWithoutTax": 37150.85,
+      "salesWithTax": 43094.99,
+      "products": [
+        {
+          "productCode": "SPIN FC5200010",
+          "productName": "CUBILETE DE COAGULACION BB10 Y 20 (5X100",
+          "productLine": "SPR18",
+          "productLineName": "REFACCIONES",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 4516.67,
+          "salesWithoutTax": 22583.35,
+          "salesWithTax": 26196.69,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 5,
+              "salesWithoutTax": 22583.35,
+              "salesWithTax": 26196.69
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709223",
+          "productName": "TP  10X2 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 1466.5,
+          "salesWithoutTax": 4399.5,
+          "salesWithTax": 5103.42,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 3,
+              "salesWithoutTax": 4399.5,
+              "salesWithTax": 5103.42
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709211",
+          "productName": "FIBRINOGENO  R1 8X2 R2 1X100 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2876,
+          "salesWithoutTax": 2876,
+          "salesWithTax": 3336.16,
+          "lastPurchaseDate": "2026-09-14",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080771",
+              "elaborationDate": "2026-09-14",
+              "quantity": 1,
+              "salesWithoutTax": 2876,
+              "salesWithTax": 3336.16
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 52010",
+          "productName": "TIRAS REACTIVAS MULTIPARAMETRICAS 100 TI",
+          "productLine": "SPP11",
+          "productLineName": "PRUEBAS RAPIDAS",
+          "unit": "pz",
+          "quantity": 10,
+          "averageUnitPrice": 200,
+          "salesWithoutTax": 2000,
+          "salesWithTax": 2320,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 10,
+              "salesWithoutTax": 2000,
+              "salesWithTax": 2320
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709201",
+          "productName": "APTT  R1 5X4 R2 5X4 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1368.5,
+          "salesWithoutTax": 1368.5,
+          "salesWithTax": 1587.46,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 1,
+              "salesWithoutTax": 1368.5,
+              "salesWithTax": 1587.46
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709104",
+          "productName": "CONTROL COAGULACION NORMAL 4X1 ML",
+          "productLine": "SP07C",
+          "productLineName": "CONTROL COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1214.5,
+          "salesWithoutTax": 1214.5,
+          "salesWithTax": 1408.82,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 1,
+              "salesWithoutTax": 1214.5,
+              "salesWithTax": 1408.82
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709106",
+          "productName": "CONTROL COAGULACION PATOLOGICO 4X1 ML",
+          "productLine": "SP07C",
+          "productLineName": "CONTROL COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1214.5,
+          "salesWithoutTax": 1214.5,
+          "salesWithTax": 1408.82,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 1,
+              "salesWithoutTax": 1214.5,
+              "salesWithTax": 1408.82
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN U021-013A",
+          "productName": "CONTROL DE ORINA LIQ. N1 1X5ML N2",
+          "productLine": "SP05",
+          "productLineName": "CONTROL DE CALIDAD",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 892.5,
+          "salesWithoutTax": 892.5,
+          "salesWithTax": 1035.3,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 1,
+              "salesWithoutTax": 892.5,
+              "salesWithTax": 1035.3
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200406",
+          "productName": "VDRL 250 PBAS",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 602,
+          "salesWithoutTax": 602,
+          "salesWithTax": 698.32,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 602,
+              "salesWithTax": 698.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "BECTON",
+      "salesWithoutTax": 7825.45,
+      "salesWithTax": 9077.52,
+      "products": [
+        {
+          "productCode": "BD VCT367292",
+          "productName": "MARIPOSA O AGUJA ALADO AZUL 23X19MM",
+          "productLine": "BDV",
+          "productLineName": "BD VCT",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 2027.23,
+          "salesWithoutTax": 6081.69,
+          "salesWithTax": 7054.76,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 2,
+              "salesWithoutTax": 4054.46,
+              "salesWithTax": 4703.17
+            },
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 2027.23,
+              "salesWithTax": 2351.59
+            }
+          ]
+        },
+        {
+          "productCode": "BD VCT365974",
+          "productName": "TUBO MICROTAINER LILA C/50PZ",
+          "productLine": "BDV",
+          "productLineName": "BD VCT",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 871.88,
+          "salesWithoutTax": 1743.76,
+          "salesWithTax": 2022.76,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 2,
+              "salesWithoutTax": 1743.76,
+              "salesWithTax": 2022.76
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Sin marca",
+      "salesWithoutTax": 3830.0,
+      "salesWithTax": 4442.8,
+      "products": [
+        {
+          "productCode": "BESE VC-005-25",
+          "productName": "FOB C/25PZ",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 4,
+          "averageUnitPrice": 690.0,
+          "salesWithoutTax": 2760.0,
+          "salesWithTax": 3201.6,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 4,
+              "salesWithoutTax": 2760.0,
+              "salesWithTax": 3201.6
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-017-25",
+          "productName": "SIFILIS C/25PZ",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 355,
+          "salesWithoutTax": 710,
+          "salesWithTax": 823.6,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 2,
+              "salesWithoutTax": 710,
+              "salesWithTax": 823.6
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-019-25",
+          "productName": "HEPATITIS B C/25 TIRAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 360,
+          "salesWithoutTax": 360,
+          "salesWithTax": 417.6,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 360,
+              "salesWithTax": 417.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "HYCEL",
+      "salesWithoutTax": 3824,
+      "salesWithTax": 4435.84,
+      "products": [
+        {
+          "productCode": "HYCE 548-100",
+          "productName": "HEMOCOLORANTE RAPIDO EQUIPO 100ML",
+          "productLine": "HYCEL",
+          "productLineName": "HYCEL",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1757,
+          "salesWithoutTax": 3514,
+          "salesWithTax": 4076.24,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 2,
+              "salesWithoutTax": 3514,
+              "salesWithTax": 4076.24
+            }
+          ]
+        },
+        {
+          "productCode": "HYCE 7379-100",
+          "productName": "STERNHEIMER-MALBIN COL P/SEDIMENTO 100ML",
+          "productLine": "HYCEL",
+          "productLineName": "HYCEL",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 155,
+          "salesWithoutTax": 310,
+          "salesWithTax": 359.6,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081073",
+              "elaborationDate": "2026-10-05",
+              "quantity": 2,
+              "salesWithoutTax": 310,
+              "salesWithTax": 359.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "AIMTAB",
+      "salesWithoutTax": 2401.44,
+      "salesWithTax": 2785.67,
+      "products": [
+        {
+          "productCode": "GERM 13320",
+          "productName": "AIMTAB AZUCARES REDUCTORES C/20",
+          "productLine": "PBARA",
+          "productLineName": "PBA RAPIDA VARIAS",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1200.72,
+          "salesWithoutTax": 2401.44,
+          "salesWithTax": 2785.67,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 2,
+              "salesWithoutTax": 2401.44,
+              "salesWithTax": 2785.67
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "CERTEST",
+      "salesWithoutTax": 1740,
+      "salesWithTax": 2018.4,
+      "products": [
+        {
+          "productCode": "CERT SC820001PC",
+          "productName": "PRUEBA SARS-CoV-2 Ag",
+          "productLine": "CERT",
+          "productLineName": "CERTUM PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1740,
+          "salesWithoutTax": 1740,
+          "salesWithTax": 2018.4,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 1740,
+              "salesWithTax": 2018.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "ACCUTRACK",
+      "salesWithoutTax": 1585,
+      "salesWithTax": 1838.6,
+      "products": [
+        {
+          "productCode": "ACCU DOA-6",
+          "productName": "PANEL 6  ANF/COC/THC/MET/OP/BZ 25 PBAS",
+          "productLine": "ACCUD",
+          "productLineName": "ACCUTRACK DROGAS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1585,
+          "salesWithoutTax": 1585,
+          "salesWithTax": 1838.6,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 1585,
+              "salesWithTax": 1838.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "DEGASA",
+      "salesWithoutTax": 1584,
+      "salesWithTax": 1837.44,
+      "products": [
+        {
+          "productCode": "DEGA 18200620",
+          "productName": "APLICADOR DE MADERA SIN ALGODON C/750",
+          "productLine": "HOSPM",
+          "productLineName": "HOSPITALARIO",
+          "unit": "pz",
+          "quantity": 8,
+          "averageUnitPrice": 198,
+          "salesWithoutTax": 1584,
+          "salesWithTax": 1837.44,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081052",
+              "elaborationDate": "2026-10-02",
+              "quantity": 4,
+              "salesWithoutTax": 792,
+              "salesWithTax": 918.72
+            },
+            {
+              "invoiceNumber": "F-QR-080701",
+              "elaborationDate": "2026-09-09",
+              "quantity": 4,
+              "salesWithoutTax": 792,
+              "salesWithTax": 918.72
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "MEDIMAZ",
+      "salesWithoutTax": 1271.16,
+      "salesWithTax": 1474.55,
+      "products": [
+        {
+          "productCode": "MAXS GLA03-G",
+          "productName": "GUANTE NEGRO DE NITRILO G C/100",
+          "productLine": "MEDIM",
+          "productLineName": "MEDIMAZ",
+          "unit": "pz",
+          "quantity": 8,
+          "averageUnitPrice": 115.56,
+          "salesWithoutTax": 924.48,
+          "salesWithTax": 1072.4,
+          "lastPurchaseDate": "2026-09-08",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080673",
+              "elaborationDate": "2026-09-08",
+              "quantity": 8,
+              "salesWithoutTax": 924.48,
+              "salesWithTax": 1072.4
+            }
+          ]
+        },
+        {
+          "productCode": "MAXS GLA03-CH",
+          "productName": "GUANTE NEGRO DE NITRILO CH C/100",
+          "productLine": "MEDIM",
+          "productLineName": "MEDIMAZ",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 115.56,
+          "salesWithoutTax": 346.68,
+          "salesWithTax": 402.15,
+          "lastPurchaseDate": "2026-09-08",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080673",
+              "elaborationDate": "2026-09-08",
+              "quantity": 3,
+              "salesWithoutTax": 346.68,
+              "salesWithTax": 402.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "CRM",
+      "salesWithoutTax": 1260,
+      "salesWithTax": 1461.6,
+      "products": [
+        {
+          "productCode": "CRM PE1014SP",
+          "productName": "PUNTAS PARA MICROPIPETA 0.5-20UL",
+          "productLine": "CRM",
+          "productLineName": "CRM GLOBE MAT. PLAST",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 420,
+          "salesWithoutTax": 1260,
+          "salesWithTax": 1461.6,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 3,
+              "salesWithoutTax": 1260,
+              "salesWithTax": 1461.6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "PISA",
+      "salesWithoutTax": 1050,
+      "salesWithTax": 1050.0,
+      "products": [
+        {
+          "productCode": "PISA 0271",
+          "productName": "AGUA INYECTABLE DE 10ML C/100",
+          "productLine": "PISA",
+          "productLineName": "PISA CURACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1050,
+          "salesWithoutTax": 1050,
+          "salesWithTax": 1050.0,
+          "lastPurchaseDate": "2026-09-09",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080701",
+              "elaborationDate": "2026-09-09",
+              "quantity": 1,
+              "salesWithoutTax": 1050,
+              "salesWithTax": 1050.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "PROTEC",
+      "salesWithoutTax": 740.01,
+      "salesWithTax": 858.41,
+      "products": [
+        {
+          "productCode": "PROT 000211",
+          "productName": "GASA ESTERIL 10X10 C/100",
+          "productLine": "PRTC",
+          "productLineName": "PROTEC CURACION",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 246.67,
+          "salesWithoutTax": 740.01,
+          "salesWithTax": 858.41,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 3,
+              "salesWithoutTax": 740.01,
+              "salesWithTax": 858.41
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "KIMAX",
+      "salesWithoutTax": 187,
+      "salesWithTax": 216.92,
+      "products": [
+        {
+          "productCode": "KIMA 40B501",
+          "productName": "TUBOS CAPILARES C/HEPARINA C/100",
+          "productLine": "KIMAX",
+          "productLineName": "KIMAX",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 187,
+          "salesWithoutTax": 187,
+          "salesWithTax": 216.92,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 1,
+              "salesWithoutTax": 187,
+              "salesWithTax": 216.92
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "AMBIDERM",
+      "salesWithoutTax": 178.33,
+      "salesWithTax": 206.86,
+      "products": [
+        {
+          "productCode": "AMBI 101070R-20",
+          "productName": "BOLSA ROJA 50X60CM RPBI B/20",
+          "productLine": "AMBID",
+          "productLineName": "AMBIDERM",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 178.33,
+          "salesWithoutTax": 178.33,
+          "salesWithTax": 206.86,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081070",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 178.33,
+              "salesWithTax": 206.86
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "CIVEQ",
+      "salesWithoutTax": 93.34,
+      "salesWithTax": 108.27,
+      "products": [
+        {
+          "productCode": "CIVE 110",
+          "productName": "FRASCO GOTERO AMBAR 50ML",
+          "productLine": "CIVEQ",
+          "productLineName": "CIVEQ",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 46.67,
+          "salesWithoutTax": 93.34,
+          "salesWithTax": 108.27,
+          "lastPurchaseDate": "2026-10-06",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081082",
+              "elaborationDate": "2026-10-06",
+              "quantity": 2,
+              "salesWithoutTax": 93.34,
+              "salesWithTax": 108.27
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elapsedMilliseconds": 86
+}

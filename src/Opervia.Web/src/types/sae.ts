@@ -1,4 +1,4 @@
-﻿export type SaeDocumentKind =
+export type SaeDocumentKind =
   | 'Quotation'
   | 'Order'
   | 'Delivery'
@@ -30,6 +30,8 @@ export interface SavedSaeConnectionSummary {
 }
 
 export interface SaeSalesFlowNode {
+  warehouseNumber?: number | null;
+  salespersonCode?: string | null;
   id: string;
   sequence: number;
   kind: SaeDocumentKind;
@@ -152,6 +154,9 @@ export interface SaeSalesFlowSummaryResult {
   brokenLinkCount: number;
   recentQuotationWithoutOrderCount: number;
   documents: SaeSalesFlowDocumentListItem[];
+  documentPage: number;
+  documentPageSize: number;
+  totalDocumentCount: number;
   elapsedMilliseconds: number;
 }
 
@@ -160,6 +165,7 @@ export interface SaeSalesFlowDocumentListItem {
   stageLabel: string;
   documentNumber: string;
   customerCode: string;
+  customerName: string | null;
   sellerCode: string | null;
   documentDate: string;
   isCancelled: boolean;
@@ -365,6 +371,105 @@ export interface SaeReceivableRecentCancellation {
   cancellationDate: string;
 }
 
+export interface SaeReceivableInvoiceRow {
+  invoiceNumber: string;
+  customerCode: string;
+  customerName: string;
+  sellerCode: string | null;
+  dueDate: string | null;
+  status: 'Liquidada' | 'Adeudo' | 'Vencido' | 'Cancelada' | 'Sin datos';
+  creationDate: string | null;
+}
+
+export interface SaeReceivableInvoiceAccountResult {
+  isSuccessful: boolean;
+  message: string;
+  invoice: {
+    invoiceNumber: string;
+    customerCode: string;
+    customerName: string;
+    sellerCode: string;
+    creationDate: string | null;
+    documentDate: string | null;
+    amountWithVat: number;
+    amountWithoutVat: number;
+    vatAmount: number;
+    balance: number | null;
+    originalCharges: number;
+    appliedReductions: number;
+    nextDueDate: string | null;
+    status: string;
+    saeStatus: string;
+    chargeCount: number;
+    uuid: string | null;
+  } | null;
+  movements: {
+    key: string;
+    reference: string;
+    chargeNumber: number;
+    conceptNumber: number;
+    conceptDescription: string;
+    document: string;
+    signedAmount: number;
+    applicationDate: string | null;
+    dueDate: string | null;
+    isOriginalCharge: boolean;
+    chargeBalance: number | null;
+    chargeStatus: string | null;
+  }[];
+  elapsedMilliseconds: number;
+}
+
+export interface SaeReceivableInvoiceListingResult {
+  isSuccessful: boolean;
+  message: string;
+  periodStart: string;
+  periodEnd: string;
+  invoices: SaeReceivableInvoiceRow[];
+  invoicePage: number;
+  invoicePageSize: number;
+  totalInvoiceCount: number;
+  elapsedMilliseconds: number;
+}
+
+export interface SaeCustomerPortfolioRow {
+  customerCode: string;
+  customerName: string;
+  sellerCode: string | null;
+  customerStatus: string;
+  classification: string;
+  hasCredit: boolean;
+  creditLimit: number;
+  creditDays: number;
+  balance: number;
+}
+
+export interface SaeCustomerPeriodInvoice {
+  invoiceNumber: string;
+  documentDate: string;
+  dueDate: string | null;
+  sellerCode: string | null;
+  amount: number;
+  status: string;
+  originalAmount: number;
+}
+
+export interface SaeCustomerPortfolioResult {
+  isSuccessful: boolean;
+  message: string;
+  periodStart: string;
+  periodEnd: string;
+  customers: SaeCustomerPortfolioRow[];
+  invoices: SaeCustomerPeriodInvoice[];
+  elapsedMilliseconds: number;
+  pendingInvoiceBalance: number | null;
+  creditBalance: number | null;
+  otherAccountBalance: number | null;
+  accountingBalance: number | null;
+  balanceDifference: number | null;
+  pendingCharges: { dueDate: string | null; amount: number }[] | null;
+}
+
 export interface SaeReceivablesSummaryFilters {
   sellerCode?: string;
   series?: string;
@@ -375,6 +480,7 @@ export interface SaeReceivablesSummaryFilters {
   invoiceStatus?: 'Active' | 'Canceled';
   fiscalPaymentMethod?: string;
   paymentConceptNumber?: number;
+  invoiceSearch?: string;
 }
 
 export interface SaeReceivableFilterOption {
@@ -425,6 +531,10 @@ export interface SaeReceivablesSummaryResult {
   dailySeries: SaeReceivablesDailyPoint[];
   recentPayments: SaeReceivableRecentMovement[];
   recentCancellations: SaeReceivableRecentCancellation[];
+  invoices: SaeReceivableInvoiceRow[];
+  invoicePage: number;
+  invoicePageSize: number;
+  totalInvoiceCount: number;
   futureDatedReductionCount: number;
   grossInvoicedAmountWithoutTax: number;
   netInvoicedAmountWithoutTax: number;
@@ -511,4 +621,25 @@ export interface CreateManualProfitabilityEntry {
   branch?: string;
   amount: number;
   note?: string;
+}
+export interface SaeCommercialOption { value: string; label: string; }
+export interface SaeCommercialBrand { brand: string; salesWithoutTax: number; salesWithTax: number; invoiceCount: number; customerCount: number; }
+export interface SaeCommercialBrandAmount { brand: string; salesWithoutTax: number; salesWithTax: number; }
+export interface SaeCommercialCustomer { customerCode: string; customerName: string; salesWithoutTax: number; salesWithTax: number; invoiceCount: number; brands: SaeCommercialBrandAmount[]; }
+export interface SaeCommercialResult { isSuccessful: boolean; message: string; periodStart: string; periodEnd: string; salesWithoutTax: number; salesWithTax: number; invoiceCount: number; customerCount: number; brands: SaeCommercialBrand[]; customers: SaeCommercialCustomer[]; sellers: SaeCommercialOption[]; brandOptions: SaeCommercialOption[]; productLines: SaeCommercialOption[]; elapsedMilliseconds: number; }
+export interface SaeCommercialProductPurchase {
+  invoiceNumber: string; elaborationDate: string; quantity: number; salesWithoutTax: number; salesWithTax: number;
+}
+export interface SaeCommercialPurchasedProduct {
+  productCode: string; productName: string; productLine: string; productLineName: string; unit: string;
+  quantity: number; averageUnitPrice: number | null; salesWithoutTax: number; salesWithTax: number;
+  lastPurchaseDate: string; purchases: SaeCommercialProductPurchase[];
+}
+export interface SaeCommercialPurchasedBrand {
+  brand: string; salesWithoutTax: number; salesWithTax: number; products: SaeCommercialPurchasedProduct[];
+}
+export interface SaeCommercialCustomerPurchasesResult {
+  isSuccessful: boolean; message: string; periodStart: string; periodEnd: string; customerCode: string;
+  customerName: string; salesWithoutTax: number; salesWithTax: number; invoiceCount: number; productCount: number;
+  brands: SaeCommercialPurchasedBrand[]; elapsedMilliseconds: number;
 }

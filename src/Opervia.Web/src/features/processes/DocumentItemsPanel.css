@@ -1,4 +1,4 @@
-﻿.document-items-panel {
+.document-items-panel {
   position: fixed;
   z-index: 900;
   top: 18px;
@@ -7,7 +7,7 @@
   width: min(470px, calc(100vw - 36px));
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
   border: 1px solid rgba(148, 163, 184, 0.17);
   border-radius: 18px;
   color: #eef4ff;
@@ -302,4 +302,60 @@
     bottom: 10px;
     width: calc(100vw - 20px);
   }
+}
+
+.document-context, .document-items-header, .document-items-summary { flex-shrink: 0; }
+
+.document-items-list { flex: 1 0 auto; overflow: visible; }
+
+html[data-theme='light'] .document-items-panel {
+  color: #172033;
+  border-color: rgba(71, 85, 105, 0.2);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 28px 80px rgba(51, 65, 85, 0.2);
+}
+
+html[data-theme='light'] .document-items-header,
+html[data-theme='light'] .document-items-summary,
+html[data-theme='light'] .document-items-footer {
+  border-color: rgba(71, 85, 105, 0.15);
+}
+
+html[data-theme='light'] .document-items-close {
+  color: #526174;
+  border-color: rgba(71, 85, 105, 0.2);
+}
+
+html[data-theme='light'] .document-items-summary article,
+html[data-theme='light'] .document-item-card {
+  border-color: rgba(71, 85, 105, 0.15);
+  background: #f8fafc;
+}
+
+html[data-theme='light'] .document-items-summary span,
+html[data-theme='light'] .document-item-data span,
+html[data-theme='light'] .document-items-footer {
+  color: #64748b;
+}
+
+html[data-theme='light'] .document-item-name span {
+  color: #526174;
+}
+
+html[data-theme='light'] .document-item-name p {
+  color: #64748b;
+}
+
+html[data-theme='light'] .document-item-data div {
+  background: #eef2f7;
+}
+
+html[data-theme='light'] .document-items-state {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .document-items-state strong,
+html[data-theme='light'] .document-items-error strong {
+  color: #172033;
 }

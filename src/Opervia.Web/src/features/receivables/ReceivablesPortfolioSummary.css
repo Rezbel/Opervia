@@ -13,6 +13,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .portfolio-toolbar > div:first-child p {
@@ -25,6 +26,42 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
+}
+
+.receivables-tax-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 35px;
+  padding: 3px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 9px;
+  background: #0b1422;
+}
+
+.receivables-tax-filter > span {
+  padding: 0 7px;
+  color: #748298;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.receivables-tax-filter button {
+  height: 27px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #8190a6;
+  background: transparent;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.receivables-tax-filter button.active {
+  color: #e7edff;
+  background: rgba(79, 124, 255, 0.22);
 }
 
 .portfolio-filter-panel {
@@ -294,9 +331,10 @@
 
 .portfolio-kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 10px;
   margin-top: 14px;
+  justify-content: center;
 }
 
 .portfolio-kpis article {
@@ -860,7 +898,7 @@
   }
 
   .portfolio-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 
   .portfolio-detail-grid {
@@ -944,5 +982,366 @@
 
   .portfolio-filter-actions {
     grid-column: auto;
+  }
+}
+
+html[data-theme='light'] .receivables-tax-filter {
+  border-color: rgba(71, 85, 105, 0.18);
+  background: #eef2f7;
+}
+
+html[data-theme='light'] .receivables-tax-filter > span,
+html[data-theme='light'] .receivables-tax-filter button {
+  color: #526174;
+}
+
+html[data-theme='light'] .receivables-tax-filter button.active {
+  color: #2448aa;
+  background: rgba(66, 108, 240, 0.16);
+}
+
+/* Tema claro para el panorama completo de cobranza y sus gráficas. */
+html[data-theme='light'] .portfolio-summary {
+  color: #172033;
+  border-color: #dce3ed;
+  background: radial-gradient(circle at 12% 0%, rgba(79,124,255,.07), transparent 27%), #f8fafc;
+}
+html[data-theme='light'] .portfolio-toolbar > div:first-child p,
+html[data-theme='light'] .portfolio-period-controls label,
+html[data-theme='light'] .portfolio-filter-heading small,
+html[data-theme='light'] .portfolio-filter-grid label > span,
+html[data-theme='light'] .portfolio-breakdown-row small,
+html[data-theme='light'] .portfolio-kpis small,
+html[data-theme='light'] .portfolio-reconciliation small,
+html[data-theme='light'] .portfolio-reconciliation span,
+html[data-theme='light'] .portfolio-panel-heading small,
+html[data-theme='light'] .portfolio-noncash-totals span,
+html[data-theme='light'] .portfolio-activity-list button small,
+html[data-theme='light'] .portfolio-empty-list,
+html[data-theme='light'] .portfolio-method-note,
+html[data-theme='light'] .portfolio-connect-state p,
+html[data-theme='light'] .portfolio-chart-totals { color: #64748b; }
+html[data-theme='light'] .portfolio-period-controls input {
+  color: #172033;
+  color-scheme: light;
+  border-color: #d7dee9;
+  background: #fff;
+}
+html[data-theme='light'] .portfolio-presets button { color: #526174; background: #f1f5f9; }
+html[data-theme='light'] .portfolio-presets button:hover { color: #2448aa; background: #e8efff; }
+html[data-theme='light'] .portfolio-kpis article,
+html[data-theme='light'] .portfolio-panel { border-color: #dce3ed; background: #fff; }
+html[data-theme='light'] .portfolio-reconciliation { border-color: #dce3ed; background: #fff; }
+html[data-theme='light'] .portfolio-reconciliation .negative strong { color: #b42318; }
+html[data-theme='light'] .portfolio-reconciliation .positive strong { color: #18794e; }
+html[data-theme='light'] .portfolio-panel-heading { border-color: #e5eaf1; }
+html[data-theme='light'] .portfolio-chart {
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 48px, rgba(100,116,139,.13) 49px);
+}
+html[data-theme='light'] .portfolio-chart-column > span { color: #64748b; }
+html[data-theme='light'] .portfolio-chart-totals b,
+html[data-theme='light'] .portfolio-breakdown-row b,
+html[data-theme='light'] .portfolio-noncash-totals b { color: #172033; }
+html[data-theme='light'] .portfolio-breakdown-row > span { background: #e8edf5; }
+html[data-theme='light'] .portfolio-noncash-totals span { background: #f1f5f9; }
+html[data-theme='light'] .portfolio-activity-list button { border-color: #e5eaf1; }
+html[data-theme='light'] .portfolio-activity-list button:hover { background: #f5f8ff; }
+html[data-theme='light'] .portfolio-activity-list.payments button b { color: #18794e; }
+html[data-theme='light'] .portfolio-activity-list.cancellations button b { color: #b42318; }
+html[data-theme='light'] .portfolio-method-note { border-color: #cfe9dc; background: #f2faf5; }
+html[data-theme='light'] .portfolio-method-note strong { color: #334155; }
+html[data-theme='light'] .portfolio-method-note > svg { color: #18794e; }
+html[data-theme='light'] .portfolio-connect-state > button { color: #2448aa; border-color: #cbd8f8; background: #edf2ff; }
+
+.portfolio-invoices {
+  margin-top: 15px;
+}
+
+.portfolio-invoice-tools {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+}
+
+.portfolio-invoice-search {
+  width: min(340px, 42vw);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--panel-soft);
+}
+
+.portfolio-invoice-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+}
+
+.portfolio-invoice-search input::placeholder { color: var(--muted); }
+.portfolio-invoice-search svg { flex-shrink:0; }
+.portfolio-invoice-search button { display:grid; place-items:center; flex-shrink:0; width:24px; height:24px; border:0; border-radius:5px; background:transparent; color:var(--muted); cursor:pointer; }
+.portfolio-invoice-search button:hover { color:var(--text); background:var(--border); }
+.portfolio-invoice-search-help { margin:0; padding:9px 16px; color:var(--muted); font-size:12px; border-bottom:1px solid var(--border); }
+.portfolio-invoice-loading { min-height:150px; }
+
+.portfolio-invoice-search-status {
+  color: #7092ff;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+html[data-theme='light'] .portfolio-invoice-search-status { color: #315bd1; }
+
+.portfolio-invoice-table-wrap {
+  overflow-x: auto;
+}
+
+.portfolio-invoice-table-head,
+.portfolio-invoice-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(220px, 1.7fr) 95px 120px 135px 115px;
+  min-width: 945px;
+  align-items: center;
+  gap: 14px;
+}
+
+.portfolio-invoice-table-head {
+  padding: 10px 15px;
+  color: #75839a;
+  border-bottom: 1px solid rgba(148, 163, 184, .12);
+  background: rgba(5, 11, 20, .22);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.portfolio-invoice-row {
+  width: 100%;
+  padding: 11px 15px;
+  border: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, .08);
+  color: #b7c3d5;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.portfolio-invoice-row:hover,
+.portfolio-invoice-row.selected {
+  background: rgba(79, 124, 255, .1);
+}
+
+.portfolio-invoice-row.selected {
+  box-shadow: inset 3px 0 0 #4f7cff;
+}
+
+.portfolio-invoice-row.paid.selected {
+  background: rgba(44, 190, 127, .12);
+  box-shadow: inset 3px 0 0 #35bd83;
+}
+
+.portfolio-invoice-row.due.selected {
+  background: rgba(79, 124, 255, .12);
+  box-shadow: inset 3px 0 0 #4f7cff;
+}
+
+.portfolio-invoice-row.overdue.selected {
+  background: rgba(245, 158, 11, .13);
+  box-shadow: inset 3px 0 0 #f0a52b;
+}
+
+.portfolio-invoice-row.cancelled.selected {
+  background: rgba(239, 68, 68, .12);
+  box-shadow: inset 3px 0 0 #ef5350;
+}
+
+.portfolio-invoice-row > strong,
+.portfolio-invoice-customer > strong {
+  overflow: hidden;
+  color: #e4ebf5;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-invoice-customer {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.portfolio-invoice-customer > strong {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.portfolio-invoice-customer small {
+  color: #78879d;
+  font-size: 8px;
+}
+
+.portfolio-invoice-row > span:not(.portfolio-invoice-customer):not(.portfolio-invoice-status) {
+  font-size: 9px;
+}
+
+.portfolio-invoice-status {
+  justify-self: start;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.portfolio-invoice-status.paid { color: #55d6a0; background: rgba(44, 190, 127, .13); }
+.portfolio-invoice-status.due { color: #86a8ff; background: rgba(79, 124, 255, .15); }
+.portfolio-invoice-status.overdue { color: #f7c96c; background: rgba(245, 158, 11, .15); }
+.portfolio-invoice-status.cancelled { color: #ff8e8e; background: rgba(239, 68, 68, .14); }
+
+.portfolio-invoice-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 15px;
+  color: #7f8ea4;
+  font-size: 9px;
+}
+
+.portfolio-invoice-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.portfolio-invoice-page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 5px;
+  white-space: nowrap;
+}
+
+.portfolio-invoice-page-size select {
+  height: 29px;
+  padding: 0 24px 0 8px;
+  border: 1px solid rgba(148, 163, 184, .17);
+  border-radius: 7px;
+  outline: 0;
+  color: #c0cbe0;
+  background: #111c2c;
+  font: inherit;
+  cursor: pointer;
+}
+
+.portfolio-invoice-pagination button {
+  padding: 6px 10px;
+  border: 1px solid rgba(148, 163, 184, .17);
+  border-radius: 7px;
+  color: #c0cbe0;
+  background: rgba(255, 255, 255, .035);
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.portfolio-invoice-pagination button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+html[data-theme='light'] .portfolio-invoice-table-head {
+  color: #64748b;
+  border-color: rgba(71, 85, 105, .14);
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .portfolio-invoice-row {
+  color: #475569;
+  border-color: rgba(71, 85, 105, .12);
+}
+
+html[data-theme='light'] .portfolio-invoice-row:hover,
+html[data-theme='light'] .portfolio-invoice-row.selected {
+  background: rgba(66, 108, 240, .08);
+}
+
+html[data-theme='light'] .portfolio-invoice-row.paid.selected {
+  background: rgba(34, 197, 94, .1);
+  box-shadow: inset 3px 0 0 #16845a;
+}
+
+html[data-theme='light'] .portfolio-invoice-row.due.selected {
+  background: rgba(66, 108, 240, .1);
+  box-shadow: inset 3px 0 0 #315bd1;
+}
+
+html[data-theme='light'] .portfolio-invoice-row.overdue.selected {
+  background: rgba(245, 158, 11, .12);
+  box-shadow: inset 3px 0 0 #c47b00;
+}
+
+html[data-theme='light'] .portfolio-invoice-row.cancelled.selected {
+  background: rgba(239, 68, 68, .1);
+  box-shadow: inset 3px 0 0 #c93636;
+}
+
+html[data-theme='light'] .portfolio-invoice-row > strong,
+html[data-theme='light'] .portfolio-invoice-customer > strong {
+  color: #172033;
+}
+
+html[data-theme='light'] .portfolio-invoice-customer small,
+html[data-theme='light'] .portfolio-invoice-pagination {
+  color: #64748b;
+}
+
+html[data-theme='light'] .portfolio-invoice-status.paid { color: #18794e; background: #e8f7ef; }
+html[data-theme='light'] .portfolio-invoice-status.due { color: #2448aa; background: #eaf0ff; }
+html[data-theme='light'] .portfolio-invoice-status.overdue { color: #9a5b00; background: #fff3d6; }
+html[data-theme='light'] .portfolio-invoice-status.cancelled { color: #b42318; background: #fff0ef; }
+
+html[data-theme='light'] .portfolio-invoice-pagination button {
+  color: #334155;
+  border-color: rgba(71, 85, 105, .2);
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .portfolio-invoice-page-size select {
+  color: #334155;
+  border-color: rgba(71, 85, 105, .2);
+  background: #fff;
+  color-scheme: light;
+}
+
+@media (max-width: 620px) {
+  .portfolio-invoices .portfolio-panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .portfolio-invoice-tools,
+  .portfolio-invoice-search {
+    width: 100%;
+  }
+
+  .portfolio-invoice-pagination,
+  .portfolio-invoice-page-actions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

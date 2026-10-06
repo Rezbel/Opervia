@@ -1,0 +1,862 @@
+{
+  "isSuccessful": true,
+  "message": "Productos adquiridos del cliente, conciliados con sus facturas de SAE.",
+  "periodStart": "2026-09-07",
+  "periodEnd": "2026-10-06",
+  "customerCode": "520",
+  "customerName": "DISTRIBUIDORA DE QUIMICOS HERGO",
+  "salesWithoutTax": 108110.77,
+  "salesWithTax": 125408.49,
+  "invoiceCount": 9,
+  "productCount": 38,
+  "brands": [
+    {
+      "brand": "SPINREACT",
+      "salesWithoutTax": 64453.39,
+      "salesWithTax": 74765.93,
+      "products": [
+        {
+          "productCode": "SPIN 1205010",
+          "productName": "KIT ANTIGENOS FEBRILES C/CONTROLES 6 X 1",
+          "productLine": "SPS10",
+          "productLineName": "SEROLOGIA FEBRILES",
+          "unit": "pz",
+          "quantity": 10,
+          "averageUnitPrice": 790.45,
+          "salesWithoutTax": 7904.54,
+          "salesWithTax": 9169.26,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 10,
+              "salesWithoutTax": 7904.54,
+              "salesWithTax": 9169.26
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 43100",
+          "productName": "HEMOGLOBINA GLICOSILADA 1X30/1X10/1X125M",
+          "productLine": "SP12",
+          "productLineName": "TURBIDIMETRIA SPIN",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 5997,
+          "salesWithoutTax": 5997,
+          "salesWithTax": 6956.52,
+          "lastPurchaseDate": "2026-09-22",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006243",
+              "elaborationDate": "2026-09-22",
+              "quantity": 1,
+              "salesWithoutTax": 5997,
+              "salesWithTax": 6956.52
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1001095",
+          "productName": "HDL-COLESTEROL 4 X 5 ML",
+          "productLine": "SPQ02",
+          "productLineName": "QUIMICA CLINICA - L",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 942,
+          "salesWithoutTax": 4710,
+          "salesWithTax": 5463.6,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 5,
+              "salesWithoutTax": 4710,
+              "salesWithTax": 5463.6
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700021",
+          "productName": "ANTI-D IgG+IgM",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 15,
+          "averageUnitPrice": 298.27,
+          "salesWithoutTax": 4474.11,
+          "salesWithTax": 5189.97,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 15,
+              "salesWithoutTax": 4474.11,
+              "salesWithTax": 5189.97
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709201",
+          "productName": "APTT  R1 5X4 R2 5X4 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 1173,
+          "salesWithoutTax": 3519,
+          "salesWithTax": 4082.04,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 3519,
+              "salesWithTax": 4082.04
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200201",
+          "productName": "FACTOR REUMATOIDE 50 PBAS",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 606,
+          "salesWithoutTax": 3030,
+          "salesWithTax": 3514.8,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 5,
+              "salesWithoutTax": 3030,
+              "salesWithTax": 3514.8
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41022",
+          "productName": "COLESTEROL 2X100 ML",
+          "productLine": "SPQ02",
+          "productLineName": "QUIMICA CLINICA - L",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 924,
+          "salesWithoutTax": 2772,
+          "salesWithTax": 3215.52,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 2772,
+              "salesWithTax": 3215.52
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41002",
+          "productName": "ACIDO URICO 2X100 ML",
+          "productLine": "SPQ01",
+          "productLineName": "QUIMICA CLINICA -S",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 876,
+          "salesWithoutTax": 2628,
+          "salesWithTax": 3048.48,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 2628,
+              "salesWithTax": 3048.48
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41023",
+          "productName": "L D L - COLESTEROL R1 30 ML /R2 10 ML",
+          "productLine": "SPQ02",
+          "productLineName": "QUIMICA CLINICA - L",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2589,
+          "salesWithoutTax": 2589,
+          "salesWithTax": 3003.24,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 2589,
+              "salesWithTax": 3003.24
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200301",
+          "productName": "PROTEINA C REACTIVA 50 PBAS",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 777,
+          "salesWithoutTax": 2331,
+          "salesWithTax": 2703.96,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 2331,
+              "salesWithTax": 2703.96
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1001260",
+          "productName": "LDH 20 X 3 ML",
+          "productLine": "SPQ03",
+          "productLineName": "QUIMICA CLINICA - E",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1152,
+          "salesWithoutTax": 2304,
+          "salesWithTax": 2672.64,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1152,
+              "salesWithTax": 1336.32
+            },
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 1152,
+              "salesWithTax": 1336.32
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41290",
+          "productName": "g-GT R1 60 ML - R2 15 ML",
+          "productLine": "SPQ03",
+          "productLineName": "QUIMICA CLINICA - E",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1107,
+          "salesWithoutTax": 2214,
+          "salesWithTax": 2568.24,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1107,
+              "salesWithTax": 1284.12
+            },
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 1107,
+              "salesWithTax": 1284.12
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1001111",
+          "productName": "CREATININA 2X150 ML",
+          "productLine": "SPQ01",
+          "productLineName": "QUIMICA CLINICA -S",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 732,
+          "salesWithoutTax": 2196,
+          "salesWithTax": 2547.36,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 2196,
+              "salesWithTax": 2547.36
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700002",
+          "productName": "ANTI-A MONOCLONAL 10 ML",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 15,
+          "averageUnitPrice": 138.23,
+          "salesWithoutTax": 2073.38,
+          "salesWithTax": 2405.12,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 15,
+              "salesWithoutTax": 2073.38,
+              "salesWithTax": 2405.12
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700004",
+          "productName": "ANTI-B MONOCLONAL 10 ML",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 15,
+          "averageUnitPrice": 138.23,
+          "salesWithoutTax": 2073.38,
+          "salesWithTax": 2405.12,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 15,
+              "salesWithoutTax": 2073.38,
+              "salesWithTax": 2405.12
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41201",
+          "productName": "a-AMILASA 20 X 2 ML",
+          "productLine": "SPQ03",
+          "productLineName": "QUIMICA CLINICA - E",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2037,
+          "salesWithoutTax": 2037,
+          "salesWithTax": 2362.92,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 2037,
+              "salesWithTax": 2362.92
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1002015",
+          "productName": "SPINCHEM 1 HUMAN SOURCE 4X5ML NORMAL",
+          "productLine": "SP05",
+          "productLineName": "CONTROL DE CALIDAD",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1677,
+          "salesWithoutTax": 1677,
+          "salesWithTax": 1945.32,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1677,
+              "salesWithTax": 1945.32
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1002025",
+          "productName": "SPINCHEM 2 HUMAN SOURCE 4X5ML PATOLÓGICO",
+          "productLine": "SP05",
+          "productLineName": "CONTROL DE CALIDAD",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1677,
+          "salesWithoutTax": 1677,
+          "salesWithTax": 1945.32,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1677,
+              "salesWithTax": 1945.32
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41001",
+          "productName": "ACIDO URICO 2X250ML",
+          "productLine": "SPQ01",
+          "productLineName": "QUIMICA CLINICA -S",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1605,
+          "salesWithoutTax": 1605,
+          "salesWithTax": 1861.8,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1605,
+              "salesWithTax": 1861.8
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1705110",
+          "productName": "LISANTE SPINCELL 3  1X1000  ML",
+          "productLine": "SP13",
+          "productLineName": "HEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1566,
+          "salesWithoutTax": 1566,
+          "salesWithTax": 1816.56,
+          "lastPurchaseDate": "2026-09-10",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006195",
+              "elaborationDate": "2026-09-10",
+              "quantity": 1,
+              "salesWithoutTax": 1566,
+              "salesWithTax": 1816.56
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41021",
+          "productName": "COLESTEROL 2 X 250 ML",
+          "productLine": "SPQ02",
+          "productLineName": "QUIMICA CLINICA - L",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1296,
+          "salesWithoutTax": 1296,
+          "salesWithTax": 1503.36,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 1296,
+              "salesWithTax": 1503.36
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 41220",
+          "productName": "LDH R1 60 ML - R2 15 ML",
+          "productLine": "SPQ03",
+          "productLineName": "QUIMICA CLINICA - E",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 936,
+          "salesWithoutTax": 936,
+          "salesWithTax": 1085.76,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 936,
+              "salesWithTax": 1085.76
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1001241",
+          "productName": "TIBC / CFTH  100 SATURACIONES",
+          "productLine": "SPQ04",
+          "productLineName": "QUIMICA CLINICA - I",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 891,
+          "salesWithoutTax": 891,
+          "salesWithTax": 1033.56,
+          "lastPurchaseDate": "2026-09-30",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081011",
+              "elaborationDate": "2026-09-30",
+              "quantity": 1,
+              "salesWithoutTax": 891,
+              "salesWithTax": 1033.56
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1709222",
+          "productName": "TP  4X4 ML",
+          "productLine": "SP07",
+          "productLineName": "COAGULACION",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 837,
+          "salesWithoutTax": 837,
+          "salesWithTax": 970.92,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 837,
+              "salesWithTax": 970.92
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700006",
+          "productName": "ANTI A+B MONOCLONAL",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 4,
+          "averageUnitPrice": 150.0,
+          "salesWithoutTax": 599.98,
+          "salesWithTax": 695.98,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 4,
+              "salesWithoutTax": 599.98,
+              "salesWithTax": 695.98
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1200406",
+          "productName": "VDRL 250 PBAS",
+          "productLine": "SPS09",
+          "productLineName": "SEROLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 516,
+          "salesWithoutTax": 516,
+          "salesWithTax": 598.56,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081057",
+              "elaborationDate": "2026-10-02",
+              "quantity": 1,
+              "salesWithoutTax": 516,
+              "salesWithTax": 598.56
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Sin marca",
+      "salesWithoutTax": 26082.25,
+      "salesWithTax": 30255.41,
+      "products": [
+        {
+          "productCode": "BESE VC-003-25",
+          "productName": "DENGUE IgG/IgM Y NS1 COMBO C/25 PLACAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 16,
+          "averageUnitPrice": 1326,
+          "salesWithoutTax": 21216,
+          "salesWithTax": 24610.56,
+          "lastPurchaseDate": "2026-09-07",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080652",
+              "elaborationDate": "2026-09-07",
+              "quantity": 16,
+              "salesWithoutTax": 21216,
+              "salesWithTax": 24610.56
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-023-25",
+          "productName": "HIV 1+2 AB C/25 PLACAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 497.25,
+          "salesWithoutTax": 2486.25,
+          "salesWithTax": 2884.05,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081058",
+              "elaborationDate": "2026-10-02",
+              "quantity": 5,
+              "salesWithoutTax": 2486.25,
+              "salesWithTax": 2884.05
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-021-25",
+          "productName": "HIV 1.2/HIV P24 COMBO C/25 PLACAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 884,
+          "salesWithoutTax": 1768,
+          "salesWithTax": 2050.88,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081058",
+              "elaborationDate": "2026-10-02",
+              "quantity": 2,
+              "salesWithoutTax": 1768,
+              "salesWithTax": 2050.88
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-019-25",
+          "productName": "HEPATITIS B C/25 TIRAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 306,
+          "salesWithoutTax": 612,
+          "salesWithTax": 709.92,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081058",
+              "elaborationDate": "2026-10-02",
+              "quantity": 2,
+              "salesWithoutTax": 612,
+              "salesWithTax": 709.92
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "MAGLUMI",
+      "salesWithoutTax": 12915.13,
+      "salesWithTax": 14981.55,
+      "products": [
+        {
+          "productCode": "MAGL 130617501",
+          "productName": "MAGLUMI ANTI  CCP 50 PRUEBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 3858.09,
+          "salesWithoutTax": 3858.09,
+          "salesWithTax": 4475.38,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 3858.09,
+              "salesWithTax": 4475.38
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130601031",
+          "productName": "CA 125 #50 PRUEBAS MAGLUMI",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 3380.88,
+          "salesWithoutTax": 3380.88,
+          "salesWithTax": 3921.82,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 3380.88,
+              "salesWithTax": 3921.82
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130601035M",
+          "productName": "F-PSA #50 PRUEBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2338.66,
+          "salesWithoutTax": 2338.66,
+          "salesWithTax": 2712.85,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 2338.66,
+              "salesWithTax": 2712.85
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130653006M",
+          "productName": "TG (TIROGLOBULINA) 2G 50 PBAS",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2147.84,
+          "salesWithoutTax": 2147.84,
+          "salesWithTax": 2491.49,
+          "lastPurchaseDate": "2026-09-29",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080956",
+              "elaborationDate": "2026-09-29",
+              "quantity": 1,
+              "salesWithoutTax": 2147.84,
+              "salesWithTax": 2491.49
+            }
+          ]
+        },
+        {
+          "productCode": "MAGL 130601032",
+          "productName": "CEA #50 PRUEBAS MAGLUMI",
+          "productLine": "MAR",
+          "productLineName": "REACTIVO MAGLUMI",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 1189.66,
+          "salesWithoutTax": 1189.66,
+          "salesWithTax": 1380.01,
+          "lastPurchaseDate": "2026-09-18",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-080837",
+              "elaborationDate": "2026-09-18",
+              "quantity": 1,
+              "salesWithoutTax": 1189.66,
+              "salesWithTax": 1380.01
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "BESELTA",
+      "salesWithoutTax": 3400.0,
+      "salesWithTax": 3944.0,
+      "products": [
+        {
+          "productCode": "BESE VC-007-25",
+          "productName": "PRUEBA DE H. Pylori Ab C/25 PBS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 531.25,
+          "salesWithoutTax": 2656.25,
+          "salesWithTax": 3081.25,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081058",
+              "elaborationDate": "2026-10-02",
+              "quantity": 5,
+              "salesWithoutTax": 2656.25,
+              "salesWithTax": 3081.25
+            }
+          ]
+        },
+        {
+          "productCode": "BESE VC-019-10",
+          "productName": "HBsAg  BESELYA C/10 PLACAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 5,
+          "averageUnitPrice": 148.75,
+          "salesWithoutTax": 743.75,
+          "salesWithTax": 862.75,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081058",
+              "elaborationDate": "2026-10-02",
+              "quantity": 5,
+              "salesWithoutTax": 743.75,
+              "salesWithTax": 862.75
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "HEMOVIL",
+      "salesWithoutTax": 1260,
+      "salesWithTax": 1461.6,
+      "products": [
+        {
+          "productCode": "HEMOVIL",
+          "productName": "SANGRE DE CARNERO DESFIBRINADA EST 50ML",
+          "productLine": "HEMOV",
+          "productLineName": "HEMOVIL",
+          "unit": "pz",
+          "quantity": 3,
+          "averageUnitPrice": 420,
+          "salesWithoutTax": 1260,
+          "salesWithTax": 1461.6,
+          "lastPurchaseDate": "2026-10-02",
+          "purchases": [
+            {
+              "invoiceNumber": "F-QR-081059",
+              "elaborationDate": "2026-10-02",
+              "quantity": 3,
+              "salesWithoutTax": 1260,
+              "salesWithTax": 1461.6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elapsedMilliseconds": 72
+}

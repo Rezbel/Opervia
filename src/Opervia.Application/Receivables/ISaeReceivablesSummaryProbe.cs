@@ -10,6 +10,9 @@ public interface ISaeReceivablesSummaryProbe
         DateOnly periodStart,
         DateOnly periodEnd,
         SaeReceivablesSummaryFilter filters,
-        CancellationToken cancellationToken = default
+        int invoicePage,
+        int invoicePageSize,
+        CancellationToken cancellationToken = default,
+        bool includeInvoices = true
     );
 }

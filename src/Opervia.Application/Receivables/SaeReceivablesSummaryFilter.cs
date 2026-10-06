@@ -9,7 +9,8 @@ public sealed record SaeReceivablesSummaryFilter(
     int? WarehouseNumber = null,
     string? InvoiceStatus = null,
     string? FiscalPaymentMethod = null,
-    int? PaymentConceptNumber = null
+    int? PaymentConceptNumber = null,
+    string? InvoiceSearch = null
 )
 {
     public bool HasInvoiceFilters =>

@@ -1,5 +1,19 @@
 # Opervia
 
+## Arranque en Windows
+
+Haz doble clic en `Iniciar Opervia.cmd`. El iniciador compila la API, inicia
+los servicios y abre http://localhost:5173/. Los registros quedan en `.run/`.
+También puedes ejecutar `scripts/start-local.ps1` desde PowerShell.
+
+En Development, si `OperviaStorage:ConnectionString` no está configurada,
+los perfiles y movimientos manuales se guardan en `src/Opervia.Api/App_Data/`.
+Las contraseñas se cifran con .NET Data Protection. Conserva también las claves
+Data Protection del usuario al respaldar esos datos. Al configurar MySQL se
+usa el almacenamiento original; los datos locales no se migran automáticamente.
+Ollama es opcional para abrir la interfaz; la IA requiere el servicio y el modelo
+`qwen3:4b`. Las consultas a SAE requieren configurar tu servidor Firebird.
+
 Opervia reconstruye flujos de venta de Aspel SAE mediante una API .NET y
 una interfaz React. La solución separa dominio, aplicación, infraestructura,
 API, worker y pruebas.

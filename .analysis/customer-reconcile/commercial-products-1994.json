@@ -1,0 +1,246 @@
+{
+  "isSuccessful": true,
+  "message": "Productos adquiridos del cliente, conciliados con sus facturas de SAE.",
+  "periodStart": "2026-09-07",
+  "periodEnd": "2026-10-06",
+  "customerCode": "1994",
+  "customerName": "XALAPA MOSTRADOR",
+  "salesWithoutTax": 16698.75,
+  "salesWithTax": 18591.03,
+  "invoiceCount": 7,
+  "productCount": 9,
+  "brands": [
+    {
+      "brand": "WONDFO",
+      "salesWithoutTax": 6576.75,
+      "salesWithTax": 7629.03,
+      "products": [
+        {
+          "productCode": "WOND W207",
+          "productName": "HBA1C HEMOGLOBINA CUANTITATIVA",
+          "productLine": "FIN",
+          "productLineName": "FINECARE",
+          "unit": "pz",
+          "quantity": 2,
+          "averageUnitPrice": 1829,
+          "salesWithoutTax": 3658,
+          "salesWithTax": 4243.28,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006228",
+              "elaborationDate": "2026-09-17",
+              "quantity": 2,
+              "salesWithoutTax": 3658,
+              "salesWithTax": 4243.28
+            }
+          ]
+        },
+        {
+          "productCode": "WOND W248",
+          "productName": "TESTOSTERONA KIT DE PRUEBA CUANTITATIVAS",
+          "productLine": "FIN",
+          "productLineName": "FINECARE",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 2918.75,
+          "salesWithoutTax": 2918.75,
+          "salesWithTax": 3385.75,
+          "lastPurchaseDate": "2026-09-08",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006182",
+              "elaborationDate": "2026-09-08",
+              "quantity": 1,
+              "salesWithoutTax": 2918.75,
+              "salesWithTax": 3385.75
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "ACQUADPIU",
+      "salesWithoutTax": 4872.0,
+      "salesWithTax": 4872.0,
+      "products": [
+        {
+          "productCode": "ACQU 20",
+          "productName": "AGUA DESTILADA GARRAFA 20L",
+          "productLine": "VARIO",
+          "productLineName": "VARIOS",
+          "unit": "pz",
+          "quantity": 14,
+          "averageUnitPrice": 324.8,
+          "salesWithoutTax": 4547.2,
+          "salesWithTax": 4547.2,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006295",
+              "elaborationDate": "2026-10-05",
+              "quantity": 9,
+              "salesWithoutTax": 2923.2,
+              "salesWithTax": 2923.2
+            },
+            {
+              "invoiceNumber": "F-XA-006232",
+              "elaborationDate": "2026-09-18",
+              "quantity": 5,
+              "salesWithoutTax": 1624,
+              "salesWithTax": 1624
+            }
+          ]
+        },
+        {
+          "productCode": "ACQU 22",
+          "productName": "AGUA TRIDESTILADA GARRAFA 20L",
+          "productLine": "VARIO",
+          "productLineName": "VARIOS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 324.8,
+          "salesWithoutTax": 324.8,
+          "salesWithTax": 324.8,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006295",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 324.8,
+              "salesWithTax": 324.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "LUX LAB",
+      "salesWithoutTax": 4500,
+      "salesWithTax": 5220,
+      "products": [
+        {
+          "productCode": "LUXL V",
+          "productName": "AGITADOR EN PLACA LUX LAB",
+          "productLine": "EQ",
+          "productLineName": "EQUIPOS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 4500,
+          "salesWithoutTax": 4500,
+          "salesWithTax": 5220,
+          "lastPurchaseDate": "2026-10-05",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006294",
+              "elaborationDate": "2026-10-05",
+              "quantity": 1,
+              "salesWithoutTax": 4500,
+              "salesWithTax": 5220
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "SPINREACT",
+      "salesWithoutTax": 580,
+      "salesWithTax": 672.8,
+      "products": [
+        {
+          "productCode": "SPIN 52010",
+          "productName": "TIRAS REACTIVAS MULTIPARAMETRICAS 100 TI",
+          "productLine": "SPP11",
+          "productLineName": "PRUEBAS RAPIDAS",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 220,
+          "salesWithoutTax": 220,
+          "salesWithTax": 255.2,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006226",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 220,
+              "salesWithTax": 255.2
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700002",
+          "productName": "ANTI-A MONOCLONAL 10 ML",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 180,
+          "salesWithoutTax": 180,
+          "salesWithTax": 208.8,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006226",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 180,
+              "salesWithTax": 208.8
+            }
+          ]
+        },
+        {
+          "productCode": "SPIN 1700004",
+          "productName": "ANTI-B MONOCLONAL 10 ML",
+          "productLine": "SP08",
+          "productLineName": "INMUNOHEMATOLOGIA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 180,
+          "salesWithoutTax": 180,
+          "salesWithTax": 208.8,
+          "lastPurchaseDate": "2026-09-17",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006226",
+              "elaborationDate": "2026-09-17",
+              "quantity": 1,
+              "salesWithoutTax": 180,
+              "salesWithTax": 208.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "BESELTA",
+      "salesWithoutTax": 170,
+      "salesWithTax": 197.2,
+      "products": [
+        {
+          "productCode": "BESE VC-017-10",
+          "productName": "SIFILIS BESELTA C/10 PLACAS",
+          "productLine": "BESPR",
+          "productLineName": "BESELTA PBA RAPIDA",
+          "unit": "pz",
+          "quantity": 1,
+          "averageUnitPrice": 170,
+          "salesWithoutTax": 170,
+          "salesWithTax": 197.2,
+          "lastPurchaseDate": "2026-09-30",
+          "purchases": [
+            {
+              "invoiceNumber": "F-XA-006275",
+              "elaborationDate": "2026-09-30",
+              "quantity": 1,
+              "salesWithoutTax": 170,
+              "salesWithTax": 197.2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elapsedMilliseconds": 74
+}

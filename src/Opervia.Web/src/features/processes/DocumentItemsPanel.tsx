@@ -1,6 +1,5 @@
-﻿import {
+import {
   Boxes,
-  Hash,
   Package,
   Store,
   X,
@@ -8,12 +7,14 @@
 
 import type {
   SaeDocumentItemsResult,
+  SaeSalesFlowNode,
   TaxDisplayMode,
 } from '../../types/sae';
 
 import './DocumentItemsPanel.css';
 
 interface DocumentItemsPanelProps {
+  document?: SaeSalesFlowNode | null;
   result: SaeDocumentItemsResult | null;
   isLoading: boolean;
   error: string | null;
@@ -47,6 +48,7 @@ function formatQuantity(
 }
 
 export function DocumentItemsPanel({
+  document,
   result,
   isLoading,
   error,
@@ -81,6 +83,15 @@ export function DocumentItemsPanel({
         </button>
       </header>
 
+      {document && <section className="document-context" aria-label="Información del documento">
+        <h3>{document.documentNumber}</h3>
+        <dl>
+          <div><dt>Cliente</dt><dd>{document.customerName || 'Nombre no disponible'} · {document.customerCode}</dd></div>
+          <div><dt>Vendedor (clave)</dt><dd>{document.salespersonCode || 'No disponible'}</dd></div>
+          <div><dt>Fecha</dt><dd>{document.documentDate?.slice(0, 10) || 'No disponible'}</dd></div>
+          <div><dt>Almacén de cabecera</dt><dd>{document.warehouseNumber ?? 'No disponible'}</dd></div>
+        </dl>
+      </section>}
       {isLoading && (
         <div className="document-items-state">
           <div className="document-items-spinner" />
@@ -111,32 +122,21 @@ export function DocumentItemsPanel({
             </article>
 
             <article>
-              <span>Cantidad total</span>
-              <strong>
-                {formatQuantity(result.totalQuantity)}
-              </strong>
+              <span>Total completo sin IVA</span>
+              <strong>{formatCurrency(document?.amountBeforeTax ?? result.totalAmount)}</strong>
             </article>
 
             <article>
-              <span>
-                {result.isTruncated
-                  ? 'Subtotal mostrado'
-                  : 'Subtotal'}
-              </span>
-              <strong>
-                {formatCurrency(
-                  taxDisplayMode === 'withTax'
-                    ? result.totalAmountWithTax
-                    : result.totalAmount,
-                )}
-              </strong>
+              <span>Total completo con IVA</span>
+              <strong>{formatCurrency(document?.amount ?? result.totalAmountWithTax)}</strong>
             </article>
+
           </section>
 
           {result.isTruncated && (
             <div className="document-items-warning" role="status">
-              {result.message} Los totales corresponden únicamente
-              a las partidas visibles.
+              {result.message} El listado muestra únicamente
+              las partidas visibles; los totales generales están arriba.
             </div>
           )}
 
@@ -188,7 +188,7 @@ export function DocumentItemsPanel({
                   </div>
 
                   <div>
-                    <span>Precio</span>
+                    <span>Precio por producto</span>
                     <strong>
                       {formatCurrency(
                         taxDisplayMode === 'withTax'
@@ -196,6 +196,16 @@ export function DocumentItemsPanel({
                           : item.price,
                       )}
                     </strong>
+                  </div>
+
+                  <div>
+                    <span>Descuentos</span>
+                    <strong>{[item.discount1, item.discount2, item.discount3].filter((value): value is number => value !== null && value !== 0).join(' / ') || '0'}%</strong>
+                  </div>
+
+                  <div>
+                    <span>IVA</span>
+                    <strong>{formatCurrency(item.taxAmount)}</strong>
                   </div>
 
                   <div>
@@ -207,15 +217,10 @@ export function DocumentItemsPanel({
                   </div>
 
                   <div>
-                    <span>Movimiento</span>
-                    <strong>
-                      <Hash size={13} />
-                      {item.movementNumber &&
-                      item.movementNumber > 0
-                        ? item.movementNumber
-                        : 'Sin movimiento'}
-                    </strong>
+                    <span>Total partida con IVA</span>
+                    <strong>{formatCurrency(item.lineTotalWithTax)}</strong>
                   </div>
+
                 </div>
 
                 {item.lotLink !== null &&

@@ -14,6 +14,9 @@ public sealed record SaeSalesFlowSummaryResult(
     int BrokenLinkCount,
     int RecentQuotationWithoutOrderCount,
     IReadOnlyList<SaeSalesFlowDocumentListItem> Documents,
+    int DocumentPage,
+    int DocumentPageSize,
+    int TotalDocumentCount,
     long ElapsedMilliseconds
 );
 
@@ -22,6 +25,7 @@ public sealed record SaeSalesFlowDocumentListItem(
     string StageLabel,
     string DocumentNumber,
     string CustomerCode,
+    string? CustomerName,
     string? SellerCode,
     DateTime DocumentDate,
     bool IsCancelled,

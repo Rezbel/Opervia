@@ -1,4 +1,4 @@
-﻿using Opervia.Application.Connections;
+using Opervia.Application.Connections;
 using System.Threading.RateLimiting;
 using Opervia.Api.Configuration;
 using Opervia.Api.Filters;
@@ -10,6 +10,7 @@ using Opervia.Application.Flows;
 using Opervia.Application.Receivables;
 using Opervia.Application.Profitability;
 using Opervia.Application.Inventory;
+using Opervia.Application.Commercial;
 using Opervia.Application.Schema;
 using Opervia.Application.Tables;
 using Opervia.Infrastructure.Firebird;
@@ -52,13 +53,18 @@ builder.Services.AddHttpClient<IOperviaAiAssistant, OllamaOperviaAssistant>(
     client => client.Timeout = TimeSpan.FromMinutes(3));
 builder.Services.AddOptions<MySqlStorageOptions>()
     .BindConfiguration(MySqlStorageOptions.SectionName);
-builder.Services.AddScoped<
-    ISaeConnectionProfileStore,
-    MySqlSaeConnectionProfileStore>();
-builder.Services.AddScoped<
-    IManualProfitabilityStore,
-    MySqlManualProfitabilityStore>();
-
+if (builder.Environment.IsDevelopment() &&
+    string.IsNullOrWhiteSpace(builder.Configuration[$"{MySqlStorageOptions.SectionName}:ConnectionString"]))
+{
+    builder.Services.AddSingleton<LocalDevelopmentStore>();
+    builder.Services.AddSingleton<ISaeConnectionProfileStore>(sp => sp.GetRequiredService<LocalDevelopmentStore>());
+    builder.Services.AddSingleton<IManualProfitabilityStore>(sp => sp.GetRequiredService<LocalDevelopmentStore>());
+}
+else
+{
+    builder.Services.AddScoped<ISaeConnectionProfileStore, MySqlSaeConnectionProfileStore>();
+    builder.Services.AddScoped<IManualProfitabilityStore, MySqlManualProfitabilityStore>();
+}
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode =
@@ -122,9 +128,11 @@ builder.Services.AddScoped<
     FirebirdSaeDocumentLookup
 >();
 
+builder.Services.AddScoped<ISaeDocumentLinksReader, FirebirdSaeDocumentLinksReader>();
+
 builder.Services.AddScoped<
     ISaeSalesFlowBuilder,
-    SaeSalesFlowBuilder
+    SaeSalesGraphBuilder
 >();
 
 builder.Services.AddScoped<
@@ -140,6 +148,11 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     ISaeCustomerLookup,
     FirebirdSaeCustomerLookup
+>();
+
+builder.Services.AddScoped<
+    ISaeCustomerPortfolioProbe,
+    FirebirdSaeCustomerPortfolioProbe
 >();
 
 builder.Services.AddScoped<
@@ -161,6 +174,8 @@ builder.Services.AddScoped<
     ISaeReceivablesSummaryProbe,
     FirebirdSaeReceivablesSummaryProbe
 >();
+builder.Services.AddScoped<ISaeReceivableInvoiceListingProbe, FirebirdSaeReceivableInvoiceListingProbe>();
+builder.Services.AddScoped<ISaeReceivableInvoiceAccountProbe, FirebirdSaeReceivableInvoiceAccountProbe>();
 
 builder.Services.AddScoped<
     ISaeProfitabilityProbe,
@@ -170,6 +185,11 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     ISaeInventoryAnalyticsProbe,
     FirebirdSaeInventoryAnalyticsProbe
+>();
+
+builder.Services.AddScoped<
+    ISaeCommercialProbe,
+    FirebirdSaeCommercialProbe
 >();
 
 builder.Services.AddScoped<
@@ -196,7 +216,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
 app.UseCors("OperviaWeb");
 
@@ -208,3 +228,8 @@ app.MapControllers()
     .RequireRateLimiting("SaeApi");
 
 app.Run();
+
+
+
+
+

@@ -1,0 +1,3 @@
+{
+  "invoice-concept": "SELECT NUM_CPTO,DESCR FROM CONC15 WHERE NUM_CPTO=1"
+}

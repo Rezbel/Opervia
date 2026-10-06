@@ -10,6 +10,11 @@ public interface ISaeSalesFlowSummaryProbe
         DateOnly from,
         DateOnly to,
         string? sellerCode,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        string? documentKind = null,
+        int page = 1,
+        int pageSize = 50,
+        string? branchCode = null,
+        string? search = null
     );
 }

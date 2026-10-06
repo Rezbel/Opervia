@@ -28,6 +28,10 @@ public sealed record SaeReceivablesSummaryResult(
     IReadOnlyList<SaeReceivablesDailyPoint> DailySeries,
     IReadOnlyList<SaeReceivableRecentMovement> RecentPayments,
     IReadOnlyList<SaeReceivableRecentCancellation> RecentCancellations,
+    IReadOnlyList<SaeReceivableInvoiceRow> Invoices,
+    int InvoicePage,
+    int InvoicePageSize,
+    int TotalInvoiceCount,
     int FutureDatedReductionCount,
     decimal GrossInvoicedAmountWithoutTax,
     decimal NetInvoicedAmountWithoutTax,
@@ -90,4 +94,14 @@ public sealed record SaeReceivableRecentCancellation(
     decimal Amount,
     DateTime DocumentDate,
     DateTime CancellationDate
+);
+
+public sealed record SaeReceivableInvoiceRow(
+    string InvoiceNumber,
+    string CustomerCode,
+    string CustomerName,
+    string? SellerCode,
+    DateTime? DueDate,
+    string Status,
+    DateTime? CreationDate = null
 );

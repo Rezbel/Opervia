@@ -4,18 +4,12 @@ import {
   Banknote,
   CalendarDays,
   CircleDollarSign,
-  CreditCard,
   FileCheck2,
-  Filter,
-  Hash,
   LoaderCircle,
   ReceiptText,
   RefreshCw,
   RotateCcw,
-  Scale,
-  Store,
-  UserRoundSearch,
-  UsersRound,
+  Search,
   X,
 } from 'lucide-react';
 import {
@@ -23,14 +17,12 @@ import {
   useMemo,
   useRef,
   useState,
-  type FormEvent,
 } from 'react';
 
-import { getReceivablesSummary } from '../../lib/saeApi';
+import { getReceivableInvoices, getReceivablesSummary } from '../../lib/saeApi';
 import type {
   SaeConnectionRequest,
-  SaeReceivableConceptTotal,
-  SaeReceivablesSummaryFilters,
+  SaeReceivableInvoiceListingResult,
   SaeReceivablesSummaryResult,
   TaxDisplayMode,
 } from '../../types/sae';
@@ -43,7 +35,10 @@ interface ReceivablesPortfolioSummaryProps {
   onRequestConnection: () => void;
   onSelectDocument: (documentNumber: string) => void;
   taxDisplayMode: TaxDisplayMode;
+  onTaxDisplayModeChange: (mode: TaxDisplayMode) => void;
 }
+
+const invoicePageSizeOptions = [10, 30, 60, 100] as const;
 
 const moneyFormatter = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -54,6 +49,12 @@ const moneyFormatter = new Intl.NumberFormat('es-MX', {
 const shortDateFormatter = new Intl.DateTimeFormat('es-MX', {
   day: '2-digit',
   month: 'short',
+});
+
+const invoiceDueDateFormatter = new Intl.DateTimeFormat('es-MX', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
 });
 
 function toLocalIsoDate(date: Date): string {
@@ -84,57 +85,17 @@ function formatShortDate(value: string): string {
     : shortDateFormatter.format(date);
 }
 
+function formatInvoiceDueDate(value: string): string {
+  const date = new Date(`${value.slice(0, 10)}T12:00:00`);
+  return Number.isNaN(date.getTime())
+    ? value
+    : invoiceDueDateFormatter.format(date);
+}
+
 function isAbortError(error: unknown): boolean {
   return (
     error instanceof DOMException &&
     error.name === 'AbortError'
-  );
-}
-
-function BreakdownList({
-  items,
-  emptyMessage,
-}: {
-  items: SaeReceivableConceptTotal[];
-  emptyMessage: string;
-}) {
-  const maximum = Math.max(
-    ...items.map((item) => item.amount),
-    1,
-  );
-
-  if (items.length === 0) {
-    return <p className="portfolio-empty-list">{emptyMessage}</p>;
-  }
-
-  return (
-    <div className="portfolio-breakdown-list">
-      {items.map((item) => (
-        <div
-          className="portfolio-breakdown-row"
-          key={`${item.classification}-${item.conceptNumber}`}
-        >
-          <div>
-            <strong>{item.description}</strong>
-            <small>
-              Concepto {item.conceptNumber} · {item.movementCount}{' '}
-              movimientos
-            </small>
-          </div>
-          <b>{formatMoney(item.amount)}</b>
-          <span>
-            <i
-              style={{
-                width: `${Math.max(
-                  3,
-                  (item.amount / maximum) * 100,
-                )}%`,
-              }}
-            />
-          </span>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -143,9 +104,11 @@ export function ReceivablesPortfolioSummary({
   onRequestConnection,
   onSelectDocument,
   taxDisplayMode,
+  onTaxDisplayModeChange,
 }: ReceivablesPortfolioSummaryProps) {
   const initialPeriod = useMemo(getCurrentPeriod, []);
   const requestRef = useRef<AbortController | null>(null);
+  const invoiceRequestRef = useRef<AbortController | null>(null);
   const [periodStart, setPeriodStart] =
     useState(initialPeriod.start);
   const [periodEnd, setPeriodEnd] =
@@ -155,10 +118,25 @@ export function ReceivablesPortfolioSummary({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
-  const [draftFilters, setDraftFilters] =
-    useState<SaeReceivablesSummaryFilters>({});
-  const [appliedFilters, setAppliedFilters] =
-    useState<SaeReceivablesSummaryFilters>({});
+  const [invoicePage, setInvoicePage] = useState(1);
+  const [invoicePageSize, setInvoicePageSize] = useState(10);
+  const [selectedInvoiceNumber, setSelectedInvoiceNumber] = useState('');
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [appliedInvoiceSearch, setAppliedInvoiceSearch] = useState('');
+  const [invoiceListing, setInvoiceListing] = useState<SaeReceivableInvoiceListingResult | null>(null);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const searchPending = invoiceSearch.trim() !== appliedInvoiceSearch;
+  const invoiceBusy = searchPending || invoicesLoading;
+  const currentInvoicePage = invoiceListing?.invoicePage ?? invoicePage;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAppliedInvoiceSearch(invoiceSearch.trim());
+      setInvoicePage(1);
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [invoiceSearch]);
 
   useEffect(() => {
     if (!connection || !periodStart || !periodEnd) {
@@ -175,17 +153,21 @@ export function ReceivablesPortfolioSummary({
       connection,
       periodStart,
       periodEnd,
-      appliedFilters,
+      {},
       controller.signal,
+      1,
+      10,
+      false,
     )
       .then((result) => {
+        if (controller.signal.aborted) return;
         if (!result.isSuccessful) {
           throw new Error(result.message);
         }
         setSummary(result);
       })
       .catch((summaryError) => {
-        if (!isAbortError(summaryError)) {
+        if (!controller.signal.aborted && !isAbortError(summaryError)) {
           setError(
             summaryError instanceof Error
               ? summaryError.message
@@ -203,28 +185,34 @@ export function ReceivablesPortfolioSummary({
     return () => controller.abort();
   }, [
     connection,
-    appliedFilters,
     periodEnd,
     periodStart,
     refreshVersion,
   ]);
 
+  useEffect(() => {
+    if (!connection || !periodStart || !periodEnd) { setInvoiceListing(null); return; }
+    const controller = new AbortController();
+    invoiceRequestRef.current?.abort();
+    invoiceRequestRef.current = controller;
+    setInvoiceListing(null);
+    setInvoicesLoading(true);
+    setInvoiceError(null);
+    void getReceivableInvoices(connection, periodStart, periodEnd, appliedInvoiceSearch, invoicePage, invoicePageSize, controller.signal)
+      .then(result => {
+        if (controller.signal.aborted) return;
+        if (!result.isSuccessful) throw new Error(result.message);
+        setInvoiceListing(result);
+      })
+      .catch(value => { if (!controller.signal.aborted) setInvoiceError(value instanceof Error ? value.message : 'No fue posible buscar las facturas.'); })
+      .finally(() => { if (invoiceRequestRef.current === controller) { invoiceRequestRef.current = null; setInvoicesLoading(false); } });
+    return () => controller.abort();
+  }, [connection, periodStart, periodEnd, appliedInvoiceSearch, invoicePage, invoicePageSize, refreshVersion]);
+
   const nonCashAmount =
     (summary?.returnsAndCreditsAmount ?? 0) +
     (summary?.appliedAdvanceAmount ?? 0) +
     (summary?.otherReductionAmount ?? 0);
-  const collectionRatio =
-    summary && summary.netInvoicedAmount > 0
-      ? (summary.realIncomeAmount / summary.netInvoicedAmount) * 100
-      : 0;
-  const activeFilterCount = Object.values(appliedFilters)
-    .filter(
-      (value) =>
-        value !== undefined &&
-        value !== null &&
-        value !== '',
-    )
-    .length;
 
   function selectPreset(
     preset: 'month' | '30days' | 'year',
@@ -247,40 +235,7 @@ export function ReceivablesPortfolioSummary({
 
     setPeriodStart(toLocalIsoDate(start));
     setPeriodEnd(toLocalIsoDate(today));
-  }
-
-  function updateDraftFilter<
-    TKey extends keyof SaeReceivablesSummaryFilters,
-  >(
-    key: TKey,
-    value: SaeReceivablesSummaryFilters[TKey],
-  ) {
-    setDraftFilters((current) => ({
-      ...current,
-      [key]: value || undefined,
-    }));
-  }
-
-  function applyFilters(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (
-      draftFilters.folioFrom !== undefined &&
-      draftFilters.folioTo !== undefined &&
-      draftFilters.folioTo < draftFilters.folioFrom
-    ) {
-      setError(
-        'El folio final debe ser igual o mayor al folio inicial.',
-      );
-      return;
-    }
-
-    setAppliedFilters({ ...draftFilters });
-  }
-
-  function clearFilters() {
-    setDraftFilters({});
-    setAppliedFilters({});
+    setInvoicePage(1);
   }
 
   if (!connection) {
@@ -310,10 +265,6 @@ export function ReceivablesPortfolioSummary({
         <div>
           <span className="eyebrow">PANORAMA DEL PERIODO</span>
           <h2>Facturación y cobranza real</h2>
-          <p>
-            Ingresos por fecha de aplicación; cancelaciones por fecha
-            efectiva de cancelación.
-          </p>
         </div>
 
         <div className="portfolio-period-controls">
@@ -329,21 +280,27 @@ export function ReceivablesPortfolioSummary({
             </button>
           </div>
           <label>
-            <span>Desde</span>
+            <span>Desde (elaboración)</span>
             <input
               type="date"
               value={periodStart}
               max={periodEnd}
-              onChange={(event) => setPeriodStart(event.target.value)}
+              onChange={(event) => {
+                setPeriodStart(event.target.value);
+                setInvoicePage(1);
+              }}
             />
           </label>
           <label>
-            <span>Hasta</span>
+            <span>Hasta (elaboración)</span>
             <input
               type="date"
               value={periodEnd}
               min={periodStart}
-              onChange={(event) => setPeriodEnd(event.target.value)}
+              onChange={(event) => {
+                setPeriodEnd(event.target.value);
+                setInvoicePage(1);
+              }}
             />
           </label>
           <button
@@ -360,294 +317,25 @@ export function ReceivablesPortfolioSummary({
             )}
           </button>
         </div>
+
+        <div className="receivables-tax-filter" role="group" aria-label="Mostrar importes">
+          <span>Importes</span>
+          <button
+            type="button"
+            className={taxDisplayMode === 'withoutTax' ? 'active' : ''}
+            onClick={() => onTaxDisplayModeChange('withoutTax')}
+          >
+            Sin IVA
+          </button>
+          <button
+            type="button"
+            className={taxDisplayMode === 'withTax' ? 'active' : ''}
+            onClick={() => onTaxDisplayModeChange('withTax')}
+          >
+            Con IVA
+          </button>
+        </div>
       </div>
-
-      <form
-        className="portfolio-filter-panel"
-        onSubmit={applyFilters}
-      >
-        <div className="portfolio-filter-heading">
-          <div>
-            <Filter size={16} />
-            <div>
-              <strong>Filtros comerciales</strong>
-              <small>
-                Segmentan facturas, cancelaciones y pagos relacionados
-              </small>
-            </div>
-          </div>
-          {activeFilterCount > 0 && (
-            <span>{activeFilterCount} activos</span>
-          )}
-        </div>
-
-        <div className="portfolio-filter-grid">
-          <label>
-            <span><UsersRound size={13} /> Vendedor</span>
-            <select
-              value={draftFilters.sellerCode ?? ''}
-              onChange={(event) =>
-                updateDraftFilter(
-                  'sellerCode',
-                  event.target.value,
-                )
-              }
-            >
-              <option value="">Todos los vendedores</option>
-              {summary?.filterOptions.sellers.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label} ({option.recordCount})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span><ReceiptText size={13} /> Serie</span>
-            <select
-              value={draftFilters.series ?? ''}
-              onChange={(event) =>
-                updateDraftFilter('series', event.target.value)
-              }
-            >
-              <option value="">Todas las series</option>
-              {summary?.filterOptions.series.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label} ({option.recordCount})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span><Hash size={13} /> Folio inicial</span>
-            <input
-              type="number"
-              min="0"
-              inputMode="numeric"
-              value={draftFilters.folioFrom ?? ''}
-              placeholder="Ej. 79000"
-              onChange={(event) =>
-                updateDraftFilter(
-                  'folioFrom',
-                  event.target.value
-                    ? Number(event.target.value)
-                    : undefined,
-                )
-              }
-            />
-          </label>
-
-          <label>
-            <span><Hash size={13} /> Folio final</span>
-            <input
-              type="number"
-              min="0"
-              inputMode="numeric"
-              value={draftFilters.folioTo ?? ''}
-              placeholder="Ej. 80057"
-              onChange={(event) =>
-                updateDraftFilter(
-                  'folioTo',
-                  event.target.value
-                    ? Number(event.target.value)
-                    : undefined,
-                )
-              }
-            />
-          </label>
-
-          <label>
-            <span><UserRoundSearch size={13} /> Cliente</span>
-            <input
-              type="search"
-              value={draftFilters.customerCode ?? ''}
-              placeholder="Clave exacta"
-              onChange={(event) =>
-                updateDraftFilter(
-                  'customerCode',
-                  event.target.value,
-                )
-              }
-            />
-          </label>
-
-          <label>
-            <span><Store size={13} /> Almacén</span>
-            <select
-              value={draftFilters.warehouseNumber ?? ''}
-              onChange={(event) =>
-                updateDraftFilter(
-                  'warehouseNumber',
-                  event.target.value
-                    ? Number(event.target.value)
-                    : undefined,
-                )
-              }
-            >
-              <option value="">Todos los almacenes</option>
-              {summary?.filterOptions.warehouses.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label} ({option.recordCount})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span><FileCheck2 size={13} /> Estado</span>
-            <select
-              value={draftFilters.invoiceStatus ?? ''}
-              onChange={(event) =>
-                updateDraftFilter(
-                  'invoiceStatus',
-                  event.target.value
-                    ? (event.target.value as
-                        | 'Active'
-                        | 'Canceled')
-                    : undefined,
-                )
-              }
-            >
-              <option value="">Todos los estados</option>
-              <option value="Active">Vigentes</option>
-              <option value="Canceled">Canceladas</option>
-            </select>
-          </label>
-
-          <label>
-            <span><CalendarDays size={13} /> Método fiscal</span>
-            <select
-              value={draftFilters.fiscalPaymentMethod ?? ''}
-              onChange={(event) =>
-                updateDraftFilter(
-                  'fiscalPaymentMethod',
-                  event.target.value,
-                )
-              }
-            >
-              <option value="">PUE y PPD</option>
-              {summary?.filterOptions.fiscalPaymentMethods.map(
-                (option) => (
-                  <option value={option.value} key={option.value}>
-                    {option.label} ({option.recordCount})
-                  </option>
-                ),
-              )}
-            </select>
-          </label>
-
-          <label>
-            <span><CreditCard size={13} /> Forma de ingreso</span>
-            <select
-              value={draftFilters.paymentConceptNumber ?? ''}
-              onChange={(event) =>
-                updateDraftFilter(
-                  'paymentConceptNumber',
-                  event.target.value
-                    ? Number(event.target.value)
-                    : undefined,
-                )
-              }
-            >
-              <option value="">Todas las formas</option>
-              {summary?.filterOptions.paymentConcepts.map(
-                (option) => (
-                  <option value={option.value} key={option.value}>
-                    {option.label} ({option.recordCount})
-                  </option>
-                ),
-              )}
-            </select>
-          </label>
-
-          <div className="portfolio-filter-actions">
-            <button type="submit" disabled={isLoading}>
-              <Filter size={14} />
-              Aplicar filtros
-            </button>
-            <button
-              type="button"
-              onClick={clearFilters}
-              disabled={activeFilterCount === 0}
-            >
-              <X size={14} />
-              Limpiar
-            </button>
-          </div>
-        </div>
-
-        {activeFilterCount > 0 && summary && (
-          <div className="portfolio-filter-chips">
-            {summary.appliedFilters.sellerCode && (
-              <span>
-                Vendedor:{' '}
-                {summary.filterOptions.sellers.find(
-                  (option) =>
-                    option.value ===
-                    summary.appliedFilters.sellerCode,
-                )?.label ?? summary.appliedFilters.sellerCode}
-              </span>
-            )}
-            {summary.appliedFilters.series && (
-              <span>Serie: {summary.appliedFilters.series}</span>
-            )}
-            {summary.appliedFilters.folioFrom !== undefined && (
-              <span>
-                Desde folio {summary.appliedFilters.folioFrom}
-              </span>
-            )}
-            {summary.appliedFilters.folioTo !== undefined && (
-              <span>
-                Hasta folio {summary.appliedFilters.folioTo}
-              </span>
-            )}
-            {summary.appliedFilters.customerCode && (
-              <span>
-                Cliente: {summary.appliedFilters.customerCode}
-              </span>
-            )}
-            {summary.appliedFilters.warehouseNumber !== undefined && (
-              <span>
-                Almacén {summary.appliedFilters.warehouseNumber}
-              </span>
-            )}
-            {summary.appliedFilters.invoiceStatus && (
-              <span>
-                {summary.appliedFilters.invoiceStatus === 'Active'
-                  ? 'Sólo vigentes'
-                  : 'Sólo canceladas'}
-              </span>
-            )}
-            {summary.appliedFilters.fiscalPaymentMethod && (
-              <span>
-                Método fiscal:{' '}
-                {summary.appliedFilters.fiscalPaymentMethod}
-              </span>
-            )}
-            {summary.appliedFilters.paymentConceptNumber !==
-              undefined && (
-              <span>
-                Ingreso:{' '}
-                {summary.filterOptions.paymentConcepts.find(
-                  (option) =>
-                    Number(option.value) ===
-                    summary.appliedFilters.paymentConceptNumber,
-                )?.label ??
-                  `Concepto ${summary.appliedFilters.paymentConceptNumber}`}
-              </span>
-            )}
-          </div>
-        )}
-
-        {activeFilterCount > 0 && (
-          <p className="portfolio-filter-scope-note">
-            Los filtros comerciales se aplican a pagos que SAE vincula
-            mediante su número de factura. Los movimientos sin factura
-            relacionada permanecen únicamente en la vista sin filtros.
-          </p>
-        )}
-      </form>
 
       {error && (
         <div className="portfolio-error">
@@ -716,14 +404,6 @@ export function ReceivablesPortfolioSummary({
               <strong>{formatMoney(nonCashAmount)}</strong>
               <p>Devoluciones, créditos y anticipos</p>
             </article>
-            <article>
-              <span className="portfolio-kpi-icon ratio">
-                <Scale size={20} />
-              </span>
-              <small>Cobrado vs. facturado</small>
-              <strong>{collectionRatio.toFixed(1)}%</strong>
-              <p>Comparación de flujos del periodo</p>
-            </article>
           </div>
 
           <div className="portfolio-reconciliation">
@@ -749,126 +429,133 @@ export function ReceivablesPortfolioSummary({
           </div>
 
           <ReceivablesChartStudio summary={summary} taxDisplayMode={taxDisplayMode} />
+        </>
+      )}
 
-          <div className="portfolio-detail-grid">
-            <article className="portfolio-panel">
-              <div className="portfolio-panel-heading">
+          <section className="portfolio-panel portfolio-invoices">
+            <div className="portfolio-panel-heading">
+              <div>
+                <FileCheck2 size={18} />
                 <div>
-                  <RotateCcw size={18} />
-                  <div>
-                    <strong>Reducciones no monetarias</strong>
-                    <small>
-                      Disminuyen cartera, pero no son ingreso nuevo
-                    </small>
-                  </div>
+                  <strong>Facturas del periodo</strong>
+                  <small>Selecciona una factura para abrir su expediente de cobranza</small>
                 </div>
               </div>
-              <div className="portfolio-noncash-totals">
-                <span>
-                  Devoluciones y créditos
-                  <b>{formatMoney(summary.returnsAndCreditsAmount)}</b>
-                </span>
-                <span>
-                  Anticipos aplicados
-                  <b>{formatMoney(summary.appliedAdvanceAmount)}</b>
-                </span>
-                <span>
-                  Otras reducciones
-                  <b>{formatMoney(summary.otherReductionAmount)}</b>
-                </span>
+              <div className="portfolio-invoice-tools">
+                <label className="portfolio-invoice-search">
+                  {invoiceBusy ? <LoaderCircle className="spin" size={16} /> : <Search size={16} />}
+                  <input
+                    value={invoiceSearch}
+                    onChange={(event) => setInvoiceSearch(event.target.value)}
+                    maxLength={120}
+                    spellCheck={false}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') { setAppliedInvoiceSearch(invoiceSearch.trim()); setInvoicePage(1); }
+                      if (event.key === 'Escape') { setInvoiceSearch(''); setAppliedInvoiceSearch(''); setInvoicePage(1); }
+                    }}
+                    placeholder="Buscar factura, clave o cliente"
+                    aria-label="Buscar por factura, clave o nombre del cliente"
+                  />
+                  {invoiceSearch && <button type="button" aria-label="Limpiar búsqueda de facturas" onClick={() => { setInvoiceSearch(''); setAppliedInvoiceSearch(''); setInvoicePage(1); }}><X size={15} /></button>}
+                </label>
+                <span className="record-limit" role="status" aria-live="polite">{invoiceBusy ? 'Buscando…' : invoiceListing ? `${invoiceListing.totalInvoiceCount.toLocaleString('es-MX')} ${appliedInvoiceSearch ? invoiceListing.totalInvoiceCount === 1 ? 'coincidencia' : 'coincidencias' : invoiceListing.totalInvoiceCount === 1 ? 'factura' : 'facturas'}` : '—'}</span>
               </div>
-              <BreakdownList
-                items={summary.nonCashBreakdown}
-                emptyMessage="No hay reducciones no monetarias en este periodo."
-              />
-            </article>
-
-            <article className="portfolio-panel">
-              <div className="portfolio-panel-heading">
-                <div>
-                  <Ban size={18} />
-                  <div>
-                    <strong>Cancelaciones recientes</strong>
-                    <small>Por fecha efectiva de cancelación</small>
-                  </div>
-                </div>
+            </div>
+            <p className="portfolio-invoice-search-help">Periodo por fecha de elaboración. Busca por factura, clave o palabras del nombre del cliente.</p>
+            {invoiceError && <div className="portfolio-error" role="alert"><AlertTriangle size={17} />{invoiceError}</div>}
+            <div className="portfolio-invoice-table-wrap">
+              <div className="portfolio-invoice-table-head" aria-hidden="true">
+                <span>Factura</span>
+                <span>Cliente</span>
+                <span>Vendedor (clave)</span>
+                <span>Elaboración</span>
+                <span>Vencimiento</span>
+                <span>Estado</span>
               </div>
-              <div className="portfolio-activity-list cancellations">
-                {summary.recentCancellations.map((item) => (
-                  <button
-                    type="button"
-                    key={`${item.invoiceNumber}-${item.cancellationDate}`}
-                    onClick={() => onSelectDocument(item.invoiceNumber)}
-                  >
-                    <span><Ban size={15} /></span>
-                    <div>
-                      <strong>{item.invoiceNumber}</strong>
-                      <small>
-                        Cliente {item.customerCode} · Cancelada{' '}
-                        {formatShortDate(item.cancellationDate)}
-                      </small>
-                    </div>
-                    <b>{formatMoney(item.amount)}</b>
-                  </button>
-                ))}
-                {summary.recentCancellations.length === 0 && (
-                  <p className="portfolio-empty-list">
-                    No hubo cancelaciones en este periodo.
-                  </p>
-                )}
-              </div>
-            </article>
-
-            <article className="portfolio-panel">
-              <div className="portfolio-panel-heading">
-                <div>
-                  <Banknote size={18} />
-                  <div>
-                    <strong>Pagos recientes</strong>
-                    <small>Ingresos monetarios confirmados</small>
-                  </div>
-                </div>
-              </div>
-              <div className="portfolio-activity-list payments">
-                {summary.recentPayments.map((item) => {
-                  const documentNumber =
-                    item.invoiceNumber ?? item.document ?? '';
+              <div className="portfolio-invoice-table" aria-busy={invoiceBusy}>
+                {invoiceBusy && <div className="portfolio-loading portfolio-invoice-loading"><LoaderCircle className="spin" size={22} />Buscando facturas del periodo…</div>}
+                {!invoiceBusy && invoiceListing?.invoices.map((invoice) => {
+                  const statusTone = invoice.status === 'Liquidada'
+                    ? 'paid'
+                    : invoice.status === 'Cancelada'
+                      ? 'cancelled'
+                      : invoice.status === 'Vencido'
+                        ? 'overdue'
+                        : 'due';
+                  const selected = selectedInvoiceNumber === invoice.invoiceNumber;
                   return (
                     <button
                       type="button"
-                      key={`${item.customerCode}-${item.applicationDate}-${item.amount}`}
-                      onClick={() =>
-                        documentNumber &&
-                        onSelectDocument(documentNumber)
-                      }
-                      disabled={!documentNumber}
+                      key={invoice.invoiceNumber}
+                      className={`portfolio-invoice-row ${statusTone}${selected ? ' selected' : ''}`}
+                      aria-pressed={selected}
+                      onClick={() => {
+                        setSelectedInvoiceNumber(invoice.invoiceNumber);
+                        onSelectDocument(invoice.invoiceNumber);
+                      }}
                     >
-                      <span><Banknote size={15} /></span>
-                      <div>
-                        <strong>{documentNumber || 'Sin factura'}</strong>
-                        <small>
-                          {item.description} ·{' '}
-                          {formatShortDate(item.applicationDate)}
-                        </small>
-                      </div>
-                      <b>{formatMoney(item.amount)}</b>
+                      <strong>{invoice.invoiceNumber}</strong>
+                      <span className="portfolio-invoice-customer">
+                        <strong>{invoice.customerName}</strong>
+                        <small>{invoice.customerCode}</small>
+                      </span>
+                      <span>{invoice.sellerCode || '—'}</span>
+                      <span>{invoice.creationDate ? formatInvoiceDueDate(invoice.creationDate) : 'Sin fecha'}</span>
+                      <span>{invoice.dueDate ? formatInvoiceDueDate(invoice.dueDate) : 'Sin fecha'}</span>
+                      <span className={`portfolio-invoice-status ${statusTone}`}>{invoice.status}</span>
                     </button>
                   );
                 })}
-                {summary.recentPayments.length === 0 && (
+                {!invoiceBusy && !invoiceError && invoiceListing?.invoices.length === 0 && (
                   <p className="portfolio-empty-list">
-                    No hubo pagos monetarios en este periodo.
+                    {appliedInvoiceSearch
+                      ? 'No se encontraron facturas con ese criterio.'
+                      : 'No hay facturas emitidas en el periodo seleccionado.'}
                   </p>
                 )}
               </div>
-            </article>
-          </div>
+            </div>
+            <div className="portfolio-invoice-pagination">
+              <span>
+                {invoiceBusy ? 'Buscando…' : `Página ${currentInvoicePage} de ${Math.max(1, Math.ceil((invoiceListing?.totalInvoiceCount ?? 0) / invoicePageSize))}`}
+              </span>
+              <div className="portfolio-invoice-page-actions">
+                <label className="portfolio-invoice-page-size">
+                  <span>Mostrar</span>
+                  <select
+                    value={invoicePageSize}
+                    disabled={invoiceBusy}
+                    onChange={(event) => {
+                      setInvoicePageSize(Number(event.target.value));
+                      setInvoicePage(1);
+                    }}
+                    aria-label="Facturas por página"
+                  >
+                    {invoicePageSizeOptions.map((size) => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                  <span>por página</span>
+                </label>
+                <button
+                  type="button"
+                  disabled={currentInvoicePage <= 1 || invoiceBusy || !invoiceListing}
+                  onClick={() => setInvoicePage(Math.max(1, currentInvoicePage - 1))}
+                >Anterior</button>
+                <button
+                  type="button"
+                  disabled={currentInvoicePage * invoicePageSize >= (invoiceListing?.totalInvoiceCount ?? 0) || invoiceBusy || !invoiceListing}
+                  onClick={() => setInvoicePage(currentInvoicePage + 1)}
+                >Siguiente</button>
+              </div>
+            </div>
+          </section>
 
-          <div className="portfolio-method-note">
+          {summary && <div className="portfolio-method-note">
             <ReceiptText size={16} />
             <p>
               <strong>Cómo se calcula:</strong> facturación vigente usa
-              facturas no canceladas por fecha de emisión; ingresos reales
+              facturas no canceladas por fecha de elaboración; ingresos reales
               usa efectivo, cheques confirmados, transferencias, TDC, TDD,
               CoDi y anticipos recibidos por fecha de aplicación.
               Devoluciones, notas de crédito y anticipos aplicados se
@@ -879,9 +566,7 @@ export function ReceivablesPortfolioSummary({
               {formatShortDate(summary.periodStart)} –{' '}
               {formatShortDate(summary.periodEnd)}
             </span>
-          </div>
-        </>
-      )}
+          </div>}
     </section>
   );
 }

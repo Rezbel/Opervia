@@ -17,7 +17,12 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
         DateOnly from,
         DateOnly to,
         string? sellerCode,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? documentKind = null,
+        int page = 1,
+        int pageSize = 50,
+        string? branchCode = null,
+        string? search = null)
     {
         var stopwatch = Stopwatch.StartNew();
         var tables = new[]
@@ -42,6 +47,7 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
 
             var documentsByKind = new Dictionary<string, IReadOnlyList<FlowDocument>>(
                 StringComparer.OrdinalIgnoreCase);
+            var customerNames = await ReadCustomerNamesAsync(connection, profile.ResolveTableName("CLIE"), cancellationToken);
             foreach (var stage in tables)
             {
                 documentsByKind[stage.Kind] = await ReadDocumentsAsync(
@@ -53,11 +59,21 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
             bool IsSelectedSeller(FlowDocument item) =>
                 string.IsNullOrWhiteSpace(sellerCode)
                 || string.Equals(item.SellerCode, sellerCode, StringComparison.OrdinalIgnoreCase);
+            bool IsSelectedBranch(FlowDocument item) =>
+                string.IsNullOrWhiteSpace(branchCode)
+                || BranchFor(item.DocumentNumber) == branchCode;
+            var normalizedSearch = search?.Trim();
+            bool IsSearchMatch(FlowDocument item) =>
+                string.IsNullOrWhiteSpace(normalizedSearch)
+                || item.DocumentNumber.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase)
+                || item.CustomerCode.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase)
+                || (customerNames.GetValueOrDefault(item.CustomerCode)?.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (item.SellerCode?.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ?? false);
 
             var cohorts = tables.ToDictionary(
                 stage => stage.Kind,
                 stage => documentsByKind[stage.Kind]
-                    .Where(item => IsInPeriod(item) && IsSelectedSeller(item))
+                    .Where(item => IsInPeriod(item) && IsSelectedSeller(item) && IsSelectedBranch(item) && IsSearchMatch(item))
                     .ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 
@@ -132,13 +148,17 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                     && documentNumbers.TryGetValue(item.PreviousDocumentType, out var sourceNumbers)
                     && !sourceNumbers.Contains(item.PreviousDocumentNumber));
 
-            var documents = tables
+            page = Math.Max(page, 1);
+            pageSize = Math.Clamp(pageSize, 10, 100);
+            var allDocuments = tables
+                .Where(stage => documentKind == null || stage.Kind == documentKind)
                 .SelectMany(stage => cohorts[stage.Kind]
                     .Select(item => new SaeSalesFlowDocumentListItem(
                         stage.Kind,
                         StageSingular(stage.Kind),
                         item.DocumentNumber,
                         item.CustomerCode,
+                        customerNames.GetValueOrDefault(item.CustomerCode),
                         item.SellerCode,
                         item.DocumentDate.ToDateTime(TimeOnly.MinValue),
                         item.IsCancelled,
@@ -146,8 +166,8 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                         item.AmountWithTax)))
                 .OrderByDescending(item => item.DocumentDate)
                 .ThenByDescending(item => item.DocumentNumber)
-                .Take(200)
                 .ToArray();
+            var documents = allDocuments.Skip((page - 1) * pageSize).Take(pageSize).ToArray();
 
             stopwatch.Stop();
             return new SaeSalesFlowSummaryResult(
@@ -164,6 +184,9 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                 brokenLinkCount,
                 recentQuotationWithoutOrderCount,
                 documents,
+                page,
+                pageSize,
+                allDocuments.Length,
                 stopwatch.ElapsedMilliseconds);
         }
         catch (OperationCanceledException)
@@ -324,6 +347,21 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
         return result;
     }
 
+    private static async Task<Dictionary<string, string>> ReadCustomerNamesAsync(
+        FbConnection connection, string table, CancellationToken cancellationToken)
+    {
+        await using var command = new FbCommand($"SELECT CLAVE, NOMBRE FROM {table}", connection) { CommandTimeout = 30 };
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var key = Text(reader, 0);
+            var name = NullableText(reader, 1);
+            if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(name)) result[key] = name;
+        }
+        return result;
+    }
+
     private static T Value<T>(FbDataReader reader, int ordinal) =>
         reader.IsDBNull(ordinal)
             ? default!
@@ -344,13 +382,30 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
         _ => "Documento"
     };
 
+    private static string? BranchFor(string number)
+    {
+        var value = number.Trim().ToUpperInvariant();
+        return value switch
+        {
+            _ when value.StartsWith("P-QR") => "QR",
+            _ when value.StartsWith("P-SL") => "SL",
+            _ when value.StartsWith("P-XA") => "XA",
+            _ when value.StartsWith("P-HT") => "HT",
+            _ when value.StartsWith("P-EH") => "EH",
+            _ when value.StartsWith("P-EQ") => "EQ",
+            _ when value.StartsWith("P-ES") => "ES",
+            _ when value.StartsWith("P-EX") => "EX",
+            _ => null
+        };
+    }
+
     private static SaeSalesFlowSummaryResult Failure(
         string message,
         DateOnly from,
         DateOnly to,
         string? seller,
         long elapsedMilliseconds) =>
-        new(false, message, from, to, seller, [], [], [], [], 0, 0, 0, [], elapsedMilliseconds);
+        new(false, message, from, to, seller, [], [], [], [], 0, 0, 0, [], 1, 50, 0, elapsedMilliseconds);
 
     private sealed record StageDefinition(
         string Kind,
