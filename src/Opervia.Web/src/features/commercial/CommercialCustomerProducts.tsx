@@ -68,8 +68,7 @@ export function CommercialCustomerProducts({ connection, customerCode, customerN
   });
 
   return <section ref={section} className="commercial-panel commercial-customer-products" aria-busy={loading}>
-    <div className="commercial-heading"><div>
-      <span className="eyebrow">COMPRAS DEL CLIENTE</span><h2>{customerName}</h2>
+    <div className="commercial-heading"><div><h2>{customerName}</h2>
       <p>Clave {customerCode} · del {dateLabel(summary.periodStart)} al {dateLabel(summary.periodEnd)} · mismos filtros de Comercial.</p>
     </div><div className="commercial-detail-actions">
       <button aria-label="Actualizar productos del cliente" disabled={loading} onClick={() => setRefresh(v => v + 1)}><RefreshCw size={16} className={loading ? 'spin' : ''} /></button>

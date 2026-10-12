@@ -40,7 +40,8 @@ public sealed record SaeReceivablesSummaryResult(
     string InvoiceTableName,
     string MovementsTableName,
     string ConceptsTableName,
-    long ElapsedMilliseconds
+    long ElapsedMilliseconds,
+    int BilledCustomerCount = 0
 );
 
 public sealed record SaeReceivablesFilterOptions(

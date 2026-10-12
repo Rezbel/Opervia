@@ -514,6 +514,7 @@ export interface SaeReceivablesSummaryResult {
   netInvoicedAmount: number;
   invoiceCount: number;
   netInvoiceCount: number;
+  billedCustomerCount: number;
   voidedInvoiceAmount: number;
   voidedInvoiceCount: number;
   canceledInPeriodAmount: number;

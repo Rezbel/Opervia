@@ -20,7 +20,7 @@ public sealed class SaeConnectionProfilesController(
         CancellationToken cancellationToken)
     {
         var profile = await store.GetLastUsedAsync(cancellationToken);
-        return profile is null ? NoContent() : Ok(ToRequest(profile));
+        return profile is null ? NoContent() : Ok(ToRequest(profile, User.IsInRole("Administrador")));
     }
 
     [HttpGet("{id:guid}/use")]
@@ -53,14 +53,14 @@ public sealed class SaeConnectionProfilesController(
             : NotFound();
 
     private static TestSaeConnectionRequest ToRequest(
-        SavedSaeConnectionProfile profile) => new()
+        SavedSaeConnectionProfile profile, bool includePassword = true) => new()
         {
             DisplayName = profile.DisplayName,
             Host = profile.Host,
             Port = profile.Port,
             Database = profile.Database,
             Username = profile.Username,
-            Password = profile.Password,
+            Password = includePassword ? profile.Password : "managed",
             CompanyNumber = profile.CompanyNumber,
             SaeVersion = profile.SaeVersion,
             Charset = profile.Charset

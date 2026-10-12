@@ -1,3 +1,4 @@
+using Opervia.Infrastructure.Persistence;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Profitability;
@@ -48,8 +49,7 @@ public sealed class FirebirdSaeProfitabilityProbe(
             await using var connection = FirebirdConnectionFactory.Create(profile, password);
             await connection.OpenAsync(cancellationToken);
 
-            var from = periodStart.ToDateTime(TimeOnly.MinValue);
-            var toExclusive = periodEnd.AddDays(1).ToDateTime(TimeOnly.MinValue);
+            var (from, toExclusive) = Opervia.Application.Reporting.SaeDatePeriod.Create(periodStart, periodEnd);
 
             var total = await ReadTotalAsync(connection, invoiceTable, linesTable,
                 from, toExclusive, branch, sellerCode, cancellationToken);
@@ -127,7 +127,7 @@ public sealed class FirebirdSaeProfitabilityProbe(
             SELECT COALESCE(SUM(COALESCE(P.CANT, 0) * COALESCE(P.COST, 0)), 0)
             FROM {invoiceTable} F
             INNER JOIN {linesTable} P ON P.CVE_DOC = F.CVE_DOC
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)};
             """;
@@ -145,7 +145,7 @@ public sealed class FirebirdSaeProfitabilityProbe(
               COALESCE(SUM(ABS(F.IMPORTE)), 0),
               COUNT(*)
             FROM {invoiceTable} F
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)};
             """;
@@ -163,14 +163,14 @@ public sealed class FirebirdSaeProfitabilityProbe(
         await using var command = connection.CreateCommand();
         command.CommandText =
             $"""
-            SELECT EXTRACT(YEAR FROM F.FECHA_DOC), EXTRACT(MONTH FROM F.FECHA_DOC),
+            SELECT EXTRACT(YEAR FROM COALESCE(F.FECHAELAB, F.FECHA_DOC)), EXTRACT(MONTH FROM COALESCE(F.FECHAELAB, F.FECHA_DOC)),
               COALESCE(SUM(COALESCE(P.CANT, 0) * COALESCE(P.COST, 0)), 0)
             FROM {invoiceTable} F
             INNER JOIN {linesTable} P ON P.CVE_DOC = F.CVE_DOC
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)}
-            GROUP BY EXTRACT(YEAR FROM F.FECHA_DOC), EXTRACT(MONTH FROM F.FECHA_DOC)
+            GROUP BY EXTRACT(YEAR FROM COALESCE(F.FECHAELAB, F.FECHA_DOC)), EXTRACT(MONTH FROM COALESCE(F.FECHAELAB, F.FECHA_DOC))
             ORDER BY 1, 2;
             """;
         AddParameters(command, from, toExclusive, branch, sellerCode);
@@ -183,12 +183,12 @@ public sealed class FirebirdSaeProfitabilityProbe(
         await using var taxCommand = connection.CreateCommand();
         taxCommand.CommandText =
             $"""
-            SELECT EXTRACT(YEAR FROM F.FECHA_DOC), EXTRACT(MONTH FROM F.FECHA_DOC),
+            SELECT EXTRACT(YEAR FROM COALESCE(F.FECHAELAB, F.FECHA_DOC)), EXTRACT(MONTH FROM COALESCE(F.FECHAELAB, F.FECHA_DOC)),
               COALESCE(SUM(ABS(COALESCE(F.CAN_TOT, 0) - COALESCE(F.DES_TOT, 0))), 0),
               COALESCE(SUM(ABS(F.IMPORTE)), 0),
               COUNT(*)
             FROM {invoiceTable} F
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)}
             GROUP BY 1, 2;
@@ -219,8 +219,8 @@ public sealed class FirebirdSaeProfitabilityProbe(
               COALESCE(SUM(COALESCE(P.CANT, 0) * COALESCE(P.COST, 0)), 0)
             FROM {invoiceTable} F
             INNER JOIN {linesTable} P ON P.CVE_DOC = F.CVE_DOC
-            LEFT JOIN {sellersTable} V ON V.CVE_VEND = F.CVE_VEND
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            LEFT JOIN {sellersTable} V ON TRIM(V.CVE_VEND) = TRIM(F.CVE_VEND)
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)}
             GROUP BY 1, 2
@@ -244,8 +244,8 @@ public sealed class FirebirdSaeProfitabilityProbe(
               COALESCE(SUM(ABS(F.IMPORTE)), 0),
               COUNT(*)
             FROM {invoiceTable} F
-            LEFT JOIN {sellersTable} V ON V.CVE_VEND = F.CVE_VEND
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            LEFT JOIN {sellersTable} V ON TRIM(V.CVE_VEND) = TRIM(F.CVE_VEND)
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               {BuildFilters(branch, sellerCode)}
             GROUP BY 1, 2;
@@ -273,7 +273,7 @@ public sealed class FirebirdSaeProfitabilityProbe(
             $"""
             SELECT DISTINCT {BranchExpression}
             FROM {invoiceTable} F
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
             ORDER BY 1;
             """;
         command.Parameters.Add("@from", FbDbType.TimeStamp).Value = from;
@@ -298,8 +298,8 @@ public sealed class FirebirdSaeProfitabilityProbe(
             SELECT DISTINCT COALESCE(NULLIF(TRIM(F.CVE_VEND), ''), 'SIN VENDEDOR'),
               COALESCE(NULLIF(TRIM(V.NOMBRE), ''), NULLIF(TRIM(F.CVE_VEND), ''), 'Sin vendedor')
             FROM {invoiceTable} F
-            LEFT JOIN {sellersTable} V ON V.CVE_VEND = F.CVE_VEND
-            WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
+            LEFT JOIN {sellersTable} V ON TRIM(V.CVE_VEND) = TRIM(F.CVE_VEND)
+            WHERE COALESCE(F.FECHAELAB, F.FECHA_DOC) >= @from AND COALESCE(F.FECHAELAB, F.FECHA_DOC) < @to
             ORDER BY 2;
             """;
         command.Parameters.Add("@from", FbDbType.TimeStamp).Value = from;
@@ -327,9 +327,9 @@ public sealed class FirebirdSaeProfitabilityProbe(
         command.Parameters.Add("@from", FbDbType.TimeStamp).Value = from;
         command.Parameters.Add("@to", FbDbType.TimeStamp).Value = toExclusive;
         if (!string.IsNullOrWhiteSpace(branch))
-            command.Parameters.Add("@branch", FbDbType.VarChar).Value = branch.Trim();
+            FilterSelectionSql.Add(command, "@branch", branch);
         if (!string.IsNullOrWhiteSpace(sellerCode))
-            command.Parameters.Add("@seller", FbDbType.VarChar).Value = sellerCode.Trim();
+            FilterSelectionSql.Add(command, "@seller", sellerCode);
     }
 
     private static decimal ReadDecimal(FbDataReader reader, int ordinal) =>

@@ -1,3 +1,4 @@
+using Opervia.Application.Access;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Receivables;
@@ -47,10 +48,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
 
             await connection.OpenAsync(cancellationToken);
 
-            var from = periodStart.ToDateTime(TimeOnly.MinValue);
-            var toExclusive = periodEnd
-                .AddDays(1)
-                .ToDateTime(TimeOnly.MinValue);
+            var (from, toExclusive) = Opervia.Application.Reporting.SaeDatePeriod.Create(periodStart, periodEnd);
 
             var invoiceSummary =
                 await ReadInvoiceSummaryAsync(
@@ -185,7 +183,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 invoiceTableName,
                 movementsTableName,
                 conceptsTableName,
-                stopwatch.ElapsedMilliseconds
+                stopwatch.ElapsedMilliseconds,
+                invoiceSummary.BilledCustomerCount
             );
         }
         catch (OperationCanceledException)
@@ -276,9 +275,10 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(
                     CASE WHEN I.STATUS = 'C'
                     THEN ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0)) ELSE 0 END
-                ), 0)
+                ), 0),
+                COUNT(DISTINCT CASE WHEN COALESCE(I.STATUS, '') <> 'C' THEN I.CVE_CLPV ELSE NULL END)
             FROM {tableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
             """;
@@ -305,7 +305,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
             GetInt32(reader, 5),
             GetDecimal(reader, 6),
             GetDecimal(reader, 7),
-            GetDecimal(reader, 8)
+            GetDecimal(reader, 8),
+            GetInt32(reader, 9)
         );
     }
 
@@ -327,7 +328,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {tableName} I
-            WHERE I.STATUS = 'C'
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND I.STATUS = 'C'
               AND I.FECHA_CANCELA >= @FROM_DATE
               AND I.FECHA_CANCELA < @TO_DATE
               AND {filterClause}
@@ -376,7 +377,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     END
                 ), 0)
             FROM {tableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
             GROUP BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
@@ -501,7 +502,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     ELSE 0 END
                 ), 0)
             FROM {tableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
               AND {filterClause}
             GROUP BY CAST(COALESCE(I.FECHAELAB, I.FECHA_DOC) AS DATE)
@@ -653,10 +654,10 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(CASE WHEN COALESCE(I.STATUS, '') <> 'C' THEN ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0)) ELSE 0 END), 0)
             FROM {sellersTableName} V
             LEFT JOIN {invoiceTableName} I
-                ON I.CVE_VEND = V.CVE_VEND
+                ON TRIM(I.CVE_VEND) = TRIM(V.CVE_VEND)
                AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
                AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
-            WHERE COALESCE(V.STATUS, 'A') <> 'B'
+            WHERE COALESCE(V.STATUS, 'A') <> 'B' AND {SellerAccessScope.Sql("V.CVE_VEND")}
             GROUP BY V.CVE_VEND, V.NOMBRE
             ORDER BY V.NOMBRE
             """,
@@ -675,7 +676,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.SERIE
             ORDER BY I.SERIE
@@ -695,7 +696,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.NUM_ALMA
             ORDER BY I.NUM_ALMA
@@ -715,7 +716,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(SUM(ABS(I.IMPORTE)), 0),
                 COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
             FROM {invoiceTableName} I
-            WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
               AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
             GROUP BY I.STATUS
             ORDER BY I.STATUS
@@ -753,7 +754,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                     COALESCE(SUM(ABS(I.IMPORTE)), 0),
                     COALESCE(SUM(ABS(COALESCE(I.CAN_TOT, 0) - COALESCE(I.DES_TOT, 0))), 0)
                 FROM {invoiceTableName} I
-                WHERE COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
+                WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND COALESCE(I.FECHAELAB, I.FECHA_DOC) >= @FROM_DATE
                   AND COALESCE(I.FECHAELAB, I.FECHA_DOC) < @TO_DATE
                 GROUP BY I.METODODEPAGO
                 ORDER BY I.METODODEPAGO
@@ -775,7 +776,8 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 FROM {movementsTableName} D
                 LEFT JOIN {conceptsTableName} C
                     ON C.NUM_CPTO = D.NUM_CPTO
-                WHERE D.FECHA_APLI >= @FROM_DATE
+                WHERE EXISTS (SELECT 1 FROM {invoiceTableName} ACCESS_DOC WHERE ACCESS_DOC.CVE_DOC = D.NO_FACTURA AND {SellerAccessScope.Sql("ACCESS_DOC.CVE_VEND")})
+                  AND D.FECHA_APLI >= @FROM_DATE
                   AND D.FECHA_APLI < @TO_DATE
                   AND (
                         CASE
@@ -981,7 +983,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
                 COALESCE(I.FECHAELAB, I.FECHA_DOC),
                 I.FECHA_CANCELA
             FROM {tableName} I
-            WHERE I.STATUS = 'C'
+            WHERE {SellerAccessScope.Sql("I.CVE_VEND")} AND I.STATUS = 'C'
               AND I.FECHA_CANCELA >= @FROM_DATE
               AND I.FECHA_CANCELA < @TO_DATE
               AND {filterClause}
@@ -1117,7 +1119,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
     {
         var clauses = new List<string>();
 
-        if (filters.HasInvoiceFilters)
+        if (filters.HasInvoiceFilters || SellerAccessScope.IsRestricted)
         {
             clauses.Add(
                 BuildInvoiceFilterClause(filters, "I")
@@ -1141,7 +1143,7 @@ public sealed class FirebirdSaeReceivablesSummaryProbe(
         string alias
     )
     {
-        var clauses = new List<string>();
+        var clauses = new List<string> { SellerAccessScope.Sql($"{alias}.CVE_VEND") };
 
         if (!string.IsNullOrWhiteSpace(filters.SellerCode))
         {
@@ -1492,7 +1494,8 @@ private sealed record InvoiceSummary(
         int VoidedCount,
         decimal GrossAmountWithoutTax,
         decimal NetAmountWithoutTax,
-        decimal VoidedAmountWithoutTax
+        decimal VoidedAmountWithoutTax,
+        int BilledCustomerCount
     );
 
     private readonly record struct CancellationSummary(

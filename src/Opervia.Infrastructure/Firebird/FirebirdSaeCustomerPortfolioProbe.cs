@@ -1,3 +1,5 @@
+using Opervia.Infrastructure.Persistence;
+using Opervia.Application.Access;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Customers;
@@ -62,6 +64,7 @@ public sealed class FirebirdSaeCustomerPortfolioProbe(ILogger<FirebirdSaeCustome
         SaeCustomerPortfolioFilter filter, CancellationToken token)
     {
         var conditions = new List<string>();
+        if (SellerAccessScope.IsRestricted) conditions.Add($"({SellerAccessScope.Sql("C.CVE_VEND")} OR EXISTS (SELECT 1 FROM {profile.ResolveTableName("FACTF")} ACCESS_DOC WHERE ACCESS_DOC.CVE_CLPV = C.CLAVE AND {SellerAccessScope.Sql("ACCESS_DOC.CVE_VEND")}))");
         if (filter.SellerCode is not null) conditions.Add("TRIM(C.CVE_VEND) = @SELLER");
         if (filter.StateCode is not null) conditions.Add("UPPER(TRIM(C.STATUS)) = @STATE");
         if (filter.BranchCode is not null) conditions.Add("SUBSTRING(UPPER(TRIM(C.CLASIFIC)) FROM 1 FOR 1) = @BRANCH");
@@ -71,13 +74,33 @@ public sealed class FirebirdSaeCustomerPortfolioProbe(ILogger<FirebirdSaeCustome
         if (filter.SelectedCustomerCode is not null) conditions.Add("TRIM(C.CLAVE) = @CUSTOMER");
         var where = conditions.Count == 0 ? string.Empty : "WHERE " + string.Join(" AND ", conditions);
         // The initial list reads the catalog only, in the order returned by SAE.
+        var scopedBalances = SellerAccessScope.IsRestricted ? $"""
+            LEFT JOIN (
+                SELECT M.CVE_CLIE AS CUSTOMER, SUM(COALESCE(M.ORIGINAL,0) + COALESCE(D.APPLIED,0)) AS BALANCE
+                FROM (
+                    SELECT CVE_CLIE, REFER, NUM_CARGO, MAX(NO_FACTURA) AS NO_FACTURA,
+                        MAX(STRCVEVEND) AS SELLER,
+                        SUM(COALESCE(IMPORTE,0) * COALESCE(SIGNO,0)) AS ORIGINAL
+                    FROM {profile.ResolveTableName("CUEN_M")} GROUP BY CVE_CLIE, REFER, NUM_CARGO
+                ) M
+                LEFT JOIN {profile.ResolveTableName("FACTF")} F ON M.NO_FACTURA = F.CVE_DOC AND M.CVE_CLIE = F.CVE_CLPV
+                LEFT JOIN (
+                    SELECT CVE_CLIE, REFER, NUM_CARGO, SUM(COALESCE(IMPORTE,0) * COALESCE(SIGNO,0)) AS APPLIED
+                    FROM {profile.ResolveTableName("CUEN_DET")} GROUP BY CVE_CLIE, REFER, NUM_CARGO
+                ) D ON D.CVE_CLIE = M.CVE_CLIE AND D.REFER = M.REFER AND D.NUM_CARGO = M.NUM_CARGO
+                WHERE {SellerAccessScope.Sql("COALESCE(F.CVE_VEND, M.SELLER)")}
+                GROUP BY M.CVE_CLIE
+            ) SCOPED ON SCOPED.CUSTOMER = C.CLAVE
+            """ : "";
+        var balanceExpression = SellerAccessScope.IsRestricted ? "COALESCE(SCOPED.BALANCE,0)" : "C.SALDO";
+        var sellerExpression = SellerAccessScope.IsRestricted ? $"CASE WHEN {SellerAccessScope.Sql("C.CVE_VEND")} THEN C.CVE_VEND ELSE NULL END" : "C.CVE_VEND";
         var sql = $"""
             SELECT C.CLAVE, COALESCE(NULLIF(TRIM(C.NOMBRECOMERCIAL), ''), C.NOMBRE, C.CLAVE),
-                C.CVE_VEND, C.STATUS, C.CLASIFIC, C.CON_CREDITO, C.LIMCRED, C.DIASCRED, C.SALDO
-            FROM {profile.ResolveTableName("CLIE")} C {where}
+                {sellerExpression}, C.STATUS, C.CLASIFIC, C.CON_CREDITO, C.LIMCRED, C.DIASCRED, {balanceExpression}
+            FROM {profile.ResolveTableName("CLIE")} C {scopedBalances} {where}
             """;
         await using var command = new FbCommand(sql, connection, transaction) { CommandTimeout = 20 };
-        void Parameter(string name, string? value) { if (value is not null) command.Parameters.AddWithValue(name, value); }
+        void Parameter(string name, string? value) { if (value is not null) FilterSelectionSql.Add(command, name, value); }
         Parameter("@SELLER", filter.SellerCode); Parameter("@STATE", filter.StateCode);
         Parameter("@BRANCH", filter.BranchCode); Parameter("@TYPE", filter.CustomerTypeCode);
         Parameter("@CLASSIFICATION", filter.ClassificationCode); Parameter("@CREDIT", filter.CreditCode);
@@ -116,6 +139,7 @@ public sealed class FirebirdSaeCustomerPortfolioProbe(ILogger<FirebirdSaeCustome
             FROM ROOTS M FULL OUTER JOIN APPLICATIONS D
                 ON D.REFER = M.REFER AND D.NUM_CARGO = M.NUM_CARGO
             LEFT JOIN {profile.ResolveTableName("FACTF")} F ON F.CVE_DOC = M.NO_FACTURA AND F.CVE_CLPV = @CUSTOMER
+            WHERE {SellerAccessScope.Sql("COALESCE(F.CVE_VEND, M.SELLER)")}
             """;
         await using var command = new FbCommand(sql, connection, transaction) { CommandTimeout = 30 };
         command.Parameters.AddWithValue("@CUSTOMER", customer);

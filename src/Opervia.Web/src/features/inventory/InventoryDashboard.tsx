@@ -1,3 +1,4 @@
+import { FilterMultiSelect } from '../filters/FilterMultiSelect';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
   AlertTriangle,
@@ -236,9 +237,9 @@ export function InventoryDashboard({
         <div className="inventory-periods">{[30, 90, 180].map((days) => <button type="button" key={days} onClick={() => applyPeriod(days)}>{days} días</button>)}</div>
         <label>Desde<input type="date" value={from} max={to} onChange={(event) => setFrom(event.target.value)} /></label>
         <label>Hasta<input type="date" value={to} min={from} onChange={(event) => setTo(event.target.value)} /></label>
-        <label>Vendedor<select value={seller} onChange={(event) => setSeller(event.target.value)}><option value="">Todos</option>{result?.filterOptions.sellers.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-        <label>Almacén<select value={warehouse} onChange={(event) => setWarehouse(event.target.value)}><option value="">Todos</option>{result?.filterOptions.warehouses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-        <label>Línea<select value={line} onChange={(event) => setLine(event.target.value)}><option value="">Todas</option>{result?.filterOptions.productLines.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+        <FilterMultiSelect label="Vendedor" placeholder="Todos" value={seller} options={result?.filterOptions.sellers ?? []} onChange={setSeller} />
+        <FilterMultiSelect label="Almacén" placeholder="Todos" value={warehouse} options={result?.filterOptions.warehouses ?? []} onChange={setWarehouse} />
+        <FilterMultiSelect label="Línea" placeholder="Todos" value={line} options={result?.filterOptions.productLines ?? []} onChange={setLine} />
         <button className="inventory-apply" type="submit" disabled={isLoading}>{isLoading ? <RefreshCw className="spin" size={17} /> : <Filter size={17} />}{isLoading ? 'Analizando' : 'Aplicar'}</button>
       </form>
 

@@ -28,7 +28,7 @@ public sealed class MySqlManualProfitabilityStore(
         command.Parameters.AddWithValue("@from", from.ToDateTime(TimeOnly.MinValue));
         command.Parameters.AddWithValue("@to", to.ToDateTime(TimeOnly.MinValue));
         if (!string.IsNullOrWhiteSpace(branch))
-            command.Parameters.AddWithValue("@branch", branch.Trim());
+            FilterSelectionSql.Add(command, "@branch", branch);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var items = new List<ManualProfitabilityEntry>();
         while (await reader.ReadAsync(cancellationToken))

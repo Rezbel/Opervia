@@ -1,4 +1,4 @@
-﻿import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import {
   Building2,
   Database,
@@ -153,6 +153,7 @@ export function SaeConnectionForm({
         Configura el servidor y la empresa que Opervia utilizará
         para consultar información en modo de solo lectura.
       </p>
+
 
       <SavedConnectionProfiles
         disabled={isSubmitting}

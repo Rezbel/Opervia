@@ -1,5 +1,6 @@
-import { AlertTriangle, ArrowDownLeft, ArrowUpRight, CalendarClock, CheckCircle2, CircleDollarSign, Clock3, History, Landmark, LoaderCircle, ReceiptText, ShieldCheck, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, CalendarClock, CheckCircle2, CircleDollarSign, Clock3, History, Landmark, LoaderCircle, ReceiptText, WalletCards } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SellerDescription } from '../sellers/SellerCatalogProvider';
 import { getCustomerPortfolio, getReceivableInvoiceAccount } from '../../lib/saeApi';
 import type { SaeConnectionRequest, SaeCustomerPortfolioResult, SaeReceivableInvoiceAccountResult, TaxDisplayMode } from '../../types/sae';
 import { ReceivablesPortfolioSummary } from './ReceivablesPortfolioSummary';
@@ -7,7 +8,6 @@ import './ReceivablesDashboard.css';
 
 interface ReceivablesDashboardProps {
   connection: SaeConnectionRequest | null;
-  connectionName: string;
   initialDocumentNumber?: string;
   taxDisplayMode: TaxDisplayMode;
   onTaxDisplayModeChange: (mode: TaxDisplayMode) => void;
@@ -32,7 +32,7 @@ function overdueDays(value: string | null | undefined): number | null {
   return Math.floor((Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(year, month - 1, day)) / 86400000);
 }
 
-export function ReceivablesDashboard({ connection, connectionName, taxDisplayMode, onTaxDisplayModeChange, onRequestConnection }: ReceivablesDashboardProps) {
+export function ReceivablesDashboard({ connection, taxDisplayMode, onTaxDisplayModeChange, onRequestConnection }: ReceivablesDashboardProps) {
   const requestRef = useRef<AbortController | null>(null);
   const [account, setAccount] = useState<SaeReceivableInvoiceAccountResult | null>(null);
   const [portfolio, setPortfolio] = useState<SaeCustomerPortfolioResult | null>(null);
@@ -103,12 +103,6 @@ export function ReceivablesDashboard({ connection, connectionName, taxDisplayMod
   const tone = invoice?.status === 'Liquidada' ? 'success' : invoice?.status === 'Cancelada' ? 'danger' : invoice?.status === 'Vencido' ? 'warning' : invoice?.status === 'Adeudo' ? 'info' : 'neutral';
 
   return <div className="receivables-view">
-    <header className="receivables-hero">
-      <div><span className="eyebrow">CONTROL DE CARTERA</span><h1>Cuentas por cobrar</h1>
-        <p>Consulta facturas, abonos y saldos vigentes directamente desde SAE.</p></div>
-      <div className="receivables-connection"><span className={connection ? 'online' : ''} />
-        <div><small>Fuente de datos</small><strong>{connectionName}</strong></div><ShieldCheck size={20} /></div>
-    </header>
     <ReceivablesPortfolioSummary connection={connection} taxDisplayMode={taxDisplayMode}
       onTaxDisplayModeChange={onTaxDisplayModeChange} onRequestConnection={onRequestConnection}
       onSelectDocument={number => {
@@ -116,7 +110,7 @@ export function ReceivablesDashboard({ connection, connectionName, taxDisplayMod
         window.requestAnimationFrame(() => document.getElementById('receivable-document-search')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
       }} />
     <div id="receivable-document-search" className="receivable-document-search-heading">
-      <div><span className="eyebrow">EXPEDIENTE INDIVIDUAL</span><h2>Consultar una factura</h2></div>
+      <div><h2>Consultar una factura</h2></div>
       <p>Revisa el total de la factura, todos sus cargos y abonos.</p>
     </div>
     {error && <div className="receivables-alert" role="alert"><AlertTriangle size={18} /><span>{error}</span></div>}
@@ -151,7 +145,7 @@ export function ReceivablesDashboard({ connection, connectionName, taxDisplayMod
         <div className="receivables-alert" role="alert"><AlertTriangle size={18} /><span>Los cargos registrados ({money(invoice.originalCharges)}) difieren del total de la factura ({money(invoice.amountWithVat)}). El saldo se calcula con los cargos y abonos de SAE.</span></div>}
       <section className="receivables-grid">
         <article className="receivable-panel aging-panel" aria-busy={portfolioLoading}>
-          <div className="receivable-panel-heading"><div><span className="eyebrow">ANTIGÜEDAD DEL CLIENTE</span><h2>Saldo pendiente por vencimiento</h2></div>
+          <div className="receivable-panel-heading"><div><h2>Saldo pendiente por vencimiento</h2></div>
             <span className="record-limit">{portfolioLoading ? <><LoaderCircle size={14} className="spin" /> Cargando…</> : aging.reduce((sum, row) => sum + row.count, 0) + ' cargos pendientes'}</span></div>
           {portfolioError ? <p className="table-empty" role="alert">{portfolioError}</p> : portfolioLoading ? <p className="table-empty">Consultando el saldo vigente del cliente…</p> : <>
             <div className="aging-bar" aria-label="Distribución por antigüedad">{aging.filter(row => row.amount > 0).map(row =>
@@ -161,10 +155,10 @@ export function ReceivablesDashboard({ connection, connectionName, taxDisplayMod
           </>}
         </article>
         <article className="receivable-panel document-detail-panel">
-          <div className="receivable-panel-heading"><div><span className="eyebrow">DOCUMENTO CONSULTADO</span><h2>Ficha de la factura</h2></div><ReceiptText size={20} /></div>
+          <div className="receivable-panel-heading"><div><h2>Ficha de la factura</h2></div><ReceiptText size={20} /></div>
           <dl className="document-facts">
             <div><dt>Cliente</dt><dd title={invoice.customerName}>{invoice.customerCode} · {invoice.customerName}</dd></div>
-            <div><dt>Vendedor (clave)</dt><dd>{invoice.sellerCode || '—'}</dd></div>
+            <div><dt>Vendedor</dt><dd><SellerDescription code={invoice.sellerCode} /></dd></div>
             <div><dt>Elaboración</dt><dd>{date(invoice.creationDate)}</dd></div>
             <div><dt>Fecha de factura</dt><dd>{date(invoice.documentDate)}</dd></div>
             <div><dt>Cargos registrados</dt><dd>{invoice.chargeCount}</dd></div>
@@ -173,7 +167,7 @@ export function ReceivablesDashboard({ connection, connectionName, taxDisplayMod
         </article>
       </section>
       <section className="receivable-panel movements-panel">
-        <div className="receivable-panel-heading"><div><span className="eyebrow">TRAZABILIDAD DE COBRANZA</span><h2>Cargos y abonos de la factura</h2></div>
+        <div className="receivable-panel-heading"><div><h2>Cargos y abonos de la factura</h2></div>
           <span className="record-limit">{account?.movements.length} registros · con IVA</span></div>
         <p className="movement-ledger-note">El importe conserva el movimiento original. El saldo y el estado de cada cargo ya descuentan sus abonos.</p>
         <div className="movement-table-wrap"><table className="movement-table"><thead><tr><th>Movimiento</th><th>Fecha</th><th>Documento / referencia</th><th>Vencimiento</th><th>Tipo / estado</th><th>Importe / saldo con IVA</th></tr></thead>

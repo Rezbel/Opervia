@@ -1,4 +1,11 @@
-import { AlertTriangle, Ban, CheckCircle2, CircleDollarSign, LoaderCircle, OctagonAlert, RefreshCw, Search, UsersRound } from 'lucide-react';
+import { FilterMultiSelect } from '../filters/FilterMultiSelect';
+import { RefreshButton } from '../filters/RefreshButton';
+import { customerBranchOptions } from '../filters/customerBranches';
+import { useSellerCatalog } from '../sellers/SellerCatalogContext';
+import { SellerDescription } from '../sellers/SellerCatalogProvider';
+import { TablePagination, TableResultCount } from '../tables/TablePagination';
+import { useAccess } from '../access/AccessContext';
+import { AlertTriangle, Ban, CheckCircle2, LoaderCircle, OctagonAlert, Search, UsersRound } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getCustomerPortfolio } from '../../lib/saeApi';
 import type { SaeConnectionRequest, SaeCustomerPortfolioResult } from '../../types/sae';
@@ -8,7 +15,7 @@ interface Props { connection: SaeConnectionRequest | null; onRequestConnection: 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 const date = new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
 const options = {
-  branch: [['Q', 'Querétaro'], ['H', 'Huasteca'], ['X', 'Xalapa'], ['S', 'San Luis Potosí']],
+  branch: customerBranchOptions,
   state: [['A', 'Activo'], ['M', 'Moroso'], ['S', 'Suspendido'], ['B', 'Baja']],
   customerType: [['L', 'Laboratorio'], ['I', 'Industria'], ['D', 'Distribuidor'], ['H', 'Hospital'], ['C', 'Centro de investigación'], ['E', 'Escuela'], ['V', 'Veterinaria']],
   classification: [['A', 'Acero'], ['R', 'Oro'], ['O', 'Plomo'], ['X', 'Oxidado']],
@@ -32,6 +39,8 @@ function urgency(dueDate: string | null) {
 }
 
 export function CustomersDashboard({ connection, onRequestConnection }: Props) {
+  const isExecutive = useAccess()?.role === 'Ejecutivo';
+  const sellerCatalog = useSellerCatalog();
   const [filters, setFilters] = useState<Record<string, string>>(emptyFilters);
   const [sellerInput, setSellerInput] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState('');
@@ -39,6 +48,9 @@ export function CustomersDashboard({ connection, onRequestConnection }: Props) {
   const [order, setOrder] = useState('source');
   const [customerPage, setCustomerPage] = useState(1);
   const [customersPerPage, setCustomersPerPage] = useState(10);
+  const [invoicePage, setInvoicePage] = useState(1);
+  const [invoicesPerPage, setInvoicesPerPage] = useState(30);
+
   const [result, setResult] = useState<SaeCustomerPortfolioResult | null>(null);
   const [detail, setDetail] = useState<SaeCustomerPortfolioResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,6 +62,7 @@ export function CustomersDashboard({ connection, onRequestConnection }: Props) {
   const cache = useRef(new Map<string, { at: number; value: SaeCustomerPortfolioResult }>());
   const connectionKey = JSON.stringify(connection);
   const filterKey = JSON.stringify(filters);
+  useEffect(() => setInvoicePage(1), [selectedCustomer, filterKey]);
 
   useEffect(() => { cache.current.clear(); setResult(null); setDetail(null); setSelectedCustomer(''); }, [connectionKey]);
   const change = (key: string, value: string) => {
@@ -126,26 +139,28 @@ export function CustomersDashboard({ connection, onRequestConnection }: Props) {
   const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / customersPerPage));
   const page = Math.min(customerPage, totalPages);
   const visibleCustomers = filteredCustomers.slice((page - 1) * customersPerPage, page * customersPerPage);
+  const invoiceTotal = detail?.invoices.length ?? 0;
+  const currentInvoicePage = Math.min(invoicePage, Math.max(1, Math.ceil(invoiceTotal / invoicesPerPage)));
+  const pageInvoices = detail?.invoices.slice((currentInvoicePage - 1) * invoicesPerPage, currentInvoicePage * invoicesPerPage) ?? [];
   const selected = detail?.customers.find(customer => customer.customerCode === selectedCustomer);
   const difference = detail?.balanceDifference ?? 0;
 
-  if (!connection) return <section className="customers-empty"><UsersRound size={34} /><h1>Clientes y cartera</h1><p>Conecta SAE para consultar los saldos de tus clientes.</p><button onClick={onRequestConnection}>Configurar conexión SAE</button></section>;
+  if (!connection) return <section className="customers-empty"><UsersRound size={34} /><h2>Conecta SAE</h2><p>Conecta SAE para consultar los saldos de tus clientes.</p><button onClick={onRequestConnection}>Configurar conexión SAE</button></section>;
   return <section className="customers-view">
-    <header className="customers-hero"><div><span className="eyebrow">CARTERA POR CLIENTE</span><h1>Clientes</h1><p>Consulta el crédito autorizado y saldo actual de SAE. Selecciona un cliente para ver todas sus facturas pendientes.</p></div><div className="customers-source"><CircleDollarSign size={18} />Datos de SAE</div></header>
-    <section className="customers-filters">
-      <label><span>Vendedor del cliente</span><input value={sellerInput} onChange={event => { setSellerInput(event.target.value); setSelectedCustomer(''); }} placeholder="Clave exacta" /></label>
+    <section className="customers-filters module-filter-bar">
+      {!isExecutive && <label><span>Vendedor del cliente</span><input value={sellerInput} onChange={event => { setSellerInput(event.target.value); setSelectedCustomer(''); }} placeholder="Clave exacta" />{sellerInput.trim() && <small className="seller-filter-description">{sellerCatalog.description(sellerInput)}</small>}</label>}
       {(Object.entries(options) as [keyof typeof options, readonly (readonly string[])[]][]).map(([key, values]) =>
-        <label key={key}><span>{labels[key]}</span><select value={filters[key]} onChange={event => change(key, event.target.value)}><option value="">Todos</option>{values.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>)}
+        <FilterMultiSelect key={key} label={labels[key]} placeholder="Todos" value={filters[key]} onChange={value => change(key,value)} options={values.map(([value,label]) => ({value,label}))} />)}
       <label><span>Ordenar</span><select value={order} onChange={event => { setOrder(event.target.value); setCustomerPage(1); }}><option value="source">Sin ordenar</option><option value="balance">Mayor saldo primero</option><option value="name">Nombre A–Z</option><option value="code">Clave</option></select></label>
-      <button className="customers-refresh" onClick={() => { cache.current.clear(); setRefresh(value => value + 1); }} disabled={loading || detailLoading} aria-label="Actualizar cartera"><RefreshCw className={loading || detailLoading ? 'spin' : ''} size={17} /></button>
+      <RefreshButton onClick={() => { cache.current.clear(); setRefresh(value => value + 1); }} busy={loading || detailLoading} label="Actualizar cartera" />
     </section>
     {error && <p className="customers-error" role="alert"><AlertTriangle size={17} />{error}</p>}
     <section className="customers-panel">
-      <div className="customers-panel-heading"><div><h2>Clientes</h2><p>{filteredCustomers.length} {filteredCustomers.length === 1 ? 'cliente encontrado' : 'clientes encontrados'}{loading ? ' · Actualizando…' : ''}</p></div><label className="customers-search"><Search size={16} /><input value={customerSearch} onChange={event => { setCustomerSearch(event.target.value); setCustomerPage(1); }} placeholder="Buscar por clave o nombre" aria-label="Buscar cliente por clave o nombre" /></label></div>
+      <div className="customers-panel-heading"><div><h2>Clientes</h2><p>Crédito y saldo actual registrados en SAE.</p></div><div className="table-header-tools"><label className="customers-search"><Search size={16} /><input value={customerSearch} onChange={event => { setCustomerSearch(event.target.value); setCustomerPage(1); }} placeholder="Buscar por clave o nombre" aria-label="Buscar cliente por clave o nombre" /></label><TableResultCount total={filteredCustomers.length} noun="clientes" busy={loading} /></div></div>
       <div className="customers-table">
-        <div className="customers-head"><span>Cliente</span><span>Vendedor</span><span>Clasificación</span><span>Límite de crédito</span><span>Días de crédito</span><span>Saldo SAE</span><span>Estado SAE</span></div>
+        <div className="customers-head"><span>Cliente</span><span>Vendedor</span><span>Clasificación</span><span>Límite de crédito</span><span>Días de crédito</span><span>{isExecutive ? 'Saldo de mis vendedores' : 'Saldo SAE'}</span><span>Estado SAE</span></div>
         {visibleCustomers.map(customer => <button key={customer.customerCode} className={`customers-row${selectedCustomer === customer.customerCode ? ' selected' : ''}`} aria-pressed={selectedCustomer === customer.customerCode} onClick={() => setSelectedCustomer(customer.customerCode)}>
-          <span><strong>{customer.customerName}</strong><small>{customer.customerCode}</small></span><b>{customer.sellerCode || '—'}</b><b>{customer.classification || 'Sin clasificación'}</b>
+          <span><strong>{customer.customerName}</strong><small>{customer.customerCode}</small></span><SellerDescription code={customer.sellerCode} /><b>{customer.classification || 'Sin clasificación'}</b>
           <span><b>{money.format(customer.creditLimit)}</b><small>{customer.hasCredit ? 'Crédito habilitado' : 'Sin crédito'}</small></span><b>{customer.creditDays} días</b>
           <span><b className={customer.balance > 0 ? 'balance due' : 'balance'}>{money.format(customer.balance)}</b>{customer.balance < -0.005 && <small>Saldo a favor</small>}</span>
           <b className={`customer-portfolio-status status-${customer.customerStatus.toLowerCase()}`}>{customer.customerStatus === 'M' ? <AlertTriangle size={13} /> : customer.customerStatus === 'S' || customer.customerStatus === 'B' ? <Ban size={13} /> : customer.customerStatus === 'A' ? <CheckCircle2 size={13} /> : null}{statusLabel(customer.customerStatus)}</b>
@@ -153,28 +168,31 @@ export function CustomersDashboard({ connection, onRequestConnection }: Props) {
         {loading && !result && <div className="customers-invoice-loading"><LoaderCircle size={22} /><span>Consultando clientes en SAE…</span></div>}
         {!loading && filteredCustomers.length === 0 && <p className="customers-no-data">No hay clientes que coincidan con la búsqueda y los filtros.</p>}
       </div>
-      {filteredCustomers.length > 0 && <div className="customers-pagination"><span>Página {page} de {totalPages}</span><label>Mostrar <select value={customersPerPage} onChange={event => { setCustomersPerPage(Number(event.target.value)); setCustomerPage(1); }}>{[10, 30, 60, 100].map(size => <option key={size} value={size}>{size}</option>)}</select> por página</label><div><button disabled={page === 1} onClick={() => setCustomerPage(page - 1)}>Anterior</button><button disabled={page >= totalPages} onClick={() => setCustomerPage(page + 1)}>Siguiente</button></div></div>}
+      <TablePagination page={page} total={filteredCustomers.length} pageSize={customersPerPage} onPageChange={setCustomerPage}
+        busy={loading} label="clientes" onPageSizeChange={size => { setCustomersPerPage(size); setCustomerPage(1); }} />
     </section>
     {selectedCustomer && <section ref={invoicesSection} className="customers-panel customers-invoices">
-      <div className="customers-panel-heading"><div><h2>Facturas pendientes del cliente</h2><p>{selected?.customerName ?? selectedCustomer} · Amarillo: vence en 7 días · rojo: factura vencida.{detailLoading && detail ? ' Actualizando…' : ''}</p></div><span>{selectedCustomer}</span></div>
+      <div className="customers-panel-heading"><div><h2>Facturas pendientes del cliente</h2><p>{selected?.customerName ?? selectedCustomer} · Amarillo: vence en 7 días · rojo: factura vencida.{detailLoading && detail ? ' Actualizando…' : ''}</p></div><TableResultCount total={invoiceTotal} noun="facturas" busy={detailLoading} /></div>
       {detailError && <p className="customers-error" role="alert">{detailError}</p>}
       {detailLoading && !detail ? <div className="customers-invoice-loading"><LoaderCircle size={22} /><span>Consultando facturas en SAE…</span></div> : detail && <>
         {selected && <div className="customers-reconciliation" aria-label="Conciliación del saldo">
-          <span>Saldo SAE<strong>{money.format(selected.balance)}</strong></span>
+          <span>{isExecutive ? 'Saldo de mis vendedores' : 'Saldo SAE'}<strong>{money.format(selected.balance)}</strong></span>
           <span>Facturas pendientes<strong>{money.format(detail.pendingInvoiceBalance ?? 0)}</strong></span>
           {Math.abs(detail.creditBalance ?? 0) >= 0.005 && <span>Menos saldos a favor<strong>{money.format(detail.creditBalance ?? 0)}</strong></span>}
           {Math.abs(detail.otherAccountBalance ?? 0) >= 0.005 && <span>Otros movimientos de cartera<strong>{money.format(detail.otherAccountBalance ?? 0)}</strong></span>}
           <span>Saldo conciliado<strong>{money.format(detail.accountingBalance ?? 0)}</strong></span>
-          <p className={Math.abs(difference) > 0.01 ? 'reconciliation-difference' : ''}>{Math.abs(difference) > 0.01 ? `Diferencia con el saldo SAE: ${money.format(difference)}. Revisa los movimientos de cartera en SAE.` : 'El desglose coincide con el saldo de SAE.'}</p>
+          <p className={Math.abs(difference) > 0.01 ? 'reconciliation-difference' : ''}>{Math.abs(difference) > 0.01 ? `Diferencia con el saldo SAE: ${money.format(difference)}. Revisa los movimientos de cartera en SAE.` : (isExecutive ? 'El desglose corresponde únicamente a tus vendedores seleccionados.' : 'El desglose coincide con el saldo de SAE.')}</p>
         </div>}
         <div className="customers-table"><div className="customers-head invoices"><span>Factura</span><span>Fecha</span><span>Vencimiento</span><span>Vendedor</span><span>Saldo pendiente</span><span>Estado</span></div>
-          {detail.invoices.map(invoice => { const tone = urgency(invoice.dueDate); return <div className={`customers-invoice-row invoice-${tone}`} key={invoice.invoiceNumber}>
+          {pageInvoices.map(invoice => { const tone = urgency(invoice.dueDate); return <div className={`customers-invoice-row invoice-${tone}`} key={invoice.invoiceNumber}>
             <strong>{invoice.invoiceNumber}{tone === 'upcoming' && <AlertTriangle className="invoice-warning-icon" size={14} />}{(tone === 'overdue' || tone === 'critical') && <OctagonAlert className="invoice-danger-icon" size={15} />}</strong>
-            <span>{formatDate(invoice.documentDate)}</span><span>{formatDate(invoice.dueDate)}</span><span>{invoice.sellerCode || '—'}</span><b title={`Importe original: ${money.format(invoice.originalAmount)}`}>{money.format(invoice.amount)}</b>
+            <span>{formatDate(invoice.documentDate)}</span><span>{formatDate(invoice.dueDate)}</span><SellerDescription code={invoice.sellerCode} /><b title={`Importe original: ${money.format(invoice.originalAmount)}`}>{money.format(invoice.amount)}</b>
             <span className={`customer-invoice-status ${tone}`}>{tone === 'critical' ? 'Muy vencida' : tone === 'upcoming' ? 'Próxima a vencer' : invoice.status}</span>
           </div>; })}
           {detail.invoices.length === 0 && <p className="customers-no-data">{selected ? 'Este cliente no tiene facturas con saldo pendiente.' : 'El cliente ya no coincide con los filtros aplicados.'}</p>}
         </div>
+        <TablePagination page={currentInvoicePage} total={invoiceTotal} pageSize={invoicesPerPage} onPageChange={setInvoicePage}
+          busy={detailLoading} label="facturas pendientes" onPageSizeChange={size => { setInvoicesPerPage(size); setInvoicePage(1); }} />
       </>}
     </section>}
   </section>;

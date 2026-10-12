@@ -1,3 +1,6 @@
+using Opervia.Application.Reporting;
+using Opervia.Infrastructure.Persistence;
+using Opervia.Application.Access;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Commercial;
@@ -87,8 +90,8 @@ public sealed class FirebirdSaeCommercialProbe(ILogger<FirebirdSaeCommercialProb
             reconciled.AddRange(parts.Select((p, i) => p with { Net = amounts[i].WithoutTax, WithTax = amounts[i].WithTax }));
         }
         return reconciled.Where(x =>
-            (string.IsNullOrWhiteSpace(filter.Brand) || string.Equals(x.Brand, filter.Brand.Trim(), StringComparison.OrdinalIgnoreCase))
-            && (string.IsNullOrWhiteSpace(filter.ProductLine) || x.Line == filter.ProductLine.Trim())).ToArray();
+            FilterSelection.Matches(filter.Brand, x.Brand)
+            && FilterSelection.Matches(filter.ProductLine, x.Line)).ToArray();
     }
 
     private static async Task<List<Row>> ReadRows(FbConnection connection, FbTransaction transaction, Tables t,
@@ -113,7 +116,8 @@ public sealed class FirebirdSaeCommercialProbe(ILogger<FirebirdSaeCommercialProb
             WHERE COALESCE(F.FECHAELAB,F.FECHA_DOC)>=@from
                 AND COALESCE(F.FECHAELAB,F.FECHA_DOC)<@to
                 AND COALESCE(F.STATUS,'')<>'C'
-                AND (CAST(@seller AS VARCHAR(10))='' OR TRIM(F.CVE_VEND)=CAST(@seller AS VARCHAR(10)))
+                AND {SellerAccessScope.Sql("F.CVE_VEND")}
+                {(FilterSelection.Values(filter.SellerCode).Length == 0 ? "" : "AND TRIM(F.CVE_VEND) = @seller")}
                 AND (CAST(@customer AS VARCHAR(20))='' OR TRIM(F.CVE_CLPV)=CAST(@customer AS VARCHAR(20)))
                 AND (COALESCE(P.TIPO_PROD,'')<>'K' OR NOT EXISTS (
                     SELECT 1 FROM {t.Par} COMPONENT
@@ -121,9 +125,10 @@ public sealed class FirebirdSaeCommercialProbe(ILogger<FirebirdSaeCommercialProb
             ORDER BY F.CVE_DOC,P.NUM_PAR
             """;
         await using var command = new FbCommand(sql, connection, transaction) { CommandTimeout = 90 };
-        command.Parameters.AddWithValue("from", from.ToDateTime(TimeOnly.MinValue));
-        command.Parameters.AddWithValue("to", to.AddDays(1).ToDateTime(TimeOnly.MinValue));
-        command.Parameters.AddWithValue("seller", filter.SellerCode?.Trim() ?? "");
+        var period = Opervia.Application.Reporting.SaeDatePeriod.Create(from, to);
+        command.Parameters.AddWithValue("from", period.FromInclusive);
+        command.Parameters.AddWithValue("to", period.UntilExclusive);
+        FilterSelectionSql.Add(command, "@seller", filter.SellerCode);
         command.Parameters.AddWithValue("customer", filter.Customer?.Trim() ?? "");
         var rows = new List<Row>();
         await using var reader = await command.ExecuteReaderAsync(token);
@@ -150,7 +155,7 @@ public sealed class FirebirdSaeCommercialProbe(ILogger<FirebirdSaeCommercialProb
             }
             return options.ToArray();
         }
-        var sellers = await Query($"SELECT CVE_VEND,NOMBRE FROM {t.Vend} ORDER BY NOMBRE");
+        var sellers = await Query($"SELECT CVE_VEND,NOMBRE FROM {t.Vend} WHERE {SellerAccessScope.Sql("CVE_VEND")} ORDER BY NOMBRE");
         var brands = await Query($"SELECT DISTINCT UPPER(TRIM(CAMPLIB1)),UPPER(TRIM(CAMPLIB1)) FROM {t.Clib} WHERE TRIM(COALESCE(CAMPLIB1,''))<>'' ORDER BY 1");
         var lines = await Query($"SELECT CVE_LIN,DESC_LIN FROM {t.Clin} ORDER BY DESC_LIN");
         return (sellers, brands.Append(new("Sin marca", "Sin marca")).ToArray(), lines);

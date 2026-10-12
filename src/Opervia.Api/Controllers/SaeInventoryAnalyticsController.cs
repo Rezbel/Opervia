@@ -1,3 +1,4 @@
+using Opervia.Application.Reporting;
 using Microsoft.AspNetCore.Mvc;
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Inventory;
@@ -15,7 +16,7 @@ public sealed class SaeInventoryAnalyticsController(
         [FromQuery] DateOnly from,
         [FromQuery] DateOnly to,
         [FromQuery] string? seller,
-        [FromQuery] int? warehouse,
+        [FromQuery] string? warehouse,
         [FromQuery] string? line,
         [FromBody] TestSaeConnectionRequest request,
         CancellationToken cancellationToken)
@@ -24,7 +25,7 @@ public sealed class SaeInventoryAnalyticsController(
             return BadRequest(new { message = "Indica un periodo de consulta válido." });
         if (to.DayNumber - from.DayNumber > 366)
             return BadRequest(new { message = "El análisis admite periodos de hasta 367 días." });
-        if (warehouse is < 0)
+        if (FilterSelection.Values(warehouse).Any(code => !int.TryParse(code, out var number) || number < 0))
             return BadRequest(new { message = "El almacén seleccionado no es válido." });
 
         var result = await probe.ReadAsync(

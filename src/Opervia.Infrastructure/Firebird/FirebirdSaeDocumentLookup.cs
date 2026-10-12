@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+using Opervia.Application.Access;
+using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Documents;
 using Opervia.Domain.Connections;
@@ -70,7 +71,7 @@ public sealed class FirebirdSaeDocumentLookup(
                     TIP_DOC_SIG,
                     DOC_SIG
                 FROM {tableName}
-                WHERE CVE_DOC = @DOCUMENT_NUMBER
+                WHERE CVE_DOC = @DOCUMENT_NUMBER AND {SellerAccessScope.Sql("CVE_VEND")}
                 """;
 
             await using var command =

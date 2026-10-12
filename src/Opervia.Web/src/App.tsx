@@ -2,8 +2,12 @@ import {
   useEffect,
   useRef,
   useState,
+  lazy,
+  Suspense,
   type FormEvent,
 } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { modulePaths, settingsPaths, usersPath, loginPath, resolveAppRoute, safeReturnPath, canOpenRoute, type SettingsSection } from './lib/appRoutes';
 
 import {
   Activity,
@@ -11,10 +15,14 @@ import {
   Boxes,
   UsersRound,
   Building2,
-  ChevronDown,
+  Menu,
+  Settings,
+  Database,
+  ShieldCheck,
+  CalendarClock,
+  X,
   LayoutDashboard,
   Search,
-  Settings,
   Moon,
   Sun,
   LogOut,
@@ -36,12 +44,20 @@ import {
 } from '@xyflow/react';
 
 import { SaeConnectionForm } from './features/connections/SaeConnectionForm';
+import { CompanyBadge, CompanyProvider } from './features/connections/CompanyIdentity';
 import { DocumentItemsPanel } from './features/processes/DocumentItemsPanel';
 import { RecentDocumentsPanel } from './features/processes/RecentDocumentsPanel';
 import { CustomersDashboard } from './features/customers/CustomersDashboard';
 import { CommercialDashboard } from './features/commercial/CommercialDashboard';
 import { ReceivablesDashboard } from './features/receivables/ReceivablesDashboard';
 import { ProfitabilityDashboard } from './features/profitability/ProfitabilityDashboard';
+import { AccessContext } from './features/access/AccessContext';
+import { accessRequest, sessionUser, setSellerScope } from './features/access/accessApi';
+import { ControlOverview } from './features/control/ControlOverview';
+import { SellerCatalogProvider, SellerDescription, ExecutiveSellerPicker } from './features/sellers/SellerCatalogProvider';
+const CollectionsControl = lazy(() => import('./features/collections/CollectionsControl').then(module => ({ default: module.CollectionsControl })));
+const MaturitiesDashboard = lazy(() => import('./features/maturities/MaturitiesDashboard').then(module => ({ default: module.MaturitiesDashboard })));
+import { UserAdministration } from './features/access/UserAdministration';
 import { BasicLogin } from './features/access/BasicLogin';
 import type { BasicAccessUser } from './features/access/basicAccess';
 import {
@@ -64,6 +80,10 @@ import type {
 
 import '@xyflow/react/dist/style.css';
 import './App.css';
+import './Sidebar.css';
+import './ModuleHeader.css';
+import './SettingsModal.css';
+import './WorkspacePanels.css';
 
 const nodeBaseStyle = {
   width: 185,
@@ -238,7 +258,7 @@ function createReactFlowNode(
             </span>
           )}
 
-          <small>Vendedor: {document.salespersonCode || 'Sin vendedor'}</small>
+          <small>Vendedor: <SellerDescription code={document.salespersonCode} inline /></small>
           <small>Almacén: {document.warehouseNumber ?? 'N/D'}</small>
 
           <small>
@@ -377,14 +397,46 @@ const demoEdges: Edge[] = [
 ];
 
 function App() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = window.localStorage.getItem('opervia.sidebarCollapsed');
+    return saved === null ? window.innerWidth <= 860 : saved === 'true';
+  });
+  const [sidebarTextVisible, setSidebarTextVisible] = useState(() => window.localStorage.getItem('opervia.sidebarCollapsed') === 'false' || (window.localStorage.getItem('opervia.sidebarCollapsed') === null && window.innerWidth > 860));
+  const sidebarRevealTimer = useRef<number | null>(null);
+  const sidebarDesiredOpen = useRef(!sidebarCollapsed);
+  useEffect(() => () => { if (sidebarRevealTimer.current !== null) window.clearTimeout(sidebarRevealTimer.current); }, []);
+  const toggleSidebar = () => {
+    if (sidebarRevealTimer.current !== null) window.clearTimeout(sidebarRevealTimer.current);
+    sidebarDesiredOpen.current = !sidebarDesiredOpen.current;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setSidebarTextVisible(false);
+    if (sidebarDesiredOpen.current) {
+      setSidebarCollapsed(false);
+      if (reducedMotion) setSidebarTextVisible(true);
+      else sidebarRevealTimer.current = window.setTimeout(() => setSidebarTextVisible(true), 275);
+    } else {
+      if (reducedMotion) setSidebarCollapsed(true);
+      else sidebarRevealTimer.current = window.setTimeout(() => setSidebarCollapsed(true), 110);
+    }
+  };
+  useEffect(() => { window.localStorage.setItem('opervia.sidebarCollapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
   const flowRequestRef = useRef<AbortController | null>(null);
   const itemsRequestRef = useRef<AbortController | null>(null);
   const aiRequestRef = useRef<AbortController | null>(null);
 
-  const [isConnectionOpen, setIsConnectionOpen] =
-    useState(false);
-  const [activeView, setActiveView] =
-    useState<'control' | 'flows' | 'receivables' | 'profitability' | 'customers' | 'commercial' | 'ai'>('control');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const route = resolveAppRoute(location.pathname);
+  const isConnectionOpen = !!route?.settings;
+  const settingsSection = route?.settings ?? 'connection';
+  const currentPath = `${location.pathname}${location.search}${location.hash}`;
+  const settingsReturnPath = safeReturnPath(new URLSearchParams(location.search).get('desde'), false);
+  const activeView = isConnectionOpen ? resolveAppRoute(settingsReturnPath.split(/[?#]/)[0])!.view : route?.view ?? 'control';
+  function openSettings(section: SettingsSection = 'connection') {
+    const from = isConnectionOpen ? settingsReturnPath : safeReturnPath(currentPath, false);
+    navigate(`${settingsPaths[section]}?${new URLSearchParams({ desde: from })}`);
+  }
+  function closeSettings() { navigate(settingsReturnPath); }
   const [taxDisplayMode, setTaxDisplayMode] = useState<TaxDisplayMode>(() =>
     window.localStorage.getItem('opervia.taxDisplayMode') === 'withoutTax'
       ? 'withoutTax'
@@ -395,12 +447,37 @@ function App() {
       ? 'light'
       : 'dark',
   );
-  const [basicUser, setBasicUser] = useState<BasicAccessUser | null>(() => {
-    try {
-      const value = window.localStorage.getItem('opervia.basicUser');
-      return value ? JSON.parse(value) as BasicAccessUser : null;
-    } catch { return null; }
-  });
+  const [basicUser, setBasicUser] = useState<BasicAccessUser | null>(null);
+  const [sessionChecking, setSessionChecking] = useState(true);
+  const [selectedSeller, setSelectedSeller] = useState('');
+  const isAdmin = basicUser?.role === 'Administrador';
+  const isExecutive = basicUser?.role === 'Ejecutivo';
+  useEffect(() => {
+    const titles = { control: 'Centro de control', flows: 'Flujos', receivables: 'Cuentas por cobrar', collections: 'Control Cobranza', maturities: 'Programación de vencimientos', profitability: 'Rentabilidad', commercial: 'Comercial', customers: 'Clientes', ai: 'Chat IA' };
+    document.title = `${location.pathname === loginPath ? 'Iniciar sesión' : isConnectionOpen ? 'Configuración' : titles[activeView]} · Opervia`;
+  }, [activeView, isConnectionOpen, location.pathname]);
+  function applyUser(user: BasicAccessUser | null) {
+    const seller = user?.role === 'Ejecutivo' && user.sellerCodes.length === 1 ? user.sellerCodes[0] : '';
+    setSellerScope(seller); setSelectedSeller(seller); setBasicUser(user);
+    setActiveConnection(null);
+    clearFlowState(); clearDocumentItemsState(); setAiAnswer(null);
+  }
+  useEffect(() => {
+    window.localStorage.removeItem('opervia.basicUser');
+    let alive = true;
+    void sessionUser().then(user => { if (alive) applyUser(user); }).catch(() => {}).finally(() => { if (alive) setSessionChecking(false); });
+    const expired = () => applyUser(null);
+    window.addEventListener('opervia-session-expired', expired);
+    return () => { alive = false; window.removeEventListener('opervia-session-expired', expired); };
+  }, []);
+  useEffect(() => {
+    if (!basicUser) return;
+    const check = () => void sessionUser().then(user => { if (!user) applyUser(null); }).catch(() => {});
+    const interval = window.setInterval(check, 60_000);
+    const visible = () => { if (document.visibilityState === 'visible') check(); };
+    document.addEventListener('visibilitychange', visible);
+    return () => { window.clearInterval(interval); document.removeEventListener('visibilitychange', visible); };
+  }, [basicUser]);
 
   const [activeConnection, setActiveConnection] =
     useState<SaeConnectionRequest | null>(null);
@@ -459,6 +536,7 @@ function App() {
   }, [themeMode]);
 
   useEffect(() => {
+    if (!basicUser) return;
     const controller = new AbortController();
     void getLastUsedConnection(controller.signal)
       .then((connection) => {
@@ -485,7 +563,7 @@ function App() {
       aiRequestRef.current?.abort();
       controller.abort();
     };
-  }, []);
+  }, [basicUser]);
 
   function clearFlowState() {
     setFlowResult(null);
@@ -556,7 +634,7 @@ function App() {
     setFlowError(null);
     clearFlowState();
     clearDocumentItemsState();
-    setIsConnectionOpen(false);
+    closeSettings();
   }
 
   async function loadFlow(
@@ -570,7 +648,7 @@ function App() {
         'Primero configura una conexión con Aspel SAE.',
       );
 
-      setIsConnectionOpen(true);
+      openSettings();
       return;
     }
 
@@ -652,7 +730,7 @@ function App() {
         'Primero configura una conexión con Aspel SAE.',
       );
 
-      setIsConnectionOpen(true);
+      openSettings();
       return;
     }
 
@@ -715,193 +793,142 @@ function App() {
       ? documentNumber
       : '');
 
+  if (sessionChecking) return <main className="basic-login"><p role="status">Comprobando tu sesión…</p></main>;
+  const canonicalPath = location.pathname.replace(/\/+$/, '') || modulePaths.control;
+  if (canonicalPath !== location.pathname) return <Navigate replace to={`${canonicalPath}${location.search}${location.hash}`} />;
+  if (location.pathname === '/configuracion') return <Navigate replace to={`${settingsPaths.connection}${location.search}`} />;
+  if (!route && location.pathname !== loginPath) return <Navigate replace to={modulePaths.control} />;
   if (!basicUser) {
-    return <BasicLogin onLogin={(user) => {
-      window.localStorage.setItem('opervia.basicUser', JSON.stringify(user));
-      setBasicUser(user);
-    }} />;
+    if (location.pathname !== loginPath) return <Navigate replace to={`${loginPath}?${new URLSearchParams({ volver: currentPath })}`} />;
+    return <BasicLogin onLogin={applyUser} />;
   }
+  if (location.pathname === loginPath) return <Navigate replace to={safeReturnPath(new URLSearchParams(location.search).get('volver'))} />;
+  if (route && !canOpenRoute(route, basicUser.role)) return <Navigate replace to={modulePaths.control} />;
+  if (isConnectionOpen && !canOpenRoute(resolveAppRoute(settingsReturnPath.split(/[?#]/)[0])!, basicUser.role)) return <Navigate replace to={settingsPaths[settingsSection]} />;
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <AccessContext.Provider value={basicUser}><CompanyProvider connection={activeConnection}><SellerCatalogProvider key={basicUser.id} connection={activeConnection}><div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'} ${sidebarTextVisible ? '' : 'sidebar-text-hidden'}`}>
+      <aside className="sidebar" aria-label="Menú principal">
         <div className="brand">
-          <div className="brand-mark">
-            <Activity size={22} />
-          </div>
-
-          <div>
-            <strong>Opervia</strong>
+          <button type="button" className="sidebar-toggle" aria-expanded={sidebarDesiredOpen.current} aria-controls="opervia-navigation" aria-label={sidebarDesiredOpen.current ? 'Contraer menú' : 'Expandir menú'} title={sidebarDesiredOpen.current ? 'Contraer menú' : 'Expandir menú'} onClick={toggleSidebar}>
+            <Menu size={22} />
+          </button>
+          <div className="brand-name">
+            <strong title={basicUser.name}>{basicUser.name}</strong>
           </div>
         </div>
 
-        <nav className="sidebar-nav">
-          <button
+        <nav className="sidebar-nav" id="opervia-navigation" aria-label="Módulos">
+          <Link title="Centro de control" aria-label="Centro de control"
             className={`nav-item ${
               activeView === 'control' ? 'active' : ''
             }`}
-            onClick={() => setActiveView('control')}
+            to={modulePaths.control} aria-current={activeView === 'control' && !isConnectionOpen ? 'page' : undefined}
           >
             <LayoutDashboard size={19} />
             <span>Centro de control</span>
-          </button>
+          </Link>
 
-          <button
+          <Link title="Flujos" aria-label="Flujos"
             className={`nav-item ${activeView === 'flows' ? 'active' : ''}`}
-            onClick={() => setActiveView('flows')}
+            to={modulePaths.flows} aria-current={activeView === 'flows' && !isConnectionOpen ? 'page' : undefined}
           >
             <Activity size={19} />
             <span>Flujos</span>
-          </button>
+          </Link>
 
-          <button
+          <Link title="Cuentas por cobrar" aria-label="Cuentas por cobrar"
             className={`nav-item ${
               activeView === 'receivables' ? 'active' : ''
             }`}
-            onClick={() => setActiveView('receivables')}
+            to={modulePaths.receivables} aria-current={activeView === 'receivables' && !isConnectionOpen ? 'page' : undefined}
           >
             <WalletCards size={19} />
             <span>Cuentas por cobrar</span>
-          </button>
+          </Link>
 
-          <button
+          <Link title="Control Cobranza" aria-label="Control Cobranza" className={`nav-item ${activeView === 'collections' ? 'active' : ''}`} to={modulePaths.collections} aria-current={activeView === 'collections' && !isConnectionOpen ? 'page' : undefined}>
+            <ShieldCheck size={19} /><span>Control Cobranza</span>
+          </Link>
+
+          <Link title="Programación de vencimientos" aria-label="Programación de vencimientos" className={`nav-item ${activeView === 'maturities' ? 'active' : ''}`} to={modulePaths.maturities} aria-current={activeView === 'maturities' && !isConnectionOpen ? 'page' : undefined}>
+            <CalendarClock size={19} /><span>Programación de vencimientos</span>
+          </Link>
+
+          {!isExecutive && <Link title="Rentabilidad" aria-label="Rentabilidad"
             className={`nav-item ${
               activeView === 'profitability' ? 'active' : ''
             }`}
-            onClick={() => setActiveView('profitability')}
+            to={modulePaths.profitability} aria-current={activeView === 'profitability' && !isConnectionOpen ? 'page' : undefined}
           >
             <TrendingUp size={19} />
             <span>Rentabilidad</span>
-          </button>          <button className={`nav-item ${activeView === 'commercial' ? 'active' : ''}`} onClick={() => setActiveView('commercial')}>
+          </Link>}          <Link title="Comercial" aria-label="Comercial" className={`nav-item ${activeView === 'commercial' ? 'active' : ''}`} to={modulePaths.commercial} aria-current={activeView === 'commercial' && !isConnectionOpen ? 'page' : undefined}>
             <BarChart3 size={19} /><span>Comercial</span>
-          </button>
+          </Link>
 
 
 
-          <button
+          <Link title="Clientes" aria-label="Clientes"
             className={`nav-item ${activeView === 'customers' ? 'active' : ''}`}
-            onClick={() => setActiveView('customers')}
+            to={modulePaths.customers} aria-current={activeView === 'customers' && !isConnectionOpen ? 'page' : undefined}
           >
             <UsersRound size={19} />
             <span>Clientes</span>
-          </button>
+          </Link>
 
-          <button className={`nav-item ${activeView === 'ai' ? 'active' : ''}`} onClick={() => setActiveView('ai')}>
+          {!isExecutive && <Link title="Chat IA" aria-label="Chat IA" className={`nav-item ${activeView === 'ai' ? 'active' : ''}`} to={modulePaths.ai} aria-current={activeView === 'ai' && !isConnectionOpen ? 'page' : undefined}>
             <Bot size={19} /><span>Chat IA</span>
-          </button>
+          </Link>}
           <div className="nav-separator" />
 
-          <button
-            className="nav-item"
-            onClick={() => setIsConnectionOpen(true)}
+          {isAdmin && <Link title="Configuración" aria-label="Configuración"
+            className={`nav-item ${isConnectionOpen ? 'active' : ''}`}
+            to={`${settingsPaths.connection}?${new URLSearchParams({ desde: isConnectionOpen ? settingsReturnPath : safeReturnPath(currentPath, false) })}`} aria-current={isConnectionOpen ? 'page' : undefined}
           >
-            <Building2 size={19} />
-            <span>Conexiones SAE</span>
-          </button>
-
-          <button className="nav-item">
             <Settings size={19} />
             <span>Configuración</span>
-          </button>
+          </Link>}
+
+
         </nav>
 
         <div className="sidebar-footer">
-          <div className="theme-display-control">
-            <span>APARIENCIA</span>
-            <button
-              type="button"
-              onClick={() => setThemeMode((current) => current === 'dark' ? 'light' : 'dark')}
-              aria-label={`Cambiar a modo ${themeMode === 'dark' ? 'claro' : 'oscuro'}`}
-            >
-              {themeMode === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-              <span>{themeMode === 'dark' ? 'Modo oscuro' : 'Modo claro'}</span>
-              <small>Cambiar</small>
-            </button>
-          </div>
-          <div className="sync-indicator">
-            <span />
-
-            <div>
-              <strong>
-                {activeConnection
-                  ? 'Perfil SAE configurado'
-                  : 'SAE sin configurar'}
-              </strong>
-
-              <small>
-                {activeConnection
-                  ? activeConnection.host
-                  : 'Configura una empresa'}
-              </small>
-            </div>
-          </div>
-          <div className="basic-user-indicator">
-            <strong>{basicUser.name}</strong>
-            <small>{basicUser.role}{basicUser.sellerCode ? ` · Vendedor ${basicUser.sellerCode}` : ''}</small>
-          </div>
           <button
             type="button"
-            className="sidebar-logout"
+            className="sidebar-logout" title="Cerrar sesión" aria-label="Cerrar sesión"
             onClick={() => {
-              window.localStorage.removeItem('opervia.basicUser');
-              setBasicUser(null);
+              void accessRequest('logout', { method: 'POST' }).then(() => applyUser(null)).catch(() => applyUser(null));
             }}
           >
-            <LogOut size={15} /> Cerrar sesión
+            <LogOut size={15} /><span>Cerrar sesión</span>
           </button>
         </div>
       </aside>
 
-      <main className="main-content">
-        {activeView === 'control' ? (
-          <section className="control-home">
-            <header className="topbar">
-              <div>
-                <span className="eyebrow">CENTRO DE CONTROL</span>
-                <h1>Operación en un solo lugar</h1>
-                <p>Elige el área que quieres revisar en SAE.</p>
-              </div>
-              <button className="company-selector" onClick={() => setIsConnectionOpen(true)}>
-                <Building2 size={18} />
-                <div><small>Empresa activa</small><strong>{activeConnectionName}</strong></div>
-                <ChevronDown size={17} />
-              </button>
-            </header>
-            <div className="control-home-grid">
-              <button className="control-home-card" onClick={() => setActiveView('flows')}><Activity size={22} /><div><strong>Flujos</strong><span>Pedidos, remisiones y facturas relacionadas.</span></div></button>
-              <button className="control-home-card" onClick={() => setActiveView('receivables')}><WalletCards size={22} /><div><strong>Cuentas por cobrar</strong><span>Cartera, pagos y vencimientos.</span></div></button>
-              <button className="control-home-card" onClick={() => setActiveView('customers')}><UsersRound size={22} /><div><strong>Clientes</strong><span>Saldos, créditos y clasificación comercial.</span></div></button>
-              <button className="control-home-card" onClick={() => setActiveView('profitability')}><TrendingUp size={22} /><div><strong>Rentabilidad</strong><span>Facturación, costos y utilidad.</span></div></button>
-            </div>
-          </section>
-        ) : activeView === 'flows' ? (
-          <>
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">
-              FLUJOS
-            </span>
-
-            <h1>Flujos operativos</h1>
-          </div>
-
-          <div className="topbar-actions">
-            <button
-              className="company-selector"
-              onClick={() => setIsConnectionOpen(true)}
-            >
-              <Building2 size={18} />
-
-              <div>
-                <small>Empresa activa</small>
-                <strong>{activeConnectionName}</strong>
-              </div>
-
-              <ChevronDown size={17} />
+      <main className="main-content" key={`${basicUser.id}:${selectedSeller}`}>
+        <header className="module-header">
+          <h1>{activeView === 'control' ? 'Operación de hoy' : activeView === 'flows' ? 'Flujos operativos' : activeView === 'receivables' ? 'Cuentas por cobrar' : activeView === 'collections' ? 'Control Cobranza' : activeView === 'maturities' ? 'Programación de vencimientos' : activeView === 'profitability' ? 'Rentabilidad comercial' : activeView === 'commercial' ? 'Facturación por marca' : activeView === 'customers' ? 'Clientes' : 'Chat IA'}</h1>
+          <div className="module-header-actions">
+            <CompanyBadge />
+            <button type="button" className="header-theme-toggle" onClick={() => setThemeMode(current => current === 'dark' ? 'light' : 'dark')}
+              aria-label={`Cambiar a modo ${themeMode === 'dark' ? 'claro' : 'oscuro'}`}
+              title={`Cambiar a modo ${themeMode === 'dark' ? 'claro' : 'oscuro'}`}>
+              {themeMode === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+              <span>{themeMode === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
             </button>
           </div>
         </header>
-
+        {isExecutive && <ExecutiveSellerPicker codes={basicUser.sellerCodes} value={selectedSeller} onChange={value => {
+            setSellerScope(value); setSelectedSeller(value);
+            flowRequestRef.current?.abort(); itemsRequestRef.current?.abort(); clearFlowState(); clearDocumentItemsState();
+          }} />}
+        {activeView === 'control' ? (
+          <section className="control-home">
+            <ControlOverview connection={activeConnection} usersOpen={!!route?.users && !isConnectionOpen} onUsersOpenChange={open => navigate(open ? usersPath : modulePaths.control)} />
+          </section>
+        ) : activeView === 'flows' ? (
+          <>
         {flowError && (
           <div className="flow-error-banner">
             {flowError}
@@ -925,9 +952,6 @@ function App() {
           <article className="panel flow-panel">
             <div className="panel-header">
               <div>
-                <span className="eyebrow">
-                  FLUJO SELECCIONADO
-                </span>
 
                 <h2>{flowTitle}</h2>
               </div>
@@ -977,9 +1001,6 @@ function App() {
           </>
         ) : activeView === 'ai' ? (
           <section className="ai-module">
-            <header className="topbar"><div><span className="eyebrow">ASISTENTE</span><h1>Chat IA</h1></div>
-              <button className="secondary-button" onClick={() => setIsConnectionOpen(true)}>Conexión SAE</button>
-            </header>
           <aside className="panel copilot-panel">
             <div className="copilot-heading">
               <div className="copilot-icon">
@@ -987,9 +1008,6 @@ function App() {
               </div>
 
               <div>
-                <span className="eyebrow">
-                  COPILOTO OPERATIVO
-                </span>
 
                 <h2>Opervia AI</h2>
                 <small className="local-ai-badge">
@@ -1000,9 +1018,6 @@ function App() {
                 </small>
               </div>
 
-              <span className="copilot-online">
-                <i /> Disponible
-              </span>
             </div>
 
             {!activeConnection && (
@@ -1094,7 +1109,6 @@ function App() {
                   </div>
                 )}
                 <div className="ai-answer-meta">
-                  <span><i /> Datos consultados en SAE</span>
                   <small>{aiAnswer.model}</small>
                 </div>
                 <div className="suggested-questions ai-followups">
@@ -1145,54 +1159,67 @@ function App() {
           </aside>
           </section>
         ) : activeView === 'commercial' ? (
-          <CommercialDashboard connection={activeConnection} onRequestConnection={() => setIsConnectionOpen(true)} />
+          <CommercialDashboard connection={activeConnection} onRequestConnection={() => { if (isAdmin) openSettings(); }} />
+        ) : activeView === 'collections' ? (
+          <Suspense fallback={<p role="status">Abriendo control de cobranza…</p>}><CollectionsControl connection={activeConnection} onRequestConnection={() => { if (isAdmin) openSettings(); }} /></Suspense>
+        ) : activeView === 'maturities' ? (
+          <Suspense fallback={<p role="status">Abriendo programación de vencimientos…</p>}><MaturitiesDashboard connection={activeConnection} onRequestConnection={() => { if (isAdmin) openSettings(); }} /></Suspense>
         ) : activeView === 'customers' ? (
           <CustomersDashboard
             connection={activeConnection}
-             onRequestConnection={() => setIsConnectionOpen(true)}
+             onRequestConnection={() => { if (isAdmin) openSettings(); }}
           />
         ) : activeView === 'receivables' ? (
           <ReceivablesDashboard
             connection={activeConnection}
-            connectionName={activeConnectionName}
             initialDocumentNumber={receivableDocumentNumber}
-            onRequestConnection={() => setIsConnectionOpen(true)}
+            onRequestConnection={() => { if (isAdmin) openSettings(); }}
             taxDisplayMode={taxDisplayMode}
             onTaxDisplayModeChange={setTaxDisplayMode}
           />
         ) : (
           <ProfitabilityDashboard
             connection={activeConnection}
-            connectionName={activeConnectionName}
             taxDisplayMode={taxDisplayMode}
-            onRequestConnection={() => setIsConnectionOpen(true)}
+            onRequestConnection={() => { if (isAdmin) openSettings(); }}
           />
         )}
       </main>
 
-      {isConnectionOpen && (
+      {isAdmin && isConnectionOpen && (
         <div
           className="connection-modal-backdrop"
           role="presentation"
           onMouseDown={() =>
-            setIsConnectionOpen(false)
+            closeSettings()
           }
         >
           <div
             className="connection-modal-content"
             role="dialog"
             aria-modal="true"
-            aria-label="Configurar conexión SAE"
+            aria-label="Configuración"
             onMouseDown={(event) =>
               event.stopPropagation()
             }
           >
-            <SaeConnectionForm
-              onCancel={() =>
-                setIsConnectionOpen(false)
-              }
-              onSubmit={handleConnectionSubmit}
-            />
+            <div className="settings-modal-heading">
+              <h2>Configuración</h2>
+              <button type="button" onClick={() => closeSettings()} aria-label="Cerrar configuración" title="Cerrar"><X size={20} /></button>
+            </div>
+            <div className="settings-modal-layout">
+              <nav className="settings-modal-nav" aria-label="Apartados de configuración">
+                <button type="button" className={settingsSection === 'connection' ? 'active' : ''} aria-current={settingsSection === 'connection' ? 'page' : undefined} onClick={() => openSettings('connection')}><Database size={18} /> Conexión</button>
+                <button type="button" className={settingsSection === 'users' ? 'active' : ''} aria-current={settingsSection === 'users' ? 'page' : undefined} onClick={() => openSettings('users')}><UsersRound size={18} /> Usuarios</button>
+                <button type="button" className={settingsSection === 'permissions' ? 'active' : ''} aria-current={settingsSection === 'permissions' ? 'page' : undefined} onClick={() => openSettings('permissions')}><ShieldCheck size={18} /> Permisos</button>
+              </nav>
+              <div className="settings-modal-panel">
+                {settingsSection === 'connection' ? <SaeConnectionForm onSubmit={handleConnectionSubmit} /> : settingsSection === 'users' ? <UserAdministration /> :
+                  <section className="settings-modal-empty" aria-label="Permisos">
+                    <h3>Permisos</h3>
+                  </section>}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1211,7 +1238,7 @@ function App() {
           }}
         />
       )}
-    </div>
+    </div></SellerCatalogProvider></CompanyProvider></AccessContext.Provider>
   );
 }
 

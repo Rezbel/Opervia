@@ -1,3 +1,4 @@
+using Opervia.Application.Access;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Receivables;
@@ -23,7 +24,7 @@ public sealed class FirebirdSaeReceivableInvoiceAccountProbe(ILogger<FirebirdSae
                     F.CVE_VEND, COALESCE(F.FECHAELAB, F.FECHA_DOC), F.FECHA_DOC, F.IMPORTE, F.IMP_TOT4, F.STATUS
                 FROM {profile.ResolveTableName("FACTF")} F
                 LEFT JOIN {profile.ResolveTableName("CLIE")} C ON C.CLAVE = F.CVE_CLPV
-                WHERE F.CVE_DOC = @DOCUMENT
+                WHERE F.CVE_DOC = @DOCUMENT AND {SellerAccessScope.Sql("F.CVE_VEND")}
                 """;
             string rawInvoice, rawCustomer, name, seller, status;
             DateTime? creation, documentDate;

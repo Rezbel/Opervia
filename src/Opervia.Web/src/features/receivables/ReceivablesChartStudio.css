@@ -55,10 +55,10 @@
 .chart-studio-config {
   display: grid;
   grid-template-columns:
-    minmax(240px, 1.35fr)
+    minmax(170px, 220px)
     minmax(260px, 1fr)
-    minmax(180px, 0.8fr)
-    minmax(110px, 0.45fr);
+    minmax(180px, 220px)
+    minmax(110px, 130px);
   align-items: end;
   gap: 12px;
   padding: 16px 18px;
@@ -502,7 +502,7 @@ html[data-theme='light'] .studio-donut-legend > div { border-color: #e2e8f0; bac
 
 @media (max-width: 1180px) {
   .chart-studio-config {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(170px, 220px) minmax(260px, 1fr);
   }
 
   .studio-distribution {

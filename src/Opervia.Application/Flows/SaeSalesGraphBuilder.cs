@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Opervia.Application.Access;
 using Opervia.Application.Customers;
 using Opervia.Application.Documents;
 using Opervia.Domain.Connections;
@@ -31,7 +32,7 @@ public sealed class SaeSalesGraphBuilder(ISaeDocumentLookup documents, ISaeCusto
             var result = await documents.FindAsync(profile,password,current.Kind,current.Number,cancellationToken);
             if (!result.IsSuccessful || result.Document is null) {
                 if (nodes.Count == 0) return new(false,result.Message,startingDocumentNumber,[],[],[],timer.ElapsedMilliseconds);
-                warnings.Add(result.Message); continue;
+                warnings.Add(SellerAccessScope.IsRestricted ? "Un documento relacionado no está disponible para tus vendedores." : result.Message); continue;
             }
             var d = result.Document;
             if (!customerCache.TryGetValue(d.CustomerCode, out var customer)) {
@@ -48,6 +49,16 @@ public sealed class SaeSalesGraphBuilder(ISaeDocumentLookup documents, ISaeCusto
                 var edgeId = $"{source}>{target}";
                 edges[edgeId] = new(edgeId,source,target,"related");
                 Enqueue(link.SourceKind,link.SourceNumber); Enqueue(link.TargetKind,link.TargetNumber);
+            }
+        }
+        if (SellerAccessScope.IsRestricted) {
+            var allowedNumbers = nodes.Values.Select(n => n.DocumentNumber).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var key in nodes.Keys.ToArray()) {
+                var node = nodes[key];
+                nodes[key] = node with {
+                    PreviousDocumentNumber = node.PreviousDocumentNumber is not null && allowedNumbers.Contains(node.PreviousDocumentNumber) ? node.PreviousDocumentNumber : null,
+                    NextDocumentNumber = node.NextDocumentNumber is not null && allowedNumbers.Contains(node.NextDocumentNumber) ? node.NextDocumentNumber : null
+                };
             }
         }
         return new(true,$"Se encontraron {nodes.Count} documentos relacionados.",startingDocumentNumber.Trim(),

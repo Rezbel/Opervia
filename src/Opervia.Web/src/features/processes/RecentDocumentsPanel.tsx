@@ -1,5 +1,10 @@
+import { FilterMultiSelect } from '../filters/FilterMultiSelect';
+import { useAccess } from '../access/AccessContext';
+import { RefreshButton } from '../filters/RefreshButton';
+import { useSellerCatalog } from '../sellers/SellerCatalogContext';
+import { SellerDescription } from '../sellers/SellerCatalogProvider';
+import { TablePagination, TableResultCount } from '../tables/TablePagination';
 import {
-  CalendarDays,
   Eye,
   FileText,
   RefreshCw,
@@ -13,6 +18,7 @@ import type {
   SaeSalesFlowDocumentListItem,
 } from '../../types/sae';
 import './RecentDocumentsPanel.css';
+import { DatePeriodFilter, usePeriodFilter } from '../filters/DatePeriodFilter';
 
 interface RecentDocumentsPanelProps {
   connection: SaeConnectionRequest;
@@ -22,7 +28,6 @@ interface RecentDocumentsPanelProps {
   ) => void;
 }
 
-type PeriodPreset = 'today' | 'month' | '30days';
 
 const kindLabels: Record<SaeDocumentKind, string> = {
   Quotation: 'Cotización',
@@ -36,18 +41,6 @@ const branchOptions = [
   ['EH', 'Equipos Huasteca'], ['EQ', 'Equipos Querétaro'], ['ES', 'Equipos San Luis Potosí'], ['EX', 'Equipos Xalapa'],
 ] as const;
 
-function localIsoDate(date: Date): string {
-  const offset = date.getTimezoneOffset();
-  return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10);
-}
-
-function periodDates(preset: PeriodPreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to);
-  if (preset === 'month') from.setDate(1);
-  if (preset === '30days') from.setDate(from.getDate() - 29);
-  return { from: localIsoDate(from), to: localIsoDate(to) };
-}
 
 const currency = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -65,12 +58,15 @@ export function RecentDocumentsPanel({
   connection,
   onSelectDocument,
 }: RecentDocumentsPanelProps) {
+  const isExecutive = useAccess()?.role === 'Ejecutivo';
+  const sellerCatalog = useSellerCatalog();
   const requestRef = useRef<AbortController | null>(null);
-  const [period, setPeriod] = useState<PeriodPreset>('30days');
   const [query, setQuery] = useState('');
   const [sellerCode, setSellerCode] = useState('');
   const [branchCode, setBranchCode] = useState('');
   const [page, setPage] = useState(1);
+  const period = usePeriodFilter('30days', () => setPage(1));
+  const { from, to } = period.applied;
   const [selectedDocumentKey, setSelectedDocumentKey] = useState('');
   const pageSize = 50;
   const [totalDocuments, setTotalDocuments] = useState(0);
@@ -85,12 +81,11 @@ export function RecentDocumentsPanel({
     requestRef.current = controller;
     setIsLoading(true);
     setError(null);
-    const selectedPeriod = periodDates(period);
     try {
       const result = await getSalesFlowSummary(
         connection,
-        selectedPeriod.from,
-        selectedPeriod.to,
+        from,
+        to,
         sellerCode,
         controller.signal,
         'Order',
@@ -99,10 +94,14 @@ export function RecentDocumentsPanel({
         branchCode,
         query,
       );
-      setDocuments(result.documents ?? []);
-      setTotalDocuments(result.totalDocumentCount ?? 0);
+      if (requestRef.current === controller && !controller.signal.aborted) {
+        const lastPage = Math.max(1, Math.ceil(result.totalDocumentCount / pageSize));
+        if (page > lastPage) { setPage(lastPage); return; }
+        setDocuments(result.documents ?? []);
+        setTotalDocuments(result.totalDocumentCount ?? 0);
+      }
     } catch (loadError) {
-      if ((loadError as Error).name !== 'AbortError') {
+      if (requestRef.current === controller && !controller.signal.aborted && (loadError as Error).name !== 'AbortError') {
         setError(loadError instanceof Error
           ? loadError.message
           : 'No fue posible cargar los documentos.');
@@ -113,7 +112,7 @@ export function RecentDocumentsPanel({
         setIsLoading(false);
       }
     }
-  }, [connection, period, sellerCode, branchCode, page, query]);
+  }, [connection, from, to, sellerCode, branchCode, page, query]);
 
   useEffect(() => {
     void load();
@@ -123,72 +122,43 @@ export function RecentDocumentsPanel({
   const visibleDocuments = documents;
 
   return (
-    <section className="recent-documents-panel">
-      <div className="recent-documents-heading">
-        <div>
-          <span className="eyebrow">PEDIDOS DEL PERIODO</span>
-          <h2>Actividad reciente · Pedidos</h2>
-          <p>Selecciona un pedido para consultar sus remisiones y facturas relacionadas.</p>
-        </div>
-        <span className="recent-documents-count">
-          {visibleDocuments.length} pedidos
-        </span>
-      </div>
+    <section className="recent-documents-view">
+      <div className="recent-documents-toolbar module-filter-bar">
+        <DatePeriodFilter filter={period} />
 
-      <div className="recent-documents-toolbar">
-        <div className="recent-periods" role="group" aria-label="Seleccionar periodo">
-          {([
-            ['today', 'Hoy'],
-            ['month', 'Este mes'],
-            ['30days', 'Últimos 30 días'],
-          ] as const).map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              className={period === value ? 'active' : ''}
-              onClick={() => { setPage(1); setPeriod(value); }}
-            >
-              {value === 'today' && <CalendarDays size={14} />}
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <label className="recent-document-search">
+        <label className="module-filter-field"><span>Buscar pedido, cliente o vendedor</span><div className="recent-document-search">
           <Search size={15} />
           <input
             value={query}
             onChange={(event) => { setPage(1); setQuery(event.target.value); }}
             placeholder="Buscar pedido, cliente o vendedor"
           />
-        </label>
-        <input
+        </div></label>
+        {!isExecutive && <label className="module-filter-field"><span>Vendedor</span><input
           className="recent-seller-filter"
           value={sellerCode}
           onChange={(event) => { setPage(1); setSellerCode(event.target.value); }}
           placeholder="Clave de vendedor"
           aria-label="Clave de vendedor"
-        />
-        <select
-          value={branchCode}
-          onChange={(event) => { setPage(1); setBranchCode(event.target.value); }}
-          aria-label="Sucursal"
-        >
-          <option value="">Todas las sucursales</option>
-          {branchOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-        </select>
+        />{sellerCode.trim() && <small className="seller-filter-description">{sellerCatalog.description(sellerCode)}</small>}</label>}
+        <FilterMultiSelect label="Sucursal" placeholder="Todas las sucursales" value={branchCode} options={branchOptions.map(([value,label]) => ({value,label}))} onChange={value => { setPage(1); setBranchCode(value); }} />
 
-        <button
-          type="button"
-          className="recent-documents-refresh"
+        <RefreshButton
+          busy={isLoading}
           onClick={() => void load()}
-          disabled={isLoading}
-          aria-label="Actualizar documentos"
-        >
-          <RefreshCw className={isLoading ? 'spin' : ''} size={16} />
-        </button>
+          disabled={isLoading || period.pending || !!period.error}
+          label="Actualizar documentos"
+        />
       </div>
 
+      <div className="recent-documents-panel">
+      <div className="recent-documents-heading">
+        <div>
+          <h2>Actividad reciente · Pedidos</h2>
+          <p>Selecciona un pedido para consultar sus remisiones y facturas relacionadas.</p>
+        </div>
+        <TableResultCount total={totalDocuments} noun="pedidos" busy={isLoading} />
+      </div>
       {error ? (
         <div className="recent-documents-empty">{error}</div>
       ) : isLoading && documents.length === 0 ? (
@@ -205,7 +175,7 @@ export function RecentDocumentsPanel({
           <div className="recent-documents-table-head">
             <span>Documento</span>
               <span>Cliente</span>
-              <span>Vendedor (clave)</span>
+              <span>Vendedor</span>
             <span>Fecha</span>
               <span>Importe total sin IVA</span>
             <span />
@@ -235,7 +205,7 @@ export function RecentDocumentsPanel({
                 <strong>{document.customerName || 'Nombre no disponible'}</strong>
                 <small>{document.customerCode}</small>
               </span>
-              <span>{document.sellerCode || 'Sin vendedor'}</span>
+              <SellerDescription code={document.sellerCode} />
               <span>{date.format(new Date(document.documentDate))}</span>
               <span className="recent-document-amount">
                 <strong>{currency.format(
@@ -250,13 +220,8 @@ export function RecentDocumentsPanel({
           })}
         </div>
       )}
-      {totalDocuments > pageSize && (
-        <div className="recent-pagination" aria-label="Paginación de pedidos">
-          <button type="button" disabled={page === 1 || isLoading} onClick={() => setPage((value) => value - 1)}>Anterior</button>
-          <span>Página {page} de {Math.max(1, Math.ceil(totalDocuments / pageSize))} · {totalDocuments} pedidos</span>
-          <button type="button" disabled={page >= Math.ceil(totalDocuments / pageSize) || isLoading} onClick={() => setPage((value) => value + 1)}>Siguiente</button>
-        </div>
-      )}
+      <TablePagination page={page} total={totalDocuments} pageSize={pageSize} onPageChange={setPage} busy={isLoading} label="pedidos" />
+      </div>
     </section>
   );
 }

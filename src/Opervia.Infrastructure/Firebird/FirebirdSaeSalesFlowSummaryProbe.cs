@@ -1,3 +1,5 @@
+using Opervia.Application.Reporting;
+using Opervia.Application.Access;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Flows;
@@ -48,6 +50,7 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
             var documentsByKind = new Dictionary<string, IReadOnlyList<FlowDocument>>(
                 StringComparer.OrdinalIgnoreCase);
             var customerNames = await ReadCustomerNamesAsync(connection, profile.ResolveTableName("CLIE"), cancellationToken);
+            var sellerNames = await FirebirdSellerCatalog.ReadAsync(connection, profile.ResolveTableName("VEND"), cancellationToken);
             foreach (var stage in tables)
             {
                 documentsByKind[stage.Kind] = await ReadDocumentsAsync(
@@ -58,10 +61,10 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                 item.DocumentDate >= from && item.DocumentDate <= to;
             bool IsSelectedSeller(FlowDocument item) =>
                 string.IsNullOrWhiteSpace(sellerCode)
-                || string.Equals(item.SellerCode, sellerCode, StringComparison.OrdinalIgnoreCase);
+                || FilterSelection.Matches(sellerCode, item.SellerCode);
             bool IsSelectedBranch(FlowDocument item) =>
                 string.IsNullOrWhiteSpace(branchCode)
-                || BranchFor(item.DocumentNumber) == branchCode;
+                || FilterSelection.Matches(branchCode, BranchFor(item.DocumentNumber));
             var normalizedSearch = search?.Trim();
             bool IsSearchMatch(FlowDocument item) =>
                 string.IsNullOrWhiteSpace(normalizedSearch)
@@ -118,7 +121,7 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                 .Where(IsInPeriod)
                 .Where(item => !string.IsNullOrWhiteSpace(item.SellerCode))
                 .GroupBy(item => item.SellerCode!, StringComparer.OrdinalIgnoreCase)
-                .Select(group => new SaeSalesFlowSellerOption(group.Key, group.Key, group.Count()))
+                .Select(group => new SaeSalesFlowSellerOption(group.Key, sellerNames.GetValueOrDefault(group.Key) is { Length: > 0 } name ? name : group.Key, group.Count()))
                 .OrderBy(item => item.Label, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
@@ -315,19 +318,20 @@ public sealed class FirebirdSaeSalesFlowSummaryProbe(
                 CVE_DOC,
                 CVE_CLPV,
                 CVE_VEND,
-                FECHA_DOC,
+                COALESCE(FECHAELAB, FECHA_DOC),
                 FECHA_CANCELA,
                 COALESCE(CAN_TOT, 0) - COALESCE(DES_TOT, 0),
                 COALESCE(IMPORTE, 0),
                 TIP_DOC_ANT,
                 DOC_ANT
             FROM {table}
-            WHERE FECHA_DOC >= @FROM_DATE
-              AND FECHA_DOC < @TO_DATE
+            WHERE {SellerAccessScope.Sql("CVE_VEND")} AND COALESCE(FECHAELAB, FECHA_DOC) >= @FROM_DATE
+              AND COALESCE(FECHAELAB, FECHA_DOC) < @TO_DATE
             """;
         await using var command = new FbCommand(sql, connection) { CommandTimeout = 30 };
-        command.Parameters.AddWithValue("@FROM_DATE", from.ToDateTime(TimeOnly.MinValue));
-        command.Parameters.AddWithValue("@TO_DATE", to.AddDays(1).ToDateTime(TimeOnly.MinValue));
+        var period = Opervia.Application.Reporting.SaeDatePeriod.Create(from, to);
+        command.Parameters.AddWithValue("@FROM_DATE", period.FromInclusive);
+        command.Parameters.AddWithValue("@TO_DATE", period.UntilExclusive);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var result = new List<FlowDocument>();
         while (await reader.ReadAsync(cancellationToken))

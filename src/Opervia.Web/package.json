@@ -10,7 +10,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:routes": "node --experimental-strip-types --test scripts/routes.test.mjs",
+    "test:period": "node --experimental-strip-types --test scripts/date-period.test.mjs",
+    "test:collections": "node --experimental-strip-types --test scripts/collections.test.mjs",
+    "test:maturities": "node --experimental-strip-types --test scripts/maturities.test.mjs",
+    "test:sellers": "node --experimental-strip-types --test scripts/seller-labels.test.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.11.2",

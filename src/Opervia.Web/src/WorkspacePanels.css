@@ -1,0 +1,42 @@
+.app-shell .main-content h2,
+.app-shell .document-items-header h2 { font-size:20px; font-weight:750; line-height:1.3; }
+.app-shell .main-content :is(.portfolio-panel-heading,.chart-studio-title) strong { font-size:19px; line-height:1.3; }
+.app-shell .main-content .eyebrow { display:none; }
+.app-shell .main-content .portfolio-summary:not(.portfolio-connect-state) { margin:0 0 18px; padding:0; border:0; border-radius:0; background:transparent; }
+.app-shell .main-content .module-filter-bar { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; padding:14px; border:1px solid var(--border); border-radius:15px; background:var(--panel); }
+.main-content .portfolio-toolbar { margin-bottom:14px; }
+.main-content .recent-documents-view { margin-bottom:18px; }
+.main-content .recent-documents-view .recent-documents-toolbar { margin-bottom:14px; }
+.main-content .recent-documents-toolbar { display:flex; flex-wrap:wrap; align-items:flex-end; background:var(--panel-soft); }
+.main-content .recent-documents-toolbar > .date-period-filter { flex-basis:100%; }
+.main-content .recent-document-search { min-width:0; }
+.main-content .recent-seller-filter { width:170px; height:38px; padding:0 10px; border:1px solid var(--border); border-radius:9px; background:var(--panel); color:var(--text); font-size:12px; }
+.main-content .recent-documents-toolbar > select { width:190px; }
+.main-content .recent-documents-refresh { flex:0 0 38px; }
+.main-content .portfolio-period-controls { flex-wrap:wrap; min-width:0; }
+.main-content .profitability-filters { display:flex; align-items:flex-end; flex-wrap:wrap; background:var(--panel); }
+.main-content .profitability-filters > .date-period-filter { flex-basis:100%; }
+.main-content .profitability-filters > label { flex:1 1 170px; }
+@media(max-width:620px) {
+  .main-content .recent-documents-toolbar > select,.main-content .recent-seller-filter { flex:1 1 150px; width:auto; }
+}
+
+.app-shell .main-content .module-filter-bar > .date-period-filter { flex-basis:100%; }
+.app-shell .main-content .module-filter-bar > label { display:flex; flex-direction:column; flex:1 1 170px; min-width:0; gap:6px; color:var(--muted); font-size:11px; font-weight:650; }
+.app-shell .main-content .module-filter-bar > label > span { display:flex; align-items:center; gap:6px; color:var(--muted); }
+.app-shell .main-content .module-filter-bar > label > :is(input,select),
+.app-shell .main-content .module-filter-bar .recent-document-search { width:100%; min-width:0; height:42px; padding:0 11px; border:1px solid var(--border); border-radius:10px; outline:0; color:var(--text); background:var(--panel-soft); font:inherit; font-size:12px; }
+.app-shell .main-content .module-filter-bar .recent-document-search input { width:100%; min-width:0; color:var(--text); background:transparent; }
+.app-shell .main-content .module-filter-bar > label > :is(input,select):focus-visible,
+.app-shell .main-content .module-filter-bar .recent-document-search:focus-within { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,124,255,.12); }
+.app-shell .main-content .module-filter-bar .module-refresh { flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:8px; height:42px; width:auto; min-width:120px; padding:0 17px; border:0; border-radius:10px; color:#fff; background:#4f7cff; font:inherit; font-size:13px; font-weight:750; cursor:pointer; }
+.app-shell .main-content .module-filter-bar .module-refresh:disabled { opacity:.55; cursor:default; }
+.app-shell .main-content .module-filter-bar .module-refresh:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+.app-shell .main-content .portfolio-toolbar .module-refresh { margin-left:auto; }
+.app-shell .main-content :is(.customers-table,.commercial-matrix) { max-height:390px; overflow:auto; }
+.app-shell .main-content .customers-head { position:sticky; top:0; z-index:1; background:var(--panel-soft); }
+.app-shell .main-content .commercial-matrix thead { position:sticky; top:0; z-index:1; background:var(--panel-soft); }
+@media(max-width:620px) {
+  .app-shell .main-content .module-filter-bar > label { flex-basis:150px; }
+  .app-shell .main-content .module-filter-bar .module-refresh { flex-grow:1; }
+}

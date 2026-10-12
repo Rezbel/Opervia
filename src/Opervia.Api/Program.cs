@@ -1,9 +1,15 @@
+using Opervia.Application.Reporting;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Opervia.Application.Access;
 using Opervia.Application.Connections;
 using System.Threading.RateLimiting;
 using Opervia.Api.Configuration;
 using Opervia.Api.Filters;
 using Opervia.Api.Infrastructure;
 using Opervia.Application.Customers;
+using Opervia.Application.Collections;
 using Opervia.Application.DocumentItems;
 using Opervia.Application.Documents;
 using Opervia.Application.Flows;
@@ -26,7 +32,30 @@ var allowedOrigins = builder.Configuration
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
-builder.Services.AddAuthorization();
+builder.Services.AddSingleton<AccessStore>();
+builder.Services.AddScoped<FirebirdAccessCatalog>();
+builder.Services.AddScoped<FirebirdCompanyReader>();
+builder.Services.AddScoped<ISaeCollectionsControlProbe, FirebirdSaeCollectionsControlProbe>();
+builder.Services.AddScoped<AccessFilter>();
+builder.Services.AddAuthentication("Cookies").AddCookie("Cookies", options => {
+    options.Cookie.Name = "Opervia.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
+    options.Events.OnRedirectToAccessDenied = context => { context.Response.StatusCode = 403; return Task.CompletedTask; };
+    options.Events.OnValidatePrincipal = async context => {
+        var store = context.HttpContext.RequestServices.GetRequiredService<AccessStore>();
+        var user = Guid.TryParse(context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? await store.FindAsync(id) : null;
+        if (user is null || !user.Active || context.Principal?.FindFirstValue("version") != user.Version.ToString()) {
+            context.RejectPrincipal();
+            await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignOutAsync(context.HttpContext, "Cookies");
+        }
+    };
+});
+builder.Services.AddAuthorization(options => options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<ValidateSaeConnectionTargetFilter>();
 builder.Services
@@ -42,7 +71,8 @@ builder.Services
 
 builder.Services.AddControllers(options =>
 {
-    options.Filters.AddService<ValidateSaeConnectionTargetFilter>();
+    options.Filters.AddService<AccessFilter>(-3000);
+    options.Filters.AddService<ValidateSaeConnectionTargetFilter>(-2500);
 });
 builder.Services.AddOpenApi();
 builder.Services.AddOptions<OpenAiOptions>()
@@ -73,8 +103,8 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy(
         "SaeApi",
         httpContext => RateLimitPartition.GetFixedWindowLimiter(
-            httpContext.Connection.RemoteIpAddress?.ToString()
-                ?? "unknown",
+            (httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous") + ":" +
+                (httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
             _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 60,
@@ -93,7 +123,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod().AllowCredentials();
 
             if (allowedOrigins.Length > 0)
             {
@@ -198,6 +228,7 @@ builder.Services.AddScoped<
 >();
 
 var app = builder.Build();
+_ = app.Services.GetRequiredService<AccessStore>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -220,10 +251,29 @@ if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
 app.UseCors("OperviaWeb");
 
+app.UseAuthentication();
 app.UseRateLimiter();
-
 app.UseAuthorization();
+app.Use(async (context, next) => {
+    var origin = context.Request.Headers.Origin.ToString();
+    if (context.Request.Method != "GET" && !string.IsNullOrEmpty(origin) && !allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase)
+        && origin != $"{context.Request.Scheme}://{context.Request.Host}") {
+        context.Response.StatusCode = 403; await context.Response.WriteAsJsonAsync(new { message = "Origen no autorizado." }); return;
+    }
+    var executive = context.User.IsInRole("Ejecutivo");
+    var sellers = executive ? context.User.FindAll("seller").Select(c => c.Value).ToArray() : null;
+    var selected = context.Request.Headers["X-Opervia-Seller"].ToString().Trim();
+    var querySeller = context.Request.Query["seller"].ToString().Trim();
+    if (executive && (!string.IsNullOrEmpty(selected) && FilterSelection.Values(selected).Any(code => !sellers!.Contains(code, StringComparer.OrdinalIgnoreCase))
+        || !string.IsNullOrEmpty(querySeller) && FilterSelection.Values(querySeller).Any(code => !sellers!.Contains(code, StringComparer.OrdinalIgnoreCase)))) {
+        context.Response.StatusCode = 403; await context.Response.WriteAsJsonAsync(new { message = "La clave de vendedor no está asignada a tu cuenta." }); return;
+    }
+    if (executive && !string.IsNullOrEmpty(selected)) sellers = FilterSelection.Values(selected);
+    SellerAccessScope.Sellers = sellers;
+    try { await next(); } finally { SellerAccessScope.Sellers = null; }
+});
 
+app.MapGet("/api/health", () => Results.Ok(new { status = "ready" })).AllowAnonymous();
 app.MapControllers()
     .RequireRateLimiting("SaeApi");
 

@@ -1,3 +1,4 @@
+import { SellerDescription } from '../sellers/SellerCatalogProvider';
 import {
   Boxes,
   Package,
@@ -64,8 +65,6 @@ export function DocumentItemsPanel({
           </div>
 
           <div>
-            <span>DETALLE DEL DOCUMENTO</span>
-
             <h2>
               {result?.documentNumber ??
                 'Partidas de la operación'}
@@ -87,7 +86,7 @@ export function DocumentItemsPanel({
         <h3>{document.documentNumber}</h3>
         <dl>
           <div><dt>Cliente</dt><dd>{document.customerName || 'Nombre no disponible'} · {document.customerCode}</dd></div>
-          <div><dt>Vendedor (clave)</dt><dd>{document.salespersonCode || 'No disponible'}</dd></div>
+          <div><dt>Vendedor</dt><dd><SellerDescription code={document.salespersonCode} /></dd></div>
           <div><dt>Fecha</dt><dd>{document.documentDate?.slice(0, 10) || 'No disponible'}</dd></div>
           <div><dt>Almacén de cabecera</dt><dd>{document.warehouseNumber ?? 'No disponible'}</dd></div>
         </dl>

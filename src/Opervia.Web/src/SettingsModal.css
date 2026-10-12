@@ -1,0 +1,79 @@
+.connection-modal-backdrop { backdrop-filter:none; background:rgba(3, 7, 14, .74); }
+html[data-theme='light'] .connection-modal-backdrop { backdrop-filter:none; background:rgba(15, 23, 42, .45); }
+.connection-modal-content {
+  display:grid;
+  grid-template-rows:64px minmax(0, 1fr);
+  width:min(1060px, calc(100vw - 32px));
+  height:min(720px, calc(100dvh - 32px));
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--panel);
+  color:var(--text);
+  box-shadow:0 20px 48px rgba(0, 0, 0, .28);
+}
+.settings-modal-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid var(--border);
+}
+.settings-modal-heading h2 { font-size:20px; }
+.settings-modal-heading button {
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--panel-soft);
+  color:var(--text);
+  cursor:pointer;
+}
+.settings-modal-layout { display:grid; grid-template-columns:190px minmax(0, 1fr); min-height:0; }
+.settings-modal-nav {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding:16px 10px;
+  border-right:1px solid var(--border);
+  background:var(--panel-soft);
+}
+.settings-modal-nav button {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:43px;
+  padding:9px 12px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+  font-size:13px;
+}
+.settings-modal-nav button.active { background:var(--primary-soft); color:var(--primary); font-weight:700; }
+.settings-modal-nav button:hover { background:var(--primary-soft); }
+.settings-modal-nav button:focus-visible,.settings-modal-heading button:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+.settings-modal-panel { min-width:0; overflow:auto; }
+.settings-modal-panel .sae-connection-form {
+  width:100%;
+  max-height:none;
+  overflow:visible;
+  padding:24px;
+  border:0;
+  border-radius:0;
+  background:var(--panel);
+  color:var(--text);
+  box-shadow:none;
+}
+.settings-modal-empty { padding:28px; }
+.settings-modal-empty h3 { margin:0; font-size:19px; }
+@media(max-width:640px) {
+  .settings-modal-layout { grid-template-columns:132px minmax(0,1fr); }
+  .settings-modal-nav { padding:12px 6px; }
+  .settings-modal-nav button { gap:6px; padding:9px 7px; font-size:12px; }
+  .settings-modal-panel .sae-connection-form { padding:16px; }
+}

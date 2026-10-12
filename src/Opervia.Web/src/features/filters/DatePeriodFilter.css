@@ -1,0 +1,9 @@
+.main-content .date-period-filter { display:flex; align-items:flex-end; flex-wrap:wrap; gap:8px; min-width:0; }
+.main-content .date-period-presets { display:flex; align-items:center; flex-wrap:wrap; gap:3px; padding:3px; border:1px solid var(--border); border-radius:9px; background:var(--panel-soft); }
+.main-content .date-period-presets button { display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 10px; border:0; border-radius:6px; color:var(--text); background:transparent; font-size:11px; font-weight:650; white-space:nowrap; cursor:pointer; }
+.main-content .date-period-presets button.active { color:#fff; background:var(--primary); }
+.main-content .date-period-filter .date-period-field { display:flex; flex-direction:column; gap:5px; margin:0; color:var(--text); font-size:11px; }
+.main-content .date-period-filter .date-period-field input { width:140px; min-width:0; height:38px; margin:0; padding:0 9px; border:1px solid var(--border); border-radius:9px; background:var(--panel); color:var(--text); font:inherit; font-size:12px; color-scheme:dark; }
+html[data-theme='light'] .main-content .date-period-filter input { color-scheme:light; }
+.main-content .date-period-filter input:focus-visible,.main-content .date-period-filter button:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+.main-content .date-period-error { flex-basis:100%; margin:0; color:#ef4444; font-size:12px; }

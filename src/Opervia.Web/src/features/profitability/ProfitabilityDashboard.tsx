@@ -1,18 +1,17 @@
+import { FilterMultiSelect } from '../filters/FilterMultiSelect';
+import { filterValues } from '../filters/filterSelection';
+import { RefreshButton } from '../filters/RefreshButton';
+import { useSellerCatalog } from '../sellers/SellerCatalogContext';
 import {
   AlertTriangle,
   BarChart3,
-  Building2,
-  CalendarRange,
   CircleDollarSign,
   Database,
-  LoaderCircle,
   Plus,
-  RefreshCw,
   ShieldCheck,
   ShoppingCart,
   Trash2,
   TrendingUp,
-  UserRound,
   WalletCards,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -30,10 +29,11 @@ import type {
   TaxDisplayMode,
 } from '../../types/sae';
 import './ProfitabilityDashboard.css';
+import { DatePeriodFilter, usePeriodFilter } from '../filters/DatePeriodFilter';
+import { localIsoDate } from '../../lib/datePeriod';
 
 interface ProfitabilityDashboardProps {
   connection: SaeConnectionRequest | null;
-  connectionName: string;
   taxDisplayMode: TaxDisplayMode;
   onRequestConnection: () => void;
 }
@@ -48,30 +48,20 @@ const percent = new Intl.NumberFormat('es-MX', {
 });
 const monthName = new Intl.DateTimeFormat('es-MX', { month: 'short' });
 
-function toInputDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function createInitialPeriod() {
-  const today = new Date();
-  return { from: `${today.getFullYear()}-01-01`, to: toInputDate(today) };
-}
-
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
 export function ProfitabilityDashboard({
   connection,
-  connectionName,
   taxDisplayMode,
   onRequestConnection,
 }: ProfitabilityDashboardProps) {
-  const initialPeriod = useMemo(createInitialPeriod, []);
+  const sellerCatalog = useSellerCatalog();
   const requestRef = useRef<AbortController | null>(null);
   const manualRequestRef = useRef<AbortController | null>(null);
-  const [from, setFrom] = useState(initialPeriod.from);
-  const [to, setTo] = useState(initialPeriod.to);
+  const period = usePeriodFilter('year');
+  const { from, to } = period.applied;
   const [branch, setBranch] = useState('');
   const [seller, setSeller] = useState('');
   const [data, setData] = useState<ProfitabilityDashboardResult | null>(null);
@@ -81,7 +71,7 @@ export function ProfitabilityDashboard({
   const [manualEntries, setManualEntries] = useState<ManualProfitabilityEntry[]>([]);
   const [manualError, setManualError] = useState<string | null>(null);
   const [manualSaving, setManualSaving] = useState(false);
-  const [manualDate, setManualDate] = useState(toInputDate(new Date()));
+  const [manualDate, setManualDate] = useState(localIsoDate(new Date()));
   const [manualCategory, setManualCategory] = useState('');
   const [manualAmount, setManualAmount] = useState('');
   const [manualNote, setManualNote] = useState('');
@@ -97,11 +87,12 @@ export function ProfitabilityDashboard({
     setLoading(true);
     setError(null);
     try {
-      setData(await getProfitabilityDashboard(
+      const result = await getProfitabilityDashboard(
         connection, from, to, branch || undefined, seller || undefined, controller.signal,
-      ));
+      );
+      if (requestRef.current === controller && !controller.signal.aborted) setData(result);
     } catch (loadError) {
-      if (!isAbortError(loadError)) {
+      if (requestRef.current === controller && !controller.signal.aborted && !isAbortError(loadError)) {
         setError(loadError instanceof Error ? loadError.message : 'No fue posible calcular la rentabilidad.');
       }
     } finally {
@@ -118,11 +109,12 @@ export function ProfitabilityDashboard({
     manualRequestRef.current = controller;
     setManualError(null);
     try {
-      setManualEntries(await listManualProfitabilityEntries(
+      const entries = await listManualProfitabilityEntries(
         from, to, branch || undefined, controller.signal,
-      ));
+      );
+      if (manualRequestRef.current === controller && !controller.signal.aborted) setManualEntries(entries);
     } catch (loadError) {
-      if (!isAbortError(loadError)) {
+      if (manualRequestRef.current === controller && !controller.signal.aborted && !isAbortError(loadError)) {
         setManualError(loadError instanceof Error ? loadError.message : 'No fue posible leer las capturas manuales.');
       }
     }
@@ -151,6 +143,7 @@ export function ProfitabilityDashboard({
       setManualError('Escribe una categoría y un importe mayor a cero.');
       return;
     }
+    if (filterValues(branch).length > 1) { setManualError('Selecciona una sola sucursal para registrar una captura manual.'); return; }
     setManualSaving(true);
     setManualError(null);
     try {
@@ -207,25 +200,12 @@ export function ProfitabilityDashboard({
 
   return (
     <div className="profitability-view">
-      <header className="profitability-hero">
-        <div>
-          <span className="eyebrow">RENTABILIDAD DESDE SAE</span>
-          <h1>Rentabilidad comercial</h1>
-          <p>La sección automática utiliza facturas, partidas y compras vigentes registradas en SAE.</p>
-        </div>
-        <div className="profitability-source-summary">
-          <span className={connection ? 'online' : ''} />
-          <div><small>Empresa activa</small><strong>{connectionName}</strong></div>
-          <ShieldCheck size={20} />
-        </div>
-      </header>
 
-      <form className="profitability-filters" onSubmit={handleSubmit}>
-        <label><span><CalendarRange size={15} /> Desde</span><input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} /></label>
-        <label><span><CalendarRange size={15} /> Hasta</span><input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} /></label>
-        <label><span><Building2 size={15} /> Sucursal</span><select value={branch} onChange={(e) => setBranch(e.target.value)}><option value="">Todas las sucursales</option>{data?.branchOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-        <label><span><UserRound size={15} /> Vendedor</span><select value={seller} onChange={(e) => setSeller(e.target.value)}><option value="">Todos los vendedores</option>{data?.sellerOptions.map((option) => <option key={`${option.value}-${option.label}`} value={option.value}>{option.label}</option>)}</select></label>
-        <button type="submit" disabled={loading || !connection}>{loading ? <LoaderCircle className="spin" size={17} /> : <RefreshCw size={17} />}{loading ? 'Calculando…' : 'Actualizar'}</button>
+      <form className="profitability-filters module-filter-bar" onSubmit={handleSubmit}>
+        <DatePeriodFilter filter={period} />
+        <FilterMultiSelect label="Sucursal" placeholder="Todas las sucursales" value={branch} options={data?.branchOptions ?? []} onChange={setBranch} />
+        <FilterMultiSelect label="Vendedor" placeholder="Todos los vendedores" value={seller} options={(data?.sellerOptions ?? []).map(option => ({value:option.value,label:sellerCatalog.label(option.value,option.label)}))} onChange={setSeller} />
+        <RefreshButton type="submit" busy={loading} disabled={!connection || period.pending || !!period.error} />
       </form>
 
       {!connection && <button className="profitability-connect" type="button" onClick={onRequestConnection}>Conectar con SAE para comenzar</button>}
@@ -242,19 +222,19 @@ export function ProfitabilityDashboard({
 
         <section className="profitability-main-grid sae-main-grid">
           <article className="profitability-panel monthly-panel">
-            <div className="profitability-panel-heading"><div><span className="eyebrow">EVOLUCIÓN</span><h2>Facturación y costo por mes</h2></div><span className="record-pill">{monthly.length} meses</span></div>
+            <div className="profitability-panel-heading"><div><h2>Facturación y costo por mes</h2></div><span className="record-pill">{monthly.length} meses</span></div>
             <div className="monthly-chart">{monthly.map((item) => <div className="monthly-column" key={item.key}><div className="monthly-values"><span className="sales" style={{ height: `${Math.max(3, item.displayedSales / maximumMonthly * 100)}%` }} title={`Facturación ${money.format(item.displayedSales)}`} /><span className="cost" style={{ height: `${Math.max(3, item.costOfSales / maximumMonthly * 100)}%` }} title={`Costo ${money.format(item.costOfSales)}`} /></div><strong>{item.label}</strong><small>{money.format(item.displayedSales)}</small></div>)}</div>
             <div className="chart-legend"><span className="sales" />Facturación {taxDisplayMode === 'withTax' ? 'con IVA' : 'sin IVA'} <span className="cost" />Costo SAE</div>
           </article>
           <article className="profitability-panel sources-panel">
-            <div className="profitability-panel-heading"><div><span className="eyebrow">TRAZABILIDAD</span><h2>Fuente automática</h2></div></div>
+            <div className="profitability-panel-heading"><div><h2>Fuente automática</h2></div></div>
             <div className="source-card safe"><Database size={20} /><div><strong>SAE en vivo</strong><span>{data.sources.saeMode}</span><small>{data.sources.saeInvoiceTable} + {data.sources.saeLinesTable} + {data.sources.saePurchaseTable} · {data.elapsedMilliseconds} ms</small></div></div>
             <p><ShieldCheck size={16} /> No se incluyen datos del Excel ni se escribe información en Firebird.</p>
           </article>
         </section>
 
         <section className="profitability-panel distribution-panel">
-          <div className="profitability-panel-heading distribution-heading"><div><span className="eyebrow">ANÁLISIS CONFIGURABLE</span><h2>¿Cómo quieres ver la facturación?</h2></div><div className="dimension-switch" role="group" aria-label="Agrupar gráfica"><button type="button" className={chartDimension === 'month' ? 'active' : ''} onClick={() => setChartDimension('month')}>Meses</button><button type="button" className={chartDimension === 'branch' ? 'active' : ''} onClick={() => setChartDimension('branch')}>Sucursales</button><button type="button" className={chartDimension === 'seller' ? 'active' : ''} onClick={() => setChartDimension('seller')}>Vendedores</button></div></div>
+          <div className="profitability-panel-heading distribution-heading"><div><h2>¿Cómo quieres ver la facturación?</h2></div><div className="dimension-switch" role="group" aria-label="Agrupar gráfica"><button type="button" className={chartDimension === 'month' ? 'active' : ''} onClick={() => setChartDimension('month')}>Meses</button><button type="button" className={chartDimension === 'branch' ? 'active' : ''} onClick={() => setChartDimension('branch')}>Sucursales</button><button type="button" className={chartDimension === 'seller' ? 'active' : ''} onClick={() => setChartDimension('seller')}>Vendedores</button></div></div>
           <div className="ranking-list">{(chartDimension === 'month' ? monthly : displayedDistribution).slice(0, 15).map((item) => {
             const key = item.key;
             const label = item.label;
@@ -265,7 +245,7 @@ export function ProfitabilityDashboard({
         </section>
 
         <section className="profitability-panel manual-entry-panel">
-          <div className="profitability-panel-heading"><div><span className="eyebrow">CAPTURA SEPARADA</span><h2>Datos manuales opcionales</h2></div><div className="manual-total"><small>Total manual del periodo</small><strong>{money.format(manualTotal)}</strong></div></div>
+          <div className="profitability-panel-heading"><div><h2>Datos manuales opcionales</h2></div><div className="manual-total"><small>Total manual del periodo</small><strong>{money.format(manualTotal)}</strong></div></div>
           <p className="manual-entry-note">Estos importes no vienen de SAE y no modifican la utilidad bruta automática. Se guardan aparte en MySQL con fecha y nota.</p>
           <form className="manual-entry-form" onSubmit={handleManualSubmit}>
             <label><span>Fecha</span><input type="date" value={manualDate} onChange={(e) => setManualDate(e.target.value)} /></label>

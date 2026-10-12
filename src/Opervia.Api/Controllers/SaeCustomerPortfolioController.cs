@@ -1,3 +1,4 @@
+using Opervia.Application.Reporting;
 using Microsoft.AspNetCore.Mvc;
 using Opervia.Api.Contracts.Connections;
 using Opervia.Application.Customers;
@@ -28,10 +29,10 @@ public sealed class SaeCustomerPortfolioController(
             return BadRequest(new { message = "Indica un periodo válido de hasta 367 días." });
 
         static bool ValidCode(string? value, string codes) => string.IsNullOrWhiteSpace(value) ||
-            (value.Trim().Length == 1 && codes.Contains(value.Trim().ToUpperInvariant(), StringComparison.Ordinal));
-        if (!ValidCode(branch, "QHXS") || !ValidCode(state, "AMSB") || !ValidCode(customerType, "LIDHCEV") ||
+            FilterSelection.Values(value).All(code => code.Length == 1 && codes.Contains(code.ToUpperInvariant(), StringComparison.Ordinal));
+        if (!ValidCode(branch, "QHXSM") || !ValidCode(state, "AMSB") || !ValidCode(customerType, "LIDHCEV") ||
             !ValidCode(classification, "AROX") || !ValidCode(credit, "012345") ||
-            seller?.Trim().Length > 10 || customer?.Trim().Length > 10)
+            FilterSelection.Values(seller).Any(code => code.Length > 10) || customer?.Trim().Length > 10)
             return BadRequest(new { message = "Revisa las claves y opciones de los filtros de clientes." });
 
         var filter = new SaeCustomerPortfolioFilter(

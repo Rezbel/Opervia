@@ -1,0 +1,6 @@
+.seller-description { display:inline-flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0; max-width:100%; white-space:normal; text-align:left; line-height:1.4; overflow-wrap:anywhere; }
+.seller-description>b { color:var(--text); font:inherit; font-weight:700; }
+.seller-description>small { display:block; margin:0 !important; color:var(--muted); font-size:10px; font-weight:400; line-height:1.4; white-space:normal; overflow-wrap:anywhere; }
+.seller-description-inline { white-space:normal; overflow-wrap:anywhere; }
+.seller-filter-description { max-width:220px; color:var(--muted); font-size:10px; white-space:normal; line-height:1.4; }
+.seller-description-list { display:flex; flex-direction:column; gap:8px; }

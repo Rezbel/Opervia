@@ -490,3 +490,10 @@ App_Data/
 *.fdb
 .analysis/sae-2026-10-05/
 
+
+# Temporary analysis and published build copies
+.analysis/
+src/invoice-parts-build/
+.env.*
+!.env.example
+

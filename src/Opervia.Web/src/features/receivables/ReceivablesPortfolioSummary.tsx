@@ -1,3 +1,7 @@
+import { RefreshButton } from '../filters/RefreshButton';
+import { SellerDescription } from '../sellers/SellerCatalogProvider';
+import { TablePagination, TableResultCount } from '../tables/TablePagination';
+import { useAccess } from '../access/AccessContext';
 import {
   AlertTriangle,
   Ban,
@@ -7,14 +11,12 @@ import {
   FileCheck2,
   LoaderCircle,
   ReceiptText,
-  RefreshCw,
   RotateCcw,
   Search,
   X,
 } from 'lucide-react';
 import {
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -29,6 +31,7 @@ import type {
 import { ReceivablesChartStudio } from './ReceivablesChartStudio';
 
 import './ReceivablesPortfolioSummary.css';
+import { DatePeriodFilter, usePeriodFilter } from '../filters/DatePeriodFilter';
 
 interface ReceivablesPortfolioSummaryProps {
   connection: SaeConnectionRequest | null;
@@ -56,23 +59,6 @@ const invoiceDueDateFormatter = new Intl.DateTimeFormat('es-MX', {
   month: 'short',
   year: 'numeric',
 });
-
-function toLocalIsoDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function getCurrentPeriod() {
-  const today = new Date();
-  return {
-    start: toLocalIsoDate(
-      new Date(today.getFullYear(), today.getMonth(), 1),
-    ),
-    end: toLocalIsoDate(today),
-  };
-}
 
 function formatMoney(value: number): string {
   return moneyFormatter.format(value);
@@ -106,13 +92,11 @@ export function ReceivablesPortfolioSummary({
   taxDisplayMode,
   onTaxDisplayModeChange,
 }: ReceivablesPortfolioSummaryProps) {
-  const initialPeriod = useMemo(getCurrentPeriod, []);
+  const isExecutive = useAccess()?.role === 'Ejecutivo';
   const requestRef = useRef<AbortController | null>(null);
   const invoiceRequestRef = useRef<AbortController | null>(null);
-  const [periodStart, setPeriodStart] =
-    useState(initialPeriod.start);
-  const [periodEnd, setPeriodEnd] =
-    useState(initialPeriod.end);
+  const period = usePeriodFilter('month', () => setInvoicePage(1));
+  const { from: periodStart, to: periodEnd } = period.applied;
   const [summary, setSummary] =
     useState<SaeReceivablesSummaryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -214,37 +198,12 @@ export function ReceivablesPortfolioSummary({
     (summary?.appliedAdvanceAmount ?? 0) +
     (summary?.otherReductionAmount ?? 0);
 
-  function selectPreset(
-    preset: 'month' | '30days' | 'year',
-  ) {
-    const today = new Date();
-    let start: Date;
-
-    if (preset === 'year') {
-      start = new Date(today.getFullYear(), 0, 1);
-    } else if (preset === '30days') {
-      start = new Date(today);
-      start.setDate(start.getDate() - 29);
-    } else {
-      start = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1,
-      );
-    }
-
-    setPeriodStart(toLocalIsoDate(start));
-    setPeriodEnd(toLocalIsoDate(today));
-    setInvoicePage(1);
-  }
-
   if (!connection) {
     return (
       <section className="portfolio-summary portfolio-connect-state">
         <div>
           <CircleDollarSign size={28} />
           <div>
-            <span className="eyebrow">RESUMEN FINANCIERO</span>
             <h2>Conecta SAE para calcular los indicadores</h2>
             <p>
               La lectura separará facturación, ingresos reales,
@@ -261,62 +220,8 @@ export function ReceivablesPortfolioSummary({
 
   return (
     <section className="portfolio-summary">
-      <div className="portfolio-toolbar">
-        <div>
-          <span className="eyebrow">PANORAMA DEL PERIODO</span>
-          <h2>Facturación y cobranza real</h2>
-        </div>
-
-        <div className="portfolio-period-controls">
-          <div className="portfolio-presets">
-            <button type="button" onClick={() => selectPreset('month')}>
-              Este mes
-            </button>
-            <button type="button" onClick={() => selectPreset('30days')}>
-              30 días
-            </button>
-            <button type="button" onClick={() => selectPreset('year')}>
-              Este año
-            </button>
-          </div>
-          <label>
-            <span>Desde (elaboración)</span>
-            <input
-              type="date"
-              value={periodStart}
-              max={periodEnd}
-              onChange={(event) => {
-                setPeriodStart(event.target.value);
-                setInvoicePage(1);
-              }}
-            />
-          </label>
-          <label>
-            <span>Hasta (elaboración)</span>
-            <input
-              type="date"
-              value={periodEnd}
-              min={periodStart}
-              onChange={(event) => {
-                setPeriodEnd(event.target.value);
-                setInvoicePage(1);
-              }}
-            />
-          </label>
-          <button
-            type="button"
-            className="portfolio-refresh"
-            aria-label="Actualizar resumen"
-            onClick={() => setRefreshVersion((value) => value + 1)}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <LoaderCircle className="spin" size={17} />
-            ) : (
-              <RefreshCw size={17} />
-            )}
-          </button>
-        </div>
+      <div className="portfolio-toolbar module-filter-bar">
+        <DatePeriodFilter filter={period} />
 
         <div className="receivables-tax-filter" role="group" aria-label="Mostrar importes">
           <span>Importes</span>
@@ -335,6 +240,8 @@ export function ReceivablesPortfolioSummary({
             Con IVA
           </button>
         </div>
+        <RefreshButton label="Actualizar resumen" onClick={() => setRefreshVersion(value => value + 1)}
+          busy={isLoading} disabled={period.pending || !!period.error} />
       </div>
 
       {error && (
@@ -406,29 +313,7 @@ export function ReceivablesPortfolioSummary({
             </article>
           </div>
 
-          <div className="portfolio-reconciliation">
-            <div>
-              <small>Facturación registrada</small>
-              <strong>
-                {formatMoney(taxDisplayMode === 'withTax' ? summary.grossInvoicedAmount : summary.grossInvoicedAmountWithoutTax)}
-              </strong>
-              <span>{summary.invoiceCount} documentos generados</span>
-            </div>
-            <i>−</i>
-            <div className="negative">
-              <small>Documentos del lote cancelados</small>
-              <strong>{formatMoney(taxDisplayMode === 'withTax' ? summary.voidedInvoiceAmount : summary.voidedInvoiceAmountWithoutTax)}</strong>
-              <span>{summary.voidedInvoiceCount} documentos</span>
-            </div>
-            <i>=</i>
-            <div className="positive">
-              <small>Total facturado vigente</small>
-              <strong>{formatMoney(taxDisplayMode === 'withTax' ? summary.netInvoicedAmount : summary.netInvoicedAmountWithoutTax)}</strong>
-              <span>Estado actual de las facturas del periodo</span>
-            </div>
-          </div>
-
-          <ReceivablesChartStudio summary={summary} taxDisplayMode={taxDisplayMode} />
+          {!isExecutive && <ReceivablesChartStudio summary={summary} taxDisplayMode={taxDisplayMode} />}
         </>
       )}
 
@@ -458,7 +343,7 @@ export function ReceivablesPortfolioSummary({
                   />
                   {invoiceSearch && <button type="button" aria-label="Limpiar búsqueda de facturas" onClick={() => { setInvoiceSearch(''); setAppliedInvoiceSearch(''); setInvoicePage(1); }}><X size={15} /></button>}
                 </label>
-                <span className="record-limit" role="status" aria-live="polite">{invoiceBusy ? 'Buscando…' : invoiceListing ? `${invoiceListing.totalInvoiceCount.toLocaleString('es-MX')} ${appliedInvoiceSearch ? invoiceListing.totalInvoiceCount === 1 ? 'coincidencia' : 'coincidencias' : invoiceListing.totalInvoiceCount === 1 ? 'factura' : 'facturas'}` : '—'}</span>
+                <TableResultCount total={invoiceListing?.totalInvoiceCount ?? 0} noun="facturas" busy={invoiceBusy} />
               </div>
             </div>
             <p className="portfolio-invoice-search-help">Periodo por fecha de elaboración. Busca por factura, clave o palabras del nombre del cliente.</p>
@@ -499,7 +384,7 @@ export function ReceivablesPortfolioSummary({
                         <strong>{invoice.customerName}</strong>
                         <small>{invoice.customerCode}</small>
                       </span>
-                      <span>{invoice.sellerCode || '—'}</span>
+                      <SellerDescription code={invoice.sellerCode} />
                       <span>{invoice.creationDate ? formatInvoiceDueDate(invoice.creationDate) : 'Sin fecha'}</span>
                       <span>{invoice.dueDate ? formatInvoiceDueDate(invoice.dueDate) : 'Sin fecha'}</span>
                       <span className={`portfolio-invoice-status ${statusTone}`}>{invoice.status}</span>
@@ -515,40 +400,9 @@ export function ReceivablesPortfolioSummary({
                 )}
               </div>
             </div>
-            <div className="portfolio-invoice-pagination">
-              <span>
-                {invoiceBusy ? 'Buscando…' : `Página ${currentInvoicePage} de ${Math.max(1, Math.ceil((invoiceListing?.totalInvoiceCount ?? 0) / invoicePageSize))}`}
-              </span>
-              <div className="portfolio-invoice-page-actions">
-                <label className="portfolio-invoice-page-size">
-                  <span>Mostrar</span>
-                  <select
-                    value={invoicePageSize}
-                    disabled={invoiceBusy}
-                    onChange={(event) => {
-                      setInvoicePageSize(Number(event.target.value));
-                      setInvoicePage(1);
-                    }}
-                    aria-label="Facturas por página"
-                  >
-                    {invoicePageSizeOptions.map((size) => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
-                  </select>
-                  <span>por página</span>
-                </label>
-                <button
-                  type="button"
-                  disabled={currentInvoicePage <= 1 || invoiceBusy || !invoiceListing}
-                  onClick={() => setInvoicePage(Math.max(1, currentInvoicePage - 1))}
-                >Anterior</button>
-                <button
-                  type="button"
-                  disabled={currentInvoicePage * invoicePageSize >= (invoiceListing?.totalInvoiceCount ?? 0) || invoiceBusy || !invoiceListing}
-                  onClick={() => setInvoicePage(currentInvoicePage + 1)}
-                >Siguiente</button>
-              </div>
-            </div>
+            <TablePagination page={currentInvoicePage} total={invoiceListing?.totalInvoiceCount ?? 0} pageSize={invoicePageSize}
+              onPageChange={setInvoicePage} busy={invoiceBusy || !invoiceListing} label="facturas"
+              pageSizeOptions={invoicePageSizeOptions} onPageSizeChange={size => { setInvoicePageSize(size); setInvoicePage(1); }} />
           </section>
 
           {summary && <div className="portfolio-method-note">

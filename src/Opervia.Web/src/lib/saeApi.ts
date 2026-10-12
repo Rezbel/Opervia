@@ -1,3 +1,5 @@
+import { apiFetch } from '../features/access/accessApi';
+import type { SaeCollectionsControlResult } from '../features/collections/collections';
 import type {
   SaeConnectionRequest,
   SaeDocumentItemsResult,
@@ -25,6 +27,17 @@ import type {
 const API_BASE_URL =
   (import.meta.env.VITE_API_URL ?? 'http://localhost:5106')
     .replace(/\/+$/, '');
+
+export async function getCollectionsControl(connection: SaeConnectionRequest, signal?: AbortSignal): Promise<SaeCollectionsControlResult> {
+  const response = await apiFetch(`${API_BASE_URL}/api/sae/collections/control`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection),
+    credentials: 'include', cache: 'no-store', signal,
+  });
+  await ensureSuccessfulResponse(response);
+  const result = await response.json() as SaeCollectionsControlResult;
+  if (!result.isSuccessful) throw new Error(result.message);
+  return result;
+}
 
 async function ensureSuccessfulResponse(
   response: Response,
@@ -65,9 +78,9 @@ export async function listManualProfitabilityEntries(
 ): Promise<ManualProfitabilityEntry[]> {
   const params = new URLSearchParams({ from, to });
   if (branch) params.set('branch', branch);
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/manual-profitability-entries?${params.toString()}`,
-    { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal },
+    { cache: 'no-store', credentials: 'include', referrerPolicy: 'no-referrer', signal },
   );
   await ensureSuccessfulResponse(response);
   return (await response.json()) as ManualProfitabilityEntry[];
@@ -76,12 +89,12 @@ export async function listManualProfitabilityEntries(
 export async function addManualProfitabilityEntry(
   entry: CreateManualProfitabilityEntry,
 ): Promise<ManualProfitabilityEntry> {
-  const response = await fetch(`${API_BASE_URL}/api/manual-profitability-entries`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/manual-profitability-entries`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(entry),
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
   });
   await ensureSuccessfulResponse(response);
@@ -89,9 +102,9 @@ export async function addManualProfitabilityEntry(
 }
 
 export async function deleteManualProfitabilityEntry(id: string): Promise<void> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/manual-profitability-entries/${encodeURIComponent(id)}`,
-    { method: 'DELETE', credentials: 'omit', referrerPolicy: 'no-referrer' },
+    { method: 'DELETE', credentials: 'include', referrerPolicy: 'no-referrer' },
   );
   await ensureSuccessfulResponse(response);
 }
@@ -99,9 +112,9 @@ export async function deleteManualProfitabilityEntry(id: string): Promise<void> 
 export async function listSavedConnections(
   signal?: AbortSignal,
 ): Promise<SavedSaeConnectionSummary[]> {
-  const response = await fetch(`${API_BASE_URL}/api/connections`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/connections`, {
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
     signal,
   });
@@ -112,12 +125,12 @@ export async function listSavedConnections(
 export async function saveConnection(
   connection: SaeConnectionRequest,
 ): Promise<SavedSaeConnectionSummary> {
-  const response = await fetch(`${API_BASE_URL}/api/connections`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/connections`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(connection),
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
   });
   await ensureSuccessfulResponse(response);
@@ -128,9 +141,9 @@ export async function loadSavedConnection(
   id: string,
   signal?: AbortSignal,
 ): Promise<SaeConnectionRequest> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/connections/${encodeURIComponent(id)}/use`,
-    { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal },
+    { cache: 'no-store', credentials: 'include', referrerPolicy: 'no-referrer', signal },
   );
   await ensureSuccessfulResponse(response);
   return (await response.json()) as SaeConnectionRequest;
@@ -139,9 +152,9 @@ export async function loadSavedConnection(
 export async function getLastUsedConnection(
   signal?: AbortSignal,
 ): Promise<SaeConnectionRequest | null> {
-  const response = await fetch(`${API_BASE_URL}/api/connections/last-used`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/connections/last-used`, {
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
     signal,
   });
@@ -151,9 +164,9 @@ export async function getLastUsedConnection(
 }
 
 export async function deleteSavedConnection(id: string): Promise<void> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/connections/${encodeURIComponent(id)}`,
-    { method: 'DELETE', credentials: 'omit', referrerPolicy: 'no-referrer' },
+    { method: 'DELETE', credentials: 'include', referrerPolicy: 'no-referrer' },
   );
   await ensureSuccessfulResponse(response);
 }
@@ -166,7 +179,7 @@ export async function askOperviaAi(
   documentItems: SaeDocumentItemsResult | null,
   signal?: AbortSignal,
 ): Promise<OperviaAiAnswer> {
-  const response = await fetch(`${API_BASE_URL}/api/ai/ask`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/ai/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -177,7 +190,7 @@ export async function askOperviaAi(
       documentItems,
     }),
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
     signal,
   });
@@ -201,7 +214,7 @@ export async function getSalesFlow(
   const encodedDocumentNumber =
     encodeURIComponent(normalizedDocumentNumber);
 
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/sales-flow/${documentKind}/${encodedDocumentNumber}`,
     {
       method: 'POST',
@@ -210,7 +223,7 @@ export async function getSalesFlow(
       },
       body: JSON.stringify(connection),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'include',
       referrerPolicy: 'no-referrer',
       signal,
     },
@@ -245,7 +258,7 @@ export async function getDocumentItems(
   const encodedDocumentNumber =
     encodeURIComponent(normalizedDocumentNumber);
 
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/document-items/${documentKind}/${encodedDocumentNumber}`,
     {
       method: 'POST',
@@ -254,7 +267,7 @@ export async function getDocumentItems(
       },
       body: JSON.stringify(connection),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'include',
       referrerPolicy: 'no-referrer',
       signal,
     },
@@ -294,14 +307,14 @@ export async function getSalesFlowSummary(
   if (seller) params.set('seller', seller);
   if (branch) params.set('branch', branch);
   if (search) params.set('search', search);
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/sales-flow/summary?${params.toString()}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(connection),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'include',
       referrerPolicy: 'no-referrer',
       signal,
     },
@@ -325,14 +338,14 @@ export async function getInventoryAnalytics(
   if (filters.seller) params.set('seller', filters.seller);
   if (filters.warehouse) params.set('warehouse', filters.warehouse);
   if (filters.line) params.set('line', filters.line);
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/inventory/analytics?${params.toString()}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(connection),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'include',
       referrerPolicy: 'no-referrer',
       signal,
     },
@@ -356,9 +369,9 @@ export async function getCustomerPortfolio(
   Object.entries(filters).forEach(([key, value]) => {
     if (value) params.set(key, value);
   });
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/customers/portfolio?${params.toString()}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal },
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'include', referrerPolicy: 'no-referrer', signal },
   );
   await ensureSuccessfulResponse(response);
   const result = await response.json() as SaeCustomerPortfolioResult;
@@ -370,7 +383,7 @@ export async function getCustomerPortfolio(
 export async function getCommercialSummary(connection: SaeConnectionRequest, from: string, to: string, filters: Record<string, string>, signal?: AbortSignal): Promise<SaeCommercialResult> {
   const params = new URLSearchParams({ from, to });
   Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
-  const response = await fetch(`${API_BASE_URL}/api/sae/commercial?${params.toString()}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal });
+  const response = await apiFetch(`${API_BASE_URL}/api/sae/commercial?${params.toString()}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection), cache: 'no-store', credentials: 'include', referrerPolicy: 'no-referrer', signal });
   await ensureSuccessfulResponse(response);
   const result = await response.json() as SaeCommercialResult;
   if (!result.isSuccessful) throw new Error(result.message || 'No fue posible consultar el análisis comercial.');
@@ -381,9 +394,9 @@ export async function getCommercialCustomerProducts(
 ): Promise<SaeCommercialCustomerPurchasesResult> {
   const params = new URLSearchParams({ from, to });
   Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
-  const response = await fetch(`${API_BASE_URL}/api/sae/commercial/customer-products?${params.toString()}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/sae/commercial/customer-products?${params.toString()}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(connection),
-    cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal,
+    cache: 'no-store', credentials: 'include', referrerPolicy: 'no-referrer', signal,
   });
   await ensureSuccessfulResponse(response);
   const result = await response.json() as SaeCommercialCustomerPurchasesResult;
@@ -396,14 +409,14 @@ async function postReceivableQuery<T>(
   connection: SaeConnectionRequest,
   signal?: AbortSignal,
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await apiFetch(`${API_BASE_URL}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(connection),
     cache: 'no-store',
-    credentials: 'omit',
+    credentials: 'include',
     referrerPolicy: 'no-referrer',
     signal,
   });
@@ -563,14 +576,14 @@ export async function getProfitabilityDashboard(
   if (branch) params.set('branch', branch);
   if (sellerCode) params.set('seller', sellerCode);
 
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/sae/profitability?${params.toString()}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(connection),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'include',
       referrerPolicy: 'no-referrer',
       signal,
     },

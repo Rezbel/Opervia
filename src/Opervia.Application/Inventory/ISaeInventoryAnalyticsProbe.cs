@@ -10,7 +10,7 @@ public interface ISaeInventoryAnalyticsProbe
         DateOnly from,
         DateOnly to,
         string? sellerCode,
-        int? warehouseNumber,
+        string? warehouseNumber,
         string? productLine,
         CancellationToken cancellationToken = default);
 }

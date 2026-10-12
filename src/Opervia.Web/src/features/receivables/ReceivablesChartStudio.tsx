@@ -3,7 +3,6 @@ import {
   ChartPie,
   Rows3,
   SlidersHorizontal,
-  Sparkles,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -51,49 +50,49 @@ interface VisualDataPoint {
 const analysisOptions: AnalysisOption[] = [
   {
     id: 'sellerBilling',
-    label: 'Facturación por vendedor',
+    label: 'Vendedor',
     description: 'Compara cuánto facturó cada integrante comercial.',
     amountLabel: 'Importe facturado',
     countLabel: 'Facturas',
   },
   {
     id: 'seriesBilling',
-    label: 'Facturación por serie',
+    label: 'Serie',
     description: 'Identifica qué series concentran la facturación.',
     amountLabel: 'Importe facturado',
     countLabel: 'Facturas',
   },
   {
     id: 'warehouseBilling',
-    label: 'Facturación por almacén',
+    label: 'Almacén',
     description: 'Compara el importe registrado por almacén.',
     amountLabel: 'Importe facturado',
     countLabel: 'Facturas',
   },
   {
     id: 'fiscalBilling',
-    label: 'Facturación PUE vs. PPD',
+    label: 'Método fiscal',
     description: 'Distribuye las facturas por su método fiscal.',
     amountLabel: 'Importe facturado',
     countLabel: 'Facturas',
   },
   {
     id: 'invoiceStatus',
-    label: 'Facturas vigentes y canceladas',
+    label: 'Estado de las facturas',
     description: 'Compara el estado actual de los documentos emitidos.',
     amountLabel: 'Importe registrado',
     countLabel: 'Facturas',
   },
   {
     id: 'incomeMethod',
-    label: 'Ingresos por forma de pago',
+    label: 'Forma de pago',
     description: 'Sólo considera entradas reales de dinero.',
     amountLabel: 'Ingreso real',
     countLabel: 'Pagos',
   },
   {
     id: 'nonCash',
-    label: 'Ajustes que no son ingreso',
+    label: 'Reducciones',
     description: 'Devoluciones, créditos y otras reducciones de cartera.',
     amountLabel: 'Importe aplicado',
     countLabel: 'Movimientos',
@@ -155,14 +154,13 @@ function getDataPoints(
   analysis: AnalysisId,
   summary: SaeReceivablesSummaryResult,
   taxDisplayMode: TaxDisplayMode,
-  billingScope: BillingScope,
 ): VisualDataPoint[] {
   switch (analysis) {
     case 'sellerBilling':
       return fromFilterOptions(
         summary.filterOptions.sellers,
         taxDisplayMode,
-        billingScope,
+        'active',
       );
     case 'seriesBilling':
       return fromFilterOptions(summary.filterOptions.series, taxDisplayMode);
@@ -214,8 +212,6 @@ export function ReceivablesChartStudio({
     useState<ChartStyle>('ranking');
   const [metric, setMetric] = useState<ChartMetric>('amount');
   const [itemLimit, setItemLimit] = useState(8);
-  const [billingScope, setBillingScope] =
-    useState<BillingScope>('active');
 
   const selectedAnalysis =
     analysisOptions.find((option) => option.id === analysisId) ??
@@ -223,7 +219,7 @@ export function ReceivablesChartStudio({
 
   const dataPoints = useMemo(
     () =>
-      getDataPoints(analysisId, summary, taxDisplayMode, billingScope)
+      getDataPoints(analysisId, summary, taxDisplayMode)
         .filter((point) =>
           metric === 'amount' ? point.amount > 0 : point.count > 0,
         )
@@ -233,7 +229,7 @@ export function ReceivablesChartStudio({
             (metric === 'amount' ? left.amount : left.count),
         )
         .slice(0, itemLimit),
-    [analysisId, billingScope, itemLimit, metric, summary, taxDisplayMode],
+    [analysisId, itemLimit, metric, summary, taxDisplayMode],
   );
 
   const total = dataPoints.reduce(
@@ -261,23 +257,18 @@ export function ReceivablesChartStudio({
       <div className="chart-studio-heading">
         <div className="chart-studio-title">
           <span>
-            <Sparkles size={19} />
+            <Rows3 size={19} />
           </span>
           <div>
-            <strong>Análisis visual</strong>
-            <small>
-              Configura la gráfica en tres pasos sencillos
-            </small>
+            <strong>Ranking</strong>
           </div>
         </div>
-        <span className="chart-studio-scope">
-          Datos reales del periodo
-        </span>
+
       </div>
 
       <div className="chart-studio-config">
         <label>
-          <span>1. ¿Qué quieres analizar?</span>
+          <span>Analizar por</span>
           <select
             value={analysisId}
             onChange={(event) =>
@@ -293,7 +284,7 @@ export function ReceivablesChartStudio({
         </label>
 
         <fieldset>
-          <legend>2. ¿Cómo quieres verlo?</legend>
+          <legend>Vista</legend>
           <div className="chart-style-picker">
             <button
               type="button"
@@ -329,7 +320,7 @@ export function ReceivablesChartStudio({
         </fieldset>
 
         <label>
-          <span>3. Medir por</span>
+          <span>Medir por</span>
           <select
             value={metric}
             onChange={(event) =>
@@ -359,38 +350,6 @@ export function ReceivablesChartStudio({
           </select>
         </label>
 
-        {analysisId === 'sellerBilling' && (
-          <fieldset className="billing-scope-control">
-            <legend>Facturación incluida</legend>
-            <div
-              className="billing-scope-picker"
-              role="group"
-              aria-label="Elegir facturación vigente o total"
-            >
-              <button
-                type="button"
-                className={billingScope === 'active' ? 'active' : ''}
-                onClick={() => setBillingScope('active')}
-                aria-pressed={billingScope === 'active'}
-              >
-                Facturado vigente
-              </button>
-              <button
-                type="button"
-                className={billingScope === 'total' ? 'active' : ''}
-                onClick={() => setBillingScope('total')}
-                aria-pressed={billingScope === 'total'}
-              >
-                Facturado total
-              </button>
-            </div>
-            <small>
-              {billingScope === 'active'
-                ? 'No incluye documentos cancelados.'
-                : 'Incluye documentos vigentes y cancelados.'}
-            </small>
-          </fieldset>
-        )}
       </div>
 
       <div className="chart-studio-context">

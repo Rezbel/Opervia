@@ -37,12 +37,12 @@ function Wait-Ready($url, $process, $name) {
     }
     throw "$name no respondio. Revisa los registros en $logs."
 }
-if (!(Is-Ready 'http://127.0.0.1:5106/api/connections')) {
+if (!(Is-Ready 'http://127.0.0.1:5106/api/health')) {
     & $dotnet build (Join-Path $root 'src/Opervia.Api/Opervia.Api.csproj') --nologo
     if ($LASTEXITCODE -ne 0) { throw 'Fallo la compilacion de la API.' }
     $api = Start-Process $dotnet -ArgumentList @('run', '--no-build', '--project', 'src/Opervia.Api/Opervia.Api.csproj', '--launch-profile', 'http') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs/api.out.log" -RedirectStandardError "$logs/api.err.log"
     $api.Id | Set-Content "$logs/api.pid"
-    Wait-Ready 'http://127.0.0.1:5106/api/connections' $api 'api'
+    Wait-Ready 'http://127.0.0.1:5106/api/health' $api 'api'
 }
 if (!(Is-Ready 'http://127.0.0.1:5173/')) {
     $page = Start-Process $node -ArgumentList @('node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5173', '--strictPort') -WorkingDirectory $web -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs/web.out.log" -RedirectStandardError "$logs/web.err.log"

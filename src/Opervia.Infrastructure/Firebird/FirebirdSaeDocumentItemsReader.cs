@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+using Opervia.Application.Access;
+using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.DocumentItems;
 using Opervia.Application.Documents;
@@ -52,32 +53,33 @@ public sealed class FirebirdSaeDocumentItemsReader(
 
             var sql = $"""
                 SELECT FIRST {MaximumItemsToRead}
-                    NUM_PAR,
-                    CVE_ART,
-                    DESCR_ART,
-                    CANT,
-                    PREC,
-                    PREC_NETO,
-                    COST,
-                    COALESCE(CANT, 0) * COALESCE(PREC, 0) *
-                    (1 - COALESCE(DESC1, 0) / 100.0) *
-                    (1 - COALESCE(DESC2, 0) / 100.0) *
-                    (1 - COALESCE(DESC3, 0) / 100.0),
-                    COALESCE(TOTIMP1, 0) + COALESCE(TOTIMP2, 0) +
-                    COALESCE(TOTIMP3, 0) + COALESCE(TOTIMP4, 0) +
-                    COALESCE(TOTIMP5, 0) + COALESCE(TOTIMP6, 0) +
-                    COALESCE(TOTIMP7, 0) + COALESCE(TOTIMP8, 0),
-                    PRECCIMP,
-                    DESC1,
-                    DESC2,
-                    DESC3,
-                    NUM_ALM,
-                    NUM_MOV,
-                    E_LTPD,
-                    UNI_VENTA
-                FROM {tableName}
-                WHERE CVE_DOC = @DOCUMENT_NUMBER
-                ORDER BY NUM_PAR
+                    P.NUM_PAR,
+                    P.CVE_ART,
+                    COALESCE(NULLIF(TRIM(P.DESCR_ART), ''), NULLIF(TRIM(I.DESCR), ''), P.CVE_ART),
+                    P.CANT,
+                    P.PREC,
+                    P.PREC_NETO,
+                    P.COST,
+                    COALESCE(P.CANT, 0) * COALESCE(P.PREC, 0) *
+                    (1 - COALESCE(P.DESC1, 0) / 100.0) *
+                    (1 - COALESCE(P.DESC2, 0) / 100.0) *
+                    (1 - COALESCE(P.DESC3, 0) / 100.0),
+                    COALESCE(P.TOTIMP1, 0) + COALESCE(P.TOTIMP2, 0) +
+                    COALESCE(P.TOTIMP3, 0) + COALESCE(P.TOTIMP4, 0) +
+                    COALESCE(P.TOTIMP5, 0) + COALESCE(P.TOTIMP6, 0) +
+                    COALESCE(P.TOTIMP7, 0) + COALESCE(P.TOTIMP8, 0),
+                    P.PRECCIMP,
+                    P.DESC1,
+                    P.DESC2,
+                    P.DESC3,
+                    P.NUM_ALM,
+                    P.NUM_MOV,
+                    P.E_LTPD,
+                    P.UNI_VENTA
+                FROM {tableName} P
+                LEFT JOIN {profile.ResolveTableName("INVE")} I ON I.CVE_ART = P.CVE_ART
+                WHERE P.CVE_DOC = @DOCUMENT_NUMBER AND EXISTS (SELECT 1 FROM {tableName.Replace("PAR_", "")} ACCESS_DOC WHERE ACCESS_DOC.CVE_DOC = @DOCUMENT_NUMBER AND {SellerAccessScope.Sql("ACCESS_DOC.CVE_VEND")})
+                ORDER BY P.NUM_PAR
                 """;
 
             await using var command =

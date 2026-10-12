@@ -1,3 +1,5 @@
+using Opervia.Application.Reporting;
+using Opervia.Infrastructure.Persistence;
 using System.Diagnostics;
 using FirebirdSql.Data.FirebirdClient;
 using Opervia.Application.Inventory;
@@ -28,7 +30,7 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         DateOnly from,
         DateOnly to,
         string? sellerCode,
-        int? warehouseNumber,
+        string? warehouseNumber,
         string? productLine,
         CancellationToken cancellationToken = default)
     {
@@ -104,7 +106,7 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
             return new SaeInventoryAnalyticsResult(
                 true,
                 "Inventario y desempeño de productos calculados exclusivamente con SAE.",
-                from, to, sellerCode, warehouseNumber, productLine,
+                from, to, sellerCode, int.TryParse(warehouseNumber, out var selectedWarehouse) ? selectedWarehouse : null, productLine,
                 activeProductCount,
                 sellingProducts.Length,
                 inventoryValue,
@@ -144,13 +146,13 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         DateOnly from,
         DateOnly to,
         string? seller,
-        int? warehouse,
+        string? warehouse,
         string? productLine,
         CancellationToken cancellationToken)
     {
-        var stockExpression = warehouse.HasValue ? "COALESCE(M.EXIST, 0)" : "COALESCE(I.EXIST, 0)";
-        var warehouseJoin = warehouse.HasValue
-            ? $"LEFT JOIN {multiWarehouseTable} M ON M.CVE_ART = I.CVE_ART AND M.CVE_ALM = @warehouse"
+        var stockExpression = !string.IsNullOrWhiteSpace(warehouse) ? "COALESCE(M.EXIST, 0)" : "COALESCE(I.EXIST, 0)";
+        var warehouseJoin = !string.IsNullOrWhiteSpace(warehouse)
+            ? $"LEFT JOIN (SELECT CVE_ART, SUM(COALESCE(EXIST,0)) AS EXIST FROM {multiWarehouseTable} WHERE CVE_ALM = @warehouse GROUP BY CVE_ART) M ON M.CVE_ART = I.CVE_ART"
             : string.Empty;
         var filters = BuildSalesFilters(seller, warehouse, productLine);
         var lineFilter = string.IsNullOrWhiteSpace(productLine)
@@ -238,7 +240,7 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         DateOnly from,
         DateOnly to,
         string? seller,
-        int? warehouse,
+        string? warehouse,
         string? productLine,
         CancellationToken cancellationToken)
     {
@@ -256,7 +258,7 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
             FROM {invoiceTable} F
             INNER JOIN {invoiceLinesTable} P ON P.CVE_DOC = F.CVE_DOC
             INNER JOIN {inventoryTable} SI ON SI.CVE_ART = P.CVE_ART
-            LEFT JOIN {sellersTable} V ON V.CVE_VEND = F.CVE_VEND
+            LEFT JOIN {sellersTable} V ON TRIM(V.CVE_VEND) = TRIM(F.CVE_VEND)
             WHERE F.FECHA_DOC >= @from AND F.FECHA_DOC < @to
               AND COALESCE(F.STATUS, '') <> 'C'
               AND P.CVE_ART IS NOT NULL
@@ -279,14 +281,14 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         DateOnly from,
         DateOnly to,
         string? seller,
-        int? warehouse,
+        string? warehouse,
         string? productLine,
         CancellationToken cancellationToken)
     {
         var lineFilter = string.IsNullOrWhiteSpace(productLine)
             ? string.Empty
             : "AND TRIM(I.LIN_PROD) = @line";
-        var warehouseFilter = warehouse.HasValue
+        var warehouseFilter = !string.IsNullOrWhiteSpace(warehouse)
             ? "AND A.CVE_ALM = @warehouse"
             : string.Empty;
         var sql = $"""
@@ -434,11 +436,11 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         item.CurrentStock > 0 && item.StockValue > 0
         && (!item.LastSaleDate.HasValue || item.LastSaleDate.Value.Date <= DateTime.Today.AddDays(-90));
 
-    private static string BuildSalesFilters(string? seller, int? warehouse, string? productLine)
+    private static string BuildSalesFilters(string? seller, string? warehouse, string? productLine)
     {
         var filters = new List<string>();
         if (!string.IsNullOrWhiteSpace(seller)) filters.Add("AND TRIM(F.CVE_VEND) = @seller");
-        if (warehouse.HasValue) filters.Add("AND COALESCE(P.NUM_ALM, F.NUM_ALMA, 0) = @warehouse");
+        if (!string.IsNullOrWhiteSpace(warehouse)) filters.Add("AND COALESCE(P.NUM_ALM, F.NUM_ALMA, 0) = @warehouse");
         if (!string.IsNullOrWhiteSpace(productLine)) filters.Add("AND TRIM(SI.LIN_PROD) = @line");
         return string.Join(Environment.NewLine, filters);
     }
@@ -448,7 +450,7 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         DateOnly from,
         DateOnly to,
         string? seller,
-        int? warehouse,
+        string? warehouse,
         string? productLine)
     {
         if (command.CommandText.Contains("@from", StringComparison.Ordinal))
@@ -456,11 +458,11 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
         if (command.CommandText.Contains("@to", StringComparison.Ordinal))
             command.Parameters.AddWithValue("@to", to.AddDays(1).ToDateTime(TimeOnly.MinValue));
         if (!string.IsNullOrWhiteSpace(seller) && command.CommandText.Contains("@seller", StringComparison.Ordinal))
-            command.Parameters.AddWithValue("@seller", seller);
-        if (warehouse.HasValue && command.CommandText.Contains("@warehouse", StringComparison.Ordinal))
-            command.Parameters.AddWithValue("@warehouse", warehouse.Value);
+            FilterSelectionSql.Add(command, "@seller", seller);
+        if (!string.IsNullOrWhiteSpace(warehouse) && command.CommandText.Contains("@warehouse", StringComparison.Ordinal))
+            FilterSelectionSql.Add(command, "@warehouse", warehouse, numeric: true);
         if (!string.IsNullOrWhiteSpace(productLine) && command.CommandText.Contains("@line", StringComparison.Ordinal))
-            command.Parameters.AddWithValue("@line", productLine);
+            FilterSelectionSql.Add(command, "@line", productLine);
     }
 
     private static decimal Decimal(FbDataReader reader, int ordinal) =>
@@ -476,8 +478,8 @@ public sealed class FirebirdSaeInventoryAnalyticsProbe(
 
     private static SaeInventoryAnalyticsResult Failure(
         string message, DateOnly from, DateOnly to, string? seller,
-        int? warehouse, string? line, long elapsedMilliseconds) =>
-        new(false, message, from, to, seller, warehouse, line,
+        string? warehouse, string? line, long elapsedMilliseconds) =>
+        new(false, message, from, to, seller, int.TryParse(warehouse, out var selectedWarehouse) ? selectedWarehouse : null, line,
             0, 0, 0, 0, 0, 0, [], [], [], [], [],
             new([], [], []), elapsedMilliseconds);
 }

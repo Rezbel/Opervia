@@ -34,8 +34,9 @@ public sealed class FirebirdSaeReceivableInvoiceListingProbe(ILogger<FirebirdSae
                 """;
             await using (var command = new FbCommand(sql, connection, transaction) { CommandTimeout = 30 })
             {
-                command.Parameters.AddWithValue("@FROM_DATE", from.ToDateTime(TimeOnly.MinValue));
-                command.Parameters.AddWithValue("@TO_DATE", to.AddDays(1).ToDateTime(TimeOnly.MinValue));
+                var period = Opervia.Application.Reporting.SaeDatePeriod.Create(from, to);
+                command.Parameters.AddWithValue("@FROM_DATE", period.FromInclusive);
+                command.Parameters.AddWithValue("@TO_DATE", period.UntilExclusive);
                 FirebirdSaeReceivablesSummaryProbe.AddFilterParameters(command, filters);
                 await using var reader = await command.ExecuteReaderAsync(token);
                 while (await reader.ReadAsync(token)) catalog.Add(new(reader.GetString(0), reader.GetString(1),

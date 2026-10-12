@@ -1,36 +1,39 @@
-import { BarChart3, CalendarDays, ChevronRight, LoaderCircle, RefreshCw, Search } from 'lucide-react';
+import { FilterMultiSelect } from '../filters/FilterMultiSelect';
+import { RefreshButton } from '../filters/RefreshButton';
+import { useSellerCatalog } from '../sellers/SellerCatalogContext';
+import { TablePagination, TableResultCount } from '../tables/TablePagination';
+import { useAccess } from '../access/AccessContext';
+import { BarChart3, ChevronRight, LoaderCircle, Search } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCommercialSummary } from '../../lib/saeApi';
 import type { SaeCommercialResult, SaeConnectionRequest } from '../../types/sae';
 import './CommercialDashboard.css';
+import { DatePeriodFilter, usePeriodFilter } from '../filters/DatePeriodFilter';
 const CommercialCustomerProducts = lazy(() => import('./CommercialCustomerProducts')
   .then(module => ({ default: module.CommercialCustomerProducts })));
 
 interface Props { connection: SaeConnectionRequest | null; onRequestConnection: () => void; }
-type Period = 'today' | 'month' | '30days';
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const percent = new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: 2 });
-const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-function range(p: Period) {
-  const to = new Date(), from = new Date(to);
-  if (p === 'month') from.setDate(1);
-  if (p === '30days') from.setDate(from.getDate() - 29);
-  return { from: iso(from), to: iso(to) };
-}
 function dateLabel(value: string) {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(year, month - 1, day).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 export function CommercialDashboard({ connection, onRequestConnection }: Props) {
+  const isExecutive = useAccess()?.role === 'Ejecutivo';
+  const sellerCatalog = useSellerCatalog();
   const abort = useRef<AbortController | null>(null);
-  const [period, setPeriod] = useState<Period>('month');
+  const period = usePeriodFilter('month');
+  const { from, to } = period.applied;
   const [filters, setFilters] = useState({ seller: '', brand: '', line: '', customer: '' });
   const [result, setResult] = useState<SaeCommercialResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
+  const [customerPage, setCustomerPage] = useState(1);
+  const [pageSize, setPageSize] = useState(30);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const productsSection = useRef<HTMLDivElement>(null);
   const customersSection = useRef<HTMLElement>(null);
@@ -40,10 +43,10 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
     const controller = new AbortController();
     abort.current = controller;
     setLoading(true);
+    setCustomerPage(1);
     setError('');
     try {
-      const r = range(period);
-      const next = await getCommercialSummary(connection, r.from, r.to, filters, controller.signal);
+      const next = await getCommercialSummary(connection, from, to, filters, controller.signal);
       if (abort.current === controller && !controller.signal.aborted) setResult(next);
     } catch (e) {
       if (abort.current === controller && !controller.signal.aborted) {
@@ -52,7 +55,7 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
     } finally {
       if (abort.current === controller) { abort.current = null; setLoading(false); }
     }
-  }, [connection, period, filters]);
+  }, [connection, from, to, filters]);
   useEffect(() => { void load(); return () => abort.current?.abort(); }, [load]);
 
   const data = loading || error ? null : result;
@@ -63,6 +66,8 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
       return tokens.every(token => text.includes(token));
     });
   }, [data, query]);
+  const page = Math.min(customerPage, Math.max(1, Math.ceil(customers.length / pageSize)));
+  const pageCustomers = customers.slice((page - 1) * pageSize, page * pageSize);
   const matrixBrands = data?.brands ?? [];
   const visibleTotals = useMemo(() => new Map(matrixBrands.map(b => [b.brand,
     customers.reduce((sum, c) => sum + (c.brands.find(x => x.brand === b.brand)?.salesWithoutTax ?? 0), 0),
@@ -79,25 +84,16 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
     window.requestAnimationFrame(() => scrollTo(productsSection.current));
   };
 
-  if (!connection) return <section className="commercial-empty"><BarChart3 size={34} /><h1>Comercial</h1>
+  if (!connection) return <section className="commercial-empty"><BarChart3 size={34} /><h2>Conecta SAE</h2>
     <p>Conecta SAE para consultar la facturación por marca.</p><button onClick={onRequestConnection}>Configurar conexión SAE</button></section>;
 
   return <section className="commercial-view" aria-busy={loading}>
-    <header className="commercial-hero"><div><span className="eyebrow">ANÁLISIS COMERCIAL</span><h1>Facturación por marca</h1>
-      <p>Facturas vigentes por fecha de elaboración. Importes después de descuentos.</p></div>
-      <span className="commercial-source">{loading ? 'Consultando SAE…' : error ? 'Consulta no disponible' : 'Datos reales de SAE'}</span></header>
-    <section className="commercial-filters">
-      <div className="commercial-periods">{([['today', 'Hoy'], ['month', 'Este mes'], ['30days', 'Últimos 30 días']] as const).map(([v, label]) =>
-        <button key={v} className={period === v ? 'active' : ''} aria-pressed={period === v} onClick={() => setPeriod(v)}>
-          {v === 'today' && <CalendarDays size={14} />} {label}</button>)}</div>
-      <label>Vendedor<select aria-label="Vendedor" value={filters.seller} onChange={e => setFilters(x => ({ ...x, seller: e.target.value }))}>
-        <option value="">Todos los vendedores</option>{result?.sellers.map(x => <option key={x.value} value={x.value}>{x.value} · {x.label}</option>)}</select></label>
-      <label>Marca<select aria-label="Marca" value={filters.brand} onChange={e => setFilters(x => ({ ...x, brand: e.target.value }))}>
-        <option value="">Todas las marcas</option>{result?.brandOptions.map(x => <option key={x.value} value={x.value}>{x.label}</option>)}</select></label>
-      <label>Línea de producto<select aria-label="Línea de producto" value={filters.line} onChange={e => setFilters(x => ({ ...x, line: e.target.value }))}>
-        <option value="">Todas las líneas</option>{result?.productLines.map(x => <option key={x.value} value={x.value}>{x.value} · {x.label}</option>)}</select></label>
-      <button className="commercial-refresh" aria-label="Actualizar análisis comercial" onClick={() => void load()} disabled={loading}>
-        <RefreshCw size={17} className={loading ? 'spin' : ''} /></button>
+    <section className="commercial-filters module-filter-bar">
+      <DatePeriodFilter filter={period} />
+      {!isExecutive && <FilterMultiSelect label="Vendedor" placeholder="Todos los vendedores" value={filters.seller} options={(result?.sellers ?? []).map(x => ({value:x.value,label:sellerCatalog.label(x.value,x.label)}))} onChange={seller => setFilters(x => ({...x,seller}))} />}
+      <FilterMultiSelect label="Marca" placeholder="Todas las marcas" value={filters.brand} options={result?.brandOptions ?? []} onChange={brand => setFilters(x => ({...x,brand}))} />
+      <FilterMultiSelect label="Línea de producto" placeholder="Todas las líneas" value={filters.line} options={(result?.productLines ?? []).map(x => ({value:x.value,label:`${x.value} · ${x.label}`}))} onChange={line => setFilters(x => ({...x,line}))} />
+      <RefreshButton busy={loading} label="Actualizar análisis comercial" onClick={() => void load()} disabled={period.pending || !!period.error} />
     </section>
     {data && <p className="commercial-period-caption">Elaboradas del {dateLabel(data.periodStart)} al {dateLabel(data.periodEnd)} · se excluyen las canceladas.</p>}
     {error && <p className="commercial-error" role="alert">{error}</p>}
@@ -122,12 +118,12 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
       </div>
     </section>
     <section ref={customersSection} className="commercial-panel"><div className="commercial-heading"><div><h2>Detalle de facturación por cliente y marca</h2>
-      <p>{customers.length} clientes · importes sin IVA. Selecciona un cliente para ver sus productos.</p></div>
-      <label className="commercial-search"><Search size={16} /><input value={query} onChange={e => setQuery(e.target.value)}
-        aria-label="Buscar cliente por clave o nombre" placeholder="Buscar cliente por clave o nombre" /></label></div>
+      <p>Importes sin IVA. Selecciona un cliente para ver sus productos.</p></div>
+      <div className="table-header-tools"><label className="commercial-search"><Search size={16} /><input value={query} onChange={e => { setQuery(e.target.value); setCustomerPage(1); }}
+        aria-label="Buscar cliente por clave o nombre" placeholder="Buscar cliente por clave o nombre" /></label><TableResultCount total={customers.length} noun="clientes" busy={loading} /></div></div>
       <div className="commercial-table commercial-matrix" role="region" aria-label="Tabla de facturación por cliente y marca" tabIndex={0}><table>
         <thead><tr><th scope="col">Cliente</th>{matrixBrands.map(b => <th scope="col" key={b.brand}>{b.brand}</th>)}<th scope="col">Total</th></tr></thead>
-        <tbody>{customers.map(c => {
+        <tbody>{pageCustomers.map(c => {
           const byBrand = new Map(c.brands.map(x => [x.brand, x.salesWithoutTax]));
           return <tr key={c.customerCode} className={`commercial-client-row${selectedCustomer === c.customerCode ? ' is-selected' : ''}`}
             onClick={() => selectCustomer(c.customerCode)}><th scope="row"><button className="commercial-client-trigger"
@@ -142,6 +138,8 @@ export function CommercialDashboard({ connection, onRequestConnection }: Props) 
           {matrixBrands.map(b => <td key={b.brand}>{money.format(visibleTotals.get(b.brand) ?? 0)}</td>)}
           <td>{money.format(customers.reduce((sum, c) => sum + c.salesWithoutTax, 0))}</td></tr></tfoot>}
       </table></div>
+      <TablePagination page={page} total={customers.length} pageSize={pageSize} onPageChange={setCustomerPage}
+        busy={loading} label="clientes" onPageSizeChange={size => { setPageSize(size); setCustomerPage(1); }} />
     </section>
     {selected && data && <div ref={productsSection} className="commercial-products-anchor" key={JSON.stringify([
       selected.customerCode, data.periodStart, data.periodEnd, filters.seller, filters.brand, filters.line,
